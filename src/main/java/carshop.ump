@@ -1,0 +1,111 @@
+namespace ca.mcgill.ecse223.carshop.model;
+
+class CarShop{
+	1 <@>- * UserAccount userAccount;
+	1 <@>- 1 Address address;
+	1 <@>- 1 CarShopInfo carShopInfo;
+	1 <@>- * WeeklySchedule weeksSchedule;
+	1 <@>- * DaySchedule daySchedule;
+	1 <@>- * Service services;
+	1 <@>- * ServiceCombo serviceCombos;
+	1 <@>- 5 Garage garages;
+	1 <@>- * GarageAgenda garageAgendas;
+	1 <@>- * TimeSlot timeSlots;
+	1 <@>- * Appointment appointments;
+}
+
+class UserAccount{
+	abstract;
+	String username;
+	String password;
+}
+class ClientAccount{
+	isA UserAccount;
+	
+	1 <@>- * Appointment client_appointments;
+}
+class OwnerAccount{
+	isA UserAccount;
+	1 -- 1 CarShopInfo carShopInfo;
+}
+
+class TechnicianAccount{
+	isA UserAccount;
+	enum TechnicianType { TiresTechnician, EngineTechnician, TransmissionTechnician, ElectronicsTechnician, FluidsTechnician }
+	TechnicianType technicianType;
+	
+	1 technician -- 1 Garage garage;
+}
+class Address{
+	String streetname;
+	Integer streetNumber;
+	String postalCode;
+	String city;
+}
+class CarShopInfo{
+	1 car_shop -- 1 Address address;
+	1 car_shop -- * WeeklySchedule weeks_schedule;
+	String phoneNumber;
+	String emailAddress;
+}
+class WeeklySchedule{
+	1 weekly_schedule -- 7 DaySchedule days_schedule;
+	unique Date weekStart;
+	unique Date weekEnd;
+}
+class DaySchedule{
+	Date date;
+	Integer startTime;
+	Integer endTime;
+	Boolean isHoliday;
+	Boolean isBreak;
+}
+
+class Garage {
+	depend ca.mcgill.ecse223.carshop.model.TechnicianAccount.TechnicianType;
+
+	1 garage -- * GarageAgenda daily_agendas;
+	1 garage -- * Service services;
+
+}
+class GarageAgenda {
+	Date date;
+	Integer openingTime;
+	Integer closingTime;
+	
+	1 garage_agenda -- * TimeSlot occupied_timslots;
+}
+class TimeSlot {
+	Integer startTime;
+	Integer endTime;
+}
+class Service {
+	String name;
+	Integer duration;
+}
+
+class ServiceCombo {
+	enum ComboType{RequiredCombo, OptionalCombo}
+	ComboType type;
+	String name;
+	
+	* service_combo -> 1 Service main_service;
+	* service_combo -> * Service side_services;
+}
+
+class Appointment {
+	abstract;
+	1 appointment -- * TimeSlot allocated_timeslots;
+}
+
+class ComboAppointment {
+	isA Appointment;
+	
+	* combo_appointment -- 1 ServiceCombo service_combo;
+}
+class ServiceAppointment {
+	isA Appointment;
+	
+	* service_appointment -- 1 Service service;
+}
+
