@@ -4,7 +4,7 @@
 package ca.mcgill.ecse223.carshop.model;
 import java.util.*;
 
-// line 96 "../../../../../carshop.ump"
+// line 98 "../../../../../carshop.ump"
 public abstract class Appointment
 {
 
@@ -85,9 +85,9 @@ public abstract class Appointment
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public TimeSlot addAllocated_timeslot(int aStartTime, int aEndTime, CarShop aCarShop, GarageAgenda aGarage_agenda)
+  public TimeSlot addAllocated_timeslot(int aStartTime, int aEndTime, Service aService_performed, CarShop aCarShop, GarageAgenda aGarage_agenda)
   {
-    return new TimeSlot(aStartTime, aEndTime, aCarShop, aGarage_agenda, this);
+    return new TimeSlot(aStartTime, aEndTime, aService_performed, aCarShop, aGarage_agenda, this);
   }
 
   public boolean addAllocated_timeslot(TimeSlot aAllocated_timeslot)

@@ -10,6 +10,12 @@ public class GarageAgenda
 {
 
   //------------------------
+  // STATIC VARIABLES
+  //------------------------
+
+  private static Map<Date, GarageAgenda> garageagendasByDate = new HashMap<Date, GarageAgenda>();
+
+  //------------------------
   // MEMBER VARIABLES
   //------------------------
 
@@ -29,9 +35,12 @@ public class GarageAgenda
 
   public GarageAgenda(Date aDate, int aOpeningTime, int aClosingTime, CarShop aCarShop, Garage aGarage)
   {
-    date = aDate;
     openingTime = aOpeningTime;
     closingTime = aClosingTime;
+    if (!setDate(aDate))
+    {
+      throw new RuntimeException("Cannot create due to duplicate date. See http://manual.umple.org?RE003ViolationofUniqueness.html");
+    }
     occupied_timslots = new ArrayList<TimeSlot>();
     boolean didAddCarShop = setCarShop(aCarShop);
     if (!didAddCarShop)
@@ -52,8 +61,19 @@ public class GarageAgenda
   public boolean setDate(Date aDate)
   {
     boolean wasSet = false;
+    Date anOldDate = getDate();
+    if (anOldDate != null && anOldDate.equals(aDate)) {
+      return true;
+    }
+    if (hasWithDate(aDate)) {
+      return wasSet;
+    }
     date = aDate;
     wasSet = true;
+    if (anOldDate != null) {
+      garageagendasByDate.remove(anOldDate);
+    }
+    garageagendasByDate.put(aDate, this);
     return wasSet;
   }
 
@@ -76,6 +96,16 @@ public class GarageAgenda
   public Date getDate()
   {
     return date;
+  }
+  /* Code from template attribute_GetUnique */
+  public static GarageAgenda getWithDate(Date aDate)
+  {
+    return garageagendasByDate.get(aDate);
+  }
+  /* Code from template attribute_HasUnique */
+  public static boolean hasWithDate(Date aDate)
+  {
+    return getWithDate(aDate) != null;
   }
 
   public int getOpeningTime()
@@ -133,9 +163,9 @@ public class GarageAgenda
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public TimeSlot addOccupied_timslot(int aStartTime, int aEndTime, CarShop aCarShop, Appointment aAppointment)
+  public TimeSlot addOccupied_timslot(int aStartTime, int aEndTime, Service aService_performed, CarShop aCarShop, Appointment aAppointment)
   {
-    return new TimeSlot(aStartTime, aEndTime, aCarShop, this, aAppointment);
+    return new TimeSlot(aStartTime, aEndTime, aService_performed, aCarShop, this, aAppointment);
   }
 
   public boolean addOccupied_timslot(TimeSlot aOccupied_timslot)
@@ -240,6 +270,7 @@ public class GarageAgenda
 
   public void delete()
   {
+    garageagendasByDate.remove(getDate());
     for(int i=occupied_timslots.size(); i > 0; i--)
     {
       TimeSlot aOccupied_timslot = occupied_timslots.get(i - 1);

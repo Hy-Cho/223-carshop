@@ -4,7 +4,7 @@
 package ca.mcgill.ecse223.carshop.model;
 import java.util.*;
 
-// line 106 "../../../../../carshop.ump"
+// line 108 "../../../../../carshop.ump"
 public class ServiceAppointment extends Appointment
 {
 

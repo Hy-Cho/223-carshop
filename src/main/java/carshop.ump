@@ -54,7 +54,7 @@ class WeeklySchedule{
 	unique Date weekEnd;
 }
 class DaySchedule{
-	Date date;
+	unique Date date;
 	Integer startTime;
 	Integer endTime;
 	Boolean isHoliday;
@@ -69,7 +69,7 @@ class Garage {
 
 }
 class GarageAgenda {
-	Date date;
+	unique Date date;
 	Integer openingTime;
 	Integer closingTime;
 	
@@ -78,6 +78,8 @@ class GarageAgenda {
 class TimeSlot {
 	Integer startTime;
 	Integer endTime;
+	
+	* time_slot -> 1 Service service_performed;
 }
 class Service {
 	String name;

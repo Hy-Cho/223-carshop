@@ -867,9 +867,9 @@ public class CarShop
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public TimeSlot addTimeSlot(int aStartTime, int aEndTime, GarageAgenda aGarage_agenda, Appointment aAppointment)
+  public TimeSlot addTimeSlot(int aStartTime, int aEndTime, Service aService_performed, GarageAgenda aGarage_agenda, Appointment aAppointment)
   {
-    return new TimeSlot(aStartTime, aEndTime, this, aGarage_agenda, aAppointment);
+    return new TimeSlot(aStartTime, aEndTime, aService_performed, this, aGarage_agenda, aAppointment);
   }
 
   public boolean addTimeSlot(TimeSlot aTimeSlot)

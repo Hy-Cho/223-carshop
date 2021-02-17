@@ -16,6 +16,7 @@ public class TimeSlot
   private int endTime;
 
   //TimeSlot Associations
+  private Service service_performed;
   private CarShop carShop;
   private GarageAgenda garage_agenda;
   private Appointment appointment;
@@ -24,10 +25,14 @@ public class TimeSlot
   // CONSTRUCTOR
   //------------------------
 
-  public TimeSlot(int aStartTime, int aEndTime, CarShop aCarShop, GarageAgenda aGarage_agenda, Appointment aAppointment)
+  public TimeSlot(int aStartTime, int aEndTime, Service aService_performed, CarShop aCarShop, GarageAgenda aGarage_agenda, Appointment aAppointment)
   {
     startTime = aStartTime;
     endTime = aEndTime;
+    if (!setService_performed(aService_performed))
+    {
+      throw new RuntimeException("Unable to create TimeSlot due to aService_performed. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+    }
     boolean didAddCarShop = setCarShop(aCarShop);
     if (!didAddCarShop)
     {
@@ -75,6 +80,11 @@ public class TimeSlot
     return endTime;
   }
   /* Code from template association_GetOne */
+  public Service getService_performed()
+  {
+    return service_performed;
+  }
+  /* Code from template association_GetOne */
   public CarShop getCarShop()
   {
     return carShop;
@@ -88,6 +98,17 @@ public class TimeSlot
   public Appointment getAppointment()
   {
     return appointment;
+  }
+  /* Code from template association_SetUnidirectionalOne */
+  public boolean setService_performed(Service aNewService_performed)
+  {
+    boolean wasSet = false;
+    if (aNewService_performed != null)
+    {
+      service_performed = aNewService_performed;
+      wasSet = true;
+    }
+    return wasSet;
   }
   /* Code from template association_SetOneToMany */
   public boolean setCarShop(CarShop aCarShop)
@@ -149,6 +170,7 @@ public class TimeSlot
 
   public void delete()
   {
+    service_performed = null;
     CarShop placeholderCarShop = carShop;
     this.carShop = null;
     if(placeholderCarShop != null)
@@ -175,6 +197,7 @@ public class TimeSlot
     return super.toString() + "["+
             "startTime" + ":" + getStartTime()+ "," +
             "endTime" + ":" + getEndTime()+ "]" + System.getProperties().getProperty("line.separator") +
+            "  " + "service_performed = "+(getService_performed()!=null?Integer.toHexString(System.identityHashCode(getService_performed())):"null") + System.getProperties().getProperty("line.separator") +
             "  " + "carShop = "+(getCarShop()!=null?Integer.toHexString(System.identityHashCode(getCarShop())):"null") + System.getProperties().getProperty("line.separator") +
             "  " + "garage_agenda = "+(getGarage_agenda()!=null?Integer.toHexString(System.identityHashCode(getGarage_agenda())):"null") + System.getProperties().getProperty("line.separator") +
             "  " + "appointment = "+(getAppointment()!=null?Integer.toHexString(System.identityHashCode(getAppointment())):"null");

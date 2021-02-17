@@ -3,10 +3,17 @@
 
 package ca.mcgill.ecse223.carshop.model;
 import java.sql.Date;
+import java.util.*;
 
 // line 56 "../../../../../carshop.ump"
 public class DaySchedule
 {
+
+  //------------------------
+  // STATIC VARIABLES
+  //------------------------
+
+  private static Map<Date, DaySchedule> dayschedulesByDate = new HashMap<Date, DaySchedule>();
 
   //------------------------
   // MEMBER VARIABLES
@@ -29,11 +36,14 @@ public class DaySchedule
 
   public DaySchedule(Date aDate, int aStartTime, int aEndTime, boolean aIsHoliday, boolean aIsBreak, CarShop aCarShop, WeeklySchedule aWeekly_schedule)
   {
-    date = aDate;
     startTime = aStartTime;
     endTime = aEndTime;
     isHoliday = aIsHoliday;
     isBreak = aIsBreak;
+    if (!setDate(aDate))
+    {
+      throw new RuntimeException("Cannot create due to duplicate date. See http://manual.umple.org?RE003ViolationofUniqueness.html");
+    }
     boolean didAddCarShop = setCarShop(aCarShop);
     if (!didAddCarShop)
     {
@@ -53,8 +63,19 @@ public class DaySchedule
   public boolean setDate(Date aDate)
   {
     boolean wasSet = false;
+    Date anOldDate = getDate();
+    if (anOldDate != null && anOldDate.equals(aDate)) {
+      return true;
+    }
+    if (hasWithDate(aDate)) {
+      return wasSet;
+    }
     date = aDate;
     wasSet = true;
+    if (anOldDate != null) {
+      dayschedulesByDate.remove(anOldDate);
+    }
+    dayschedulesByDate.put(aDate, this);
     return wasSet;
   }
 
@@ -93,6 +114,16 @@ public class DaySchedule
   public Date getDate()
   {
     return date;
+  }
+  /* Code from template attribute_GetUnique */
+  public static DaySchedule getWithDate(Date aDate)
+  {
+    return dayschedulesByDate.get(aDate);
+  }
+  /* Code from template attribute_HasUnique */
+  public static boolean hasWithDate(Date aDate)
+  {
+    return getWithDate(aDate) != null;
   }
 
   public int getStartTime()
@@ -187,6 +218,7 @@ public class DaySchedule
 
   public void delete()
   {
+    dayschedulesByDate.remove(getDate());
     CarShop placeholderCarShop = carShop;
     this.carShop = null;
     if(placeholderCarShop != null)

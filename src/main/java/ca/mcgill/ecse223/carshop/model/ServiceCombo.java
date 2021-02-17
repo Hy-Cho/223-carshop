@@ -4,7 +4,7 @@
 package ca.mcgill.ecse223.carshop.model;
 import java.util.*;
 
-// line 87 "../../../../../carshop.ump"
+// line 89 "../../../../../carshop.ump"
 public class ServiceCombo
 {
 
