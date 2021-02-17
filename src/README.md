@@ -1,2 +1,2 @@
 Group: 06
-ECSE 223 Group Project Repository Test
+ECSE 223 Group Project Repository
