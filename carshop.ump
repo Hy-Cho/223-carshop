@@ -1,0 +1,50 @@
+class CarShop{
+	1 <@>- * UserAccount userAccount;
+	1 <@>- 1 Address address;
+	1 <@>- 1 CarShopInfo carShopInfo;
+	1 <@>- * WeeklySchedule weeklySchedule;
+	1 <@>- * DaySchedule daySchedule;
+	
+}
+abstract class UserAccount{
+	abstract;
+	String username;
+	String password;
+}
+class ClientAccount{
+	isA UserAccount;
+}
+class OwnerAccount{
+	isA UserAccount;
+	1 -- 1 CarShopInfo carShopInfo;
+}
+
+class TechnicianAccount{
+	isA UserAccount;
+	enum TechnicianType { TiresTechnician, EngineTechnician, TransmissionTechnician, ElectronicsTechnician, FluidsTechnician }
+	TechnicianType technicianType;
+}
+class Address{
+	String streetname;
+	Integer streetNumber;
+	String postalCode;
+	String city;
+}
+class CarShopInfo{
+	1 -- 1 Address address;
+	1 -- * WeeklySchedule weeklySchedule;
+	String phoneNumber;
+	String emailAddress;
+}
+class WeeklySchedule{
+	1 -- 7 DaySchedule daySchedule;
+	unique Date weekStart;
+	unique Date weekEnd;
+}
+class DaySchedule{
+	Date date;
+	Integer startTime;
+	Integer endTime;
+	Boolean isHoliday;
+	Boolean isBreak;
+}
