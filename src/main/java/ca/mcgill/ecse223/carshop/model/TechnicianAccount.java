@@ -2,6 +2,7 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse223.carshop.model;
+import java.util.*;
 
 // line 32 "../../../../../carshop.ump"
 public class TechnicianAccount extends UserAccount

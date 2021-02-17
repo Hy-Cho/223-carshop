@@ -16,7 +16,7 @@ class CarShop{
 
 class UserAccount{
 	abstract;
-	String username;
+	unique String username;
 	String password;
 }
 class ClientAccount{

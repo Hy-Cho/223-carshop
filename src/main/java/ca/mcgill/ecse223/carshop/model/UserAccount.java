@@ -2,10 +2,17 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse223.carshop.model;
+import java.util.*;
 
 // line 17 "../../../../../carshop.ump"
 public abstract class UserAccount
 {
+
+  //------------------------
+  // STATIC VARIABLES
+  //------------------------
+
+  private static Map<String, UserAccount> useraccountsByUsername = new HashMap<String, UserAccount>();
 
   //------------------------
   // MEMBER VARIABLES
@@ -24,8 +31,11 @@ public abstract class UserAccount
 
   public UserAccount(String aUsername, String aPassword, CarShop aCarShop)
   {
-    username = aUsername;
     password = aPassword;
+    if (!setUsername(aUsername))
+    {
+      throw new RuntimeException("Cannot create due to duplicate username. See http://manual.umple.org?RE003ViolationofUniqueness.html");
+    }
     boolean didAddCarShop = setCarShop(aCarShop);
     if (!didAddCarShop)
     {
@@ -40,8 +50,19 @@ public abstract class UserAccount
   public boolean setUsername(String aUsername)
   {
     boolean wasSet = false;
+    String anOldUsername = getUsername();
+    if (anOldUsername != null && anOldUsername.equals(aUsername)) {
+      return true;
+    }
+    if (hasWithUsername(aUsername)) {
+      return wasSet;
+    }
     username = aUsername;
     wasSet = true;
+    if (anOldUsername != null) {
+      useraccountsByUsername.remove(anOldUsername);
+    }
+    useraccountsByUsername.put(aUsername, this);
     return wasSet;
   }
 
@@ -56,6 +77,16 @@ public abstract class UserAccount
   public String getUsername()
   {
     return username;
+  }
+  /* Code from template attribute_GetUnique */
+  public static UserAccount getWithUsername(String aUsername)
+  {
+    return useraccountsByUsername.get(aUsername);
+  }
+  /* Code from template attribute_HasUnique */
+  public static boolean hasWithUsername(String aUsername)
+  {
+    return getWithUsername(aUsername) != null;
   }
 
   public String getPassword()
@@ -89,6 +120,7 @@ public abstract class UserAccount
 
   public void delete()
   {
+    useraccountsByUsername.remove(getUsername());
     CarShop placeholderCarShop = carShop;
     this.carShop = null;
     if(placeholderCarShop != null)
