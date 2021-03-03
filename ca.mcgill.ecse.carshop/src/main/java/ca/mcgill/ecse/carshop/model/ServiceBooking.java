@@ -3,7 +3,7 @@
 
 package ca.mcgill.ecse.carshop.model;
 
-// line 103 "../../../../../carshop.ump"
+// line 104 "../../../../../carshop.ump"
 public class ServiceBooking
 {
 

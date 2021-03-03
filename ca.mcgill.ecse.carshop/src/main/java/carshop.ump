@@ -3,6 +3,7 @@ namespace ca.mcgill.ecse.carshop.model;
 class CarShop  {
   1 <@>- 0..1 Business business;
   1 <@>- 0..1 Owner owner;
+  1 <@>- * Customer customers;
   1 <@>- 0..5 Technician technicians;
   1 <@>- 0..5 Garage garages;
   1 <@>- * BusinessHour hours;

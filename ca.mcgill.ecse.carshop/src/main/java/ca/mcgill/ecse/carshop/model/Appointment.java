@@ -4,7 +4,7 @@
 package ca.mcgill.ecse.carshop.model;
 import java.util.*;
 
-// line 97 "../../../../../carshop.ump"
+// line 98 "../../../../../carshop.ump"
 public class Appointment
 {
 

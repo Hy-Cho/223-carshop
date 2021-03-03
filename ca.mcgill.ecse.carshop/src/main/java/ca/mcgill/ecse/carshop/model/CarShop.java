@@ -17,6 +17,7 @@ public class CarShop
   //CarShop Associations
   private Business business;
   private Owner owner;
+  private List<Customer> customers;
   private List<Technician> technicians;
   private List<Garage> garages;
   private List<BusinessHour> hours;
@@ -30,6 +31,7 @@ public class CarShop
 
   public CarShop()
   {
+    customers = new ArrayList<Customer>();
     technicians = new ArrayList<Technician>();
     garages = new ArrayList<Garage>();
     hours = new ArrayList<BusinessHour>();
@@ -62,6 +64,36 @@ public class CarShop
   {
     boolean has = owner != null;
     return has;
+  }
+  /* Code from template association_GetMany */
+  public Customer getCustomer(int index)
+  {
+    Customer aCustomer = customers.get(index);
+    return aCustomer;
+  }
+
+  public List<Customer> getCustomers()
+  {
+    List<Customer> newCustomers = Collections.unmodifiableList(customers);
+    return newCustomers;
+  }
+
+  public int numberOfCustomers()
+  {
+    int number = customers.size();
+    return number;
+  }
+
+  public boolean hasCustomers()
+  {
+    boolean has = customers.size() > 0;
+    return has;
+  }
+
+  public int indexOfCustomer(Customer aCustomer)
+  {
+    int index = customers.indexOf(aCustomer);
+    return index;
   }
   /* Code from template association_GetMany */
   public Technician getTechnician(int index)
@@ -296,6 +328,78 @@ public class CarShop
     }
     wasSet = true;
     return wasSet;
+  }
+  /* Code from template association_MinimumNumberOfMethod */
+  public static int minimumNumberOfCustomers()
+  {
+    return 0;
+  }
+  /* Code from template association_AddManyToOne */
+  public Customer addCustomer(String aUsername, String aPassword)
+  {
+    return new Customer(aUsername, aPassword, this);
+  }
+
+  public boolean addCustomer(Customer aCustomer)
+  {
+    boolean wasAdded = false;
+    if (customers.contains(aCustomer)) { return false; }
+    CarShop existingCarShop = aCustomer.getCarShop();
+    boolean isNewCarShop = existingCarShop != null && !this.equals(existingCarShop);
+    if (isNewCarShop)
+    {
+      aCustomer.setCarShop(this);
+    }
+    else
+    {
+      customers.add(aCustomer);
+    }
+    wasAdded = true;
+    return wasAdded;
+  }
+
+  public boolean removeCustomer(Customer aCustomer)
+  {
+    boolean wasRemoved = false;
+    //Unable to remove aCustomer, as it must always have a carShop
+    if (!this.equals(aCustomer.getCarShop()))
+    {
+      customers.remove(aCustomer);
+      wasRemoved = true;
+    }
+    return wasRemoved;
+  }
+  /* Code from template association_AddIndexControlFunctions */
+  public boolean addCustomerAt(Customer aCustomer, int index)
+  {  
+    boolean wasAdded = false;
+    if(addCustomer(aCustomer))
+    {
+      if(index < 0 ) { index = 0; }
+      if(index > numberOfCustomers()) { index = numberOfCustomers() - 1; }
+      customers.remove(aCustomer);
+      customers.add(index, aCustomer);
+      wasAdded = true;
+    }
+    return wasAdded;
+  }
+
+  public boolean addOrMoveCustomerAt(Customer aCustomer, int index)
+  {
+    boolean wasAdded = false;
+    if(customers.contains(aCustomer))
+    {
+      if(index < 0 ) { index = 0; }
+      if(index > numberOfCustomers()) { index = numberOfCustomers() - 1; }
+      customers.remove(aCustomer);
+      customers.add(index, aCustomer);
+      wasAdded = true;
+    } 
+    else 
+    {
+      wasAdded = addCustomerAt(aCustomer, index);
+    }
+    return wasAdded;
   }
   /* Code from template association_MinimumNumberOfMethod */
   public static int minimumNumberOfTechnicians()
@@ -777,6 +881,13 @@ public class CarShop
       existingOwner.delete();
       existingOwner.setCarShop(null);
     }
+    while (customers.size() > 0)
+    {
+      Customer aCustomer = customers.get(customers.size() - 1);
+      aCustomer.delete();
+      customers.remove(aCustomer);
+    }
+    
     while (technicians.size() > 0)
     {
       Technician aTechnician = technicians.get(technicians.size() - 1);

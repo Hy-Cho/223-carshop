@@ -4,7 +4,7 @@
 package ca.mcgill.ecse.carshop.model;
 import java.util.*;
 
-// line 24 "../../../../../carshop.ump"
+// line 25 "../../../../../carshop.ump"
 public class Customer extends User
 {
 
@@ -13,21 +13,32 @@ public class Customer extends User
   //------------------------
 
   //Customer Associations
+  private CarShop carShop;
   private List<Appointment> appointments;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public Customer(String aUsername, String aPassword)
+  public Customer(String aUsername, String aPassword, CarShop aCarShop)
   {
     super(aUsername, aPassword);
+    boolean didAddCarShop = setCarShop(aCarShop);
+    if (!didAddCarShop)
+    {
+      throw new RuntimeException("Unable to create customer due to carShop. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+    }
     appointments = new ArrayList<Appointment>();
   }
 
   //------------------------
   // INTERFACE
   //------------------------
+  /* Code from template association_GetOne */
+  public CarShop getCarShop()
+  {
+    return carShop;
+  }
   /* Code from template association_GetMany */
   public Appointment getAppointment(int index)
   {
@@ -57,6 +68,25 @@ public class Customer extends User
   {
     int index = appointments.indexOf(aAppointment);
     return index;
+  }
+  /* Code from template association_SetOneToMany */
+  public boolean setCarShop(CarShop aCarShop)
+  {
+    boolean wasSet = false;
+    if (aCarShop == null)
+    {
+      return wasSet;
+    }
+
+    CarShop existingCarShop = carShop;
+    carShop = aCarShop;
+    if (existingCarShop != null && !existingCarShop.equals(aCarShop))
+    {
+      existingCarShop.removeCustomer(this);
+    }
+    carShop.addCustomer(this);
+    wasSet = true;
+    return wasSet;
   }
   /* Code from template association_MinimumNumberOfMethod */
   public static int minimumNumberOfAppointments()
@@ -133,6 +163,12 @@ public class Customer extends User
 
   public void delete()
   {
+    CarShop placeholderCarShop = carShop;
+    this.carShop = null;
+    if(placeholderCarShop != null)
+    {
+      placeholderCarShop.removeCustomer(this);
+    }
     for(int i=appointments.size(); i > 0; i--)
     {
       Appointment aAppointment = appointments.get(i - 1);

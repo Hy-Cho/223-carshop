@@ -4,7 +4,7 @@
 package ca.mcgill.ecse.carshop.model;
 import java.util.*;
 
-// line 20 "../../../../../carshop.ump"
+// line 21 "../../../../../carshop.ump"
 public class Owner extends User
 {
 

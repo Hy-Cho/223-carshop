@@ -117,14 +117,14 @@ Feature: Update business information
 
   Scenario Outline: Update holiday
     Given the user is logged in to an account with username "<username>"
-    When the user tries to change the "holiday" on "2020-08-15" at "16:00" to be with start date "<startDate>" at "<startTime>" and end date "<endDate>" at "<endTime>"
+    When the user tries to change the "holiday" on "2021-03-15" at "16:00" to be with start date "<startDate>" at "<startTime>" and end date "<endDate>" at "<endTime>"
     Then the "holiday" shall "<result>" updated with start date "<startDate>" at "<startTime>" and end date "<endDate>" at "<endTime>"
     Then an error message "<error>" shall "<resultError>" raised
 
     Examples: 
       | username          | startDate  | startTime | endDate    | endTime | result | error                                        | resultError |
       | owner             | 2021-09-01 | 09:30     | 2021-09-15 | 09:20   | be     |                                              | not be      |
-      | owner             | 2021-03-01 | 16:00     | 2020-03-07 | 09:00   | not be | Holiday and vacation times cannot overlap    | be          |
+      | owner             | 2021-03-01 | 16:00     | 2021-03-07 | 09:00   | not be | Holiday and vacation times cannot overlap    | be          |
       | User1             | 2021-09-01 | 09:30     | 2021-09-15 | 09:20   | not be | No permission to update business information | be          |
       | Engine-Technician | 2021-09-01 | 09:30     | 2021-09-15 | 09:20   | not be | No permission to update business information | be          |
       | owner             | 2021-07-26 | 09:00     | 2021-07-25 | 09:00   | not be | Start time must be before end time           | be          |
