@@ -26,6 +26,11 @@ public class Service extends BookableService
   public Service(String aName, CarShop aCarShop, int aDuration, Garage aGarage)
   {
     super(aName, aCarShop);
+    // line 84 "../../../../../carshop.ump"
+    if(aDuration <= 0) {
+      	  throw new RuntimeException("Duration must be positive");
+      	}
+    // END OF UMPLE BEFORE INJECTION
     duration = aDuration;
     boolean didAddGarage = setGarage(aGarage);
     if (!didAddGarage)
@@ -42,6 +47,11 @@ public class Service extends BookableService
   public boolean setDuration(int aDuration)
   {
     boolean wasSet = false;
+    // line 84 "../../../../../carshop.ump"
+    if(aDuration <= 0) {
+      	  throw new RuntimeException("Duration must be positive");
+      	}
+    // END OF UMPLE BEFORE INJECTION
     duration = aDuration;
     wasSet = true;
     return wasSet;

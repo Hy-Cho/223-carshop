@@ -4,7 +4,7 @@
 package ca.mcgill.ecse.carshop.model;
 import java.util.*;
 
-// line 84 "../../../../../carshop.ump"
+// line 90 "../../../../../carshop.ump"
 public class ServiceCombo extends BookableService
 {
 

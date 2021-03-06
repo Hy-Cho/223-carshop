@@ -79,6 +79,12 @@ class BookableService {
 class Service {
   isA BookableService;
   int duration;
+  
+  before constructor, setDuration {
+  	if(aDuration <= 0) {
+  	  throw new RuntimeException("Duration must be positive");
+  	}
+  }
 }
 
 class ServiceCombo {
