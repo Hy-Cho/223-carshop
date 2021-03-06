@@ -71,7 +71,7 @@ Feature: Make appointment
     Examples: 
       # row 1: appointment in regular available slot
       # row 2: appointment in another garage
-      | serviceName              | optServices              | date       | startTimes       | endTimes         |
+      | serviceName              | optionalServices         | date       | startTimes       | endTimes         |
       | engine-check-basic       | transmission-check       | 2021-02-02 | 9:00,10:10       | 10:00,11:25      |
       | electronics-repair-basic | engine-check,tire-change | 2021-02-22 | 9:00,10:10,11:30 | 9:50,11:10,13:30 |
 

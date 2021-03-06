@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
+import java.util.List;
 
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.controller.CarShopController;
+import ca.mcgill.ecse.carshop.controller.InvalidInputException;
 import ca.mcgill.ecse.carshop.model.Business;
 import ca.mcgill.ecse.carshop.model.CarShop;
 import ca.mcgill.ecse.carshop.model.Garage;
@@ -61,12 +63,6 @@ public class CucumberStepDefinitions {
 		Owner owner = new Owner(username, "password", this.carshop);
 	}
 	
-	//When Clauses
-	@When("{username} initiates the addition of the service {name} belonging to the garage of {garage}")
-	public void serviceAddedToSystem(String username, String name, String type) {
-		TechnicianType techType = getTechnicianTypeFromString(type);
-	}
-	
 	private TechnicianType getTechnicianTypeFromString(String type) {
 		TechnicianType techType;
 		switch(type) {
@@ -90,5 +86,19 @@ public class CucumberStepDefinitions {
 				break;
 		}
 		return techType;
+	}
+	
+	private Garage getGarageOfTechnician(TechnicianType techType) {
+		if(this.carshop == null) {
+			return null;
+		}
+		
+		List<Garage> garages = this.carshop.getGarages();
+		for(Garage garage: garages) {
+			if (garage.getTechnician().getType() == techType) {
+				return garage;
+			}
+		}
+		return null;
 	}
 }
