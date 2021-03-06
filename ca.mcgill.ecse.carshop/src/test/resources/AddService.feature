@@ -16,7 +16,7 @@ Feature: Add Service
 
   Scenario Outline: Add a service successfully
     Given the Owner with username "owner" is logged in
-    When "owner" initiates the addition of the service "<name>" belonging to the garage of "<garage>" technician
+    When "owner" initiates the addition of the service "<name>" with duration "<duration>" belonging to the garage of "<garage>" technician
     Then the service "<name>" shall exist in the system
     Then the service "<name>" shall belong to the garage of "<garage>" technician
     Then the number of services in the system shall be "1"
@@ -30,7 +30,7 @@ Feature: Add Service
 
   Scenario Outline: Add a service with invalid parameters
     Given the Owner with username "owner" is logged in
-    When "owner" initiates the addition of the service "<name>" belonging to the garage of "<garage>" technician
+    When "owner" initiates the addition of the service "<name>" with duration "<duration>" belonging to the garage of "<garage>" technician
     Then an error message with content "<error>" shall be raised
     Then the service "<name>" shall not exist in the system
     Then the number of services in the system shall be "0"
@@ -45,7 +45,7 @@ Feature: Add Service
       | name        | duration | garage |
       | tire-change |      120 | Tire   |
     Given the Owner with username "owner" is logged in
-    When "owner" initiates the addition of the service "<name>" belonging to the garage of "<garage>" technician
+    When "owner" initiates the addition of the service "<name>" with duration "<duration>" belonging to the garage of "<garage>" technician
     Then an error message with content "<error>" shall be raised
     Then the service "<name>" shall still preserve the following properties:
       | name        | duration | garage |
@@ -64,7 +64,7 @@ Feature: Add Service
       | customer1 |  1234567 |
       | customer2 |  8901234 |
     Given the user with username "<username>" is logged in
-    When "<username>" initiates the addition of the service "tire-change" belonging to the garage of "Tire" technician
+    When "<username>" initiates the addition of the service "tire-change" with duration "100" belonging to the garage of "Tire" technician
     Then an error message with content "<error>" shall be raised
     Then the service "tire-change" shall not exist in the system
     Then the number of services in the system shall be "0"
