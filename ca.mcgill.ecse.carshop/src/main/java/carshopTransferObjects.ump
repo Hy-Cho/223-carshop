@@ -1,0 +1,8 @@
+namespace ca.mcgill.ecse.carshop.controller;
+
+class TOBusinessInfo {
+	String name;
+ 	String address;
+  	String phoneNumber;
+  	String email;
+}
