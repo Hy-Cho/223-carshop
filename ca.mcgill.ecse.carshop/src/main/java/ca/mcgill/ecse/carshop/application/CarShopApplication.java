@@ -3,11 +3,16 @@
  */
 package ca.mcgill.ecse.carshop.application;
 
+import java.util.List;
+import ca.mcgill.ecse.carshop.model.Business;
+import ca.mcgill.ecse.carshop.model.BusinessHour;
 import ca.mcgill.ecse.carshop.model.CarShop;
+import ca.mcgill.ecse.carshop.model.TimeSlot;
 
 public class CarShopApplication {
 	
 	private static CarShop carShop;
+	private static Business business;
 	
     public String getGreeting() {
         return "Hello World!";
@@ -23,5 +28,29 @@ public class CarShopApplication {
     	}
     	
     	return carShop;
+    }
+    
+    
+    
+    public static Business getBusiness() {
+      business = carShop.getBusiness();
+      return business;
+    }
+    
+    public static void setBusiness(Business b) {
+      business = b;
+      carShop.setBusiness(business);
+    }
+    
+    public static List<BusinessHour> getBusinessHour() {
+      return business.getBusinessHours();
+    }
+    
+    public static List<TimeSlot> getHolidays(){
+      return business.getHolidays();
+    }
+    
+    public static List<TimeSlot> getVacations(){
+      return business.getVacations();
     }
 }
