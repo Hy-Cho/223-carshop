@@ -9,6 +9,8 @@ import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.Business;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
+import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
+import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse.carshop.model.CarShop;
 import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Owner;
@@ -16,15 +18,13 @@ import ca.mcgill.ecse.carshop.model.Service;
 import ca.mcgill.ecse.carshop.model.TimeSlot;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.User;
-import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 
 public class CarShopController {
 	
 	private static User loggedInUser;
 	private static Date today = Date.valueOf(LocalDate.of(2021, 2, 1));
-	
-	public CarShopController() {}
-	
+	private static User Account;
+		
 	public static void signUpCustomerAccount(String username, String password) throws InvalidInputException {
 		CarShop carShop=CarShopApplication.getCarShop();
 		if(username == null || username.length()==0) {
@@ -72,13 +72,49 @@ public class CarShopController {
 			loggedInUser.setPassword(newPassword);
 		}
 		catch(RuntimeException e) {
-			
-			throw new InvalidInputException(e.getMessage());
+			throw new InvalidInputException(e.getMessage());	
+		}
+	}
+	public static void UpdateGarageOpeningHours(String username, DayOfWeek day, Time startTime, Time endTime, TechnicianType techType) throws InvalidInputException {
+		CarShop carShop = CarShopApplication.getCarShop();
+	    List<BusinessHour> bHour = carShop.getBusiness().getBusinessHours();
+	    if (!(loggedInUser instanceof Technician) || ((Technician)loggedInUser).getType() != techType) {
+	      throw new InvalidInputException("You are not authorized to perform this operation");
+	    }
+	    if (startTime.after(endTime)) {
+	      throw new InvalidInputException("Start time must be before end time");
+	    }
+	    for (BusinessHour b: bHour) {
+	        if (b.getDayOfWeek() == day) {
+	          if (!(b.getStartTime().before(startTime) && b.getEndTime().after(endTime))) {
+	            throw new InvalidInputException("The opening hours cannot overlap");        
+	          }
+	        }
+	    }
+	    BusinessHour bHourGarage = getBussinessHourOfDayByGarage(getGarageOfTechnician(techType),day);
+	    if (bHourGarage == null) {
+	    	bHourGarage = new BusinessHour(day, startTime, endTime, carShop);
+	    	getGarageOfTechnician(techType).addBusinessHour(bHourGarage);
+	    }
+	    else {
+	    bHourGarage.setStartTime(startTime);
+	    bHourGarage.setEndTime(endTime);
+	    }
+	}
+	public static void logIn(String username, String password, TechnicianType techType ) throws InvalidInputException {
+		if (username != Account.getUsername() || password != Account.getPassword())
+			throw new InvalidInputException("Username/password not found");
+		if (username == "owner") {
+			Account.setPassword("owner");
+		if (username == "Tire-Technician" || username == "Engine-Technician" || username == "Transmission-Technician" || username == "Electronics-Technician" || username == "Fluids-Technician") {
+			Account.setPassword(username);
+			((Technician) Account).setType(techType);
+		}
 		}
 	}
 	public static void createService(String name, int duration, Garage garage) throws RuntimeException, InvalidInputException {
 		if(loggedInUser == null  || loggedInUser.getUsername() != "owner" || !(loggedInUser instanceof Owner)) {
-			throw new RuntimeException("You are not autorized to perform this operation");
+			throw new RuntimeException("You are not authorized to perform this operation");
 		}
 		
 		CarShop carShop = CarShopApplication.getCarShop();
@@ -96,7 +132,7 @@ public class CarShopController {
 		if(loggedInUser == null  || loggedInUser.getUsername() != "owner" || !(loggedInUser instanceof Owner)) {
 			throw new RuntimeException("You are not autorized to perform this operation");
 		}
-		
+
 		CarShop carShop = CarShopApplication.getCarShop();
 		Service serviceToModify = getServiceFromName(oldName, carShop);
 		if(serviceToModify != null) {
@@ -105,7 +141,7 @@ public class CarShopController {
 			serviceToModify.setGarage(newGarage);
 		}
 	}
-	
+
 	public static User getLoggedInUser() {
 		return loggedInUser;
 	}
@@ -119,7 +155,7 @@ public class CarShopController {
 				}
 			}
 		}
-		
+
 		return null;
 	}
 	
@@ -476,4 +512,29 @@ public class CarShopController {
 	    
 	    return valid;
 	  }
+	  private static BusinessHour getBussinessHourOfDayByGarage(Garage g, DayOfWeek day) {
+			List<BusinessHour> businessHourPerGarage = g.getBusinessHours();
+			for(BusinessHour hours: businessHourPerGarage) {
+				if(hours.getDayOfWeek() == day) {
+					return hours;
+				}
+			}
+			
+			return null;
+		}
+	  private static Garage getGarageOfTechnician(TechnicianType techType) {
+			CarShop carshop = CarShopApplication.getCarShop();
+			if(carshop == null) {
+				return null;
+			}
+			
+			List<Garage> garages = carshop.getGarages();
+			for(Garage garage: garages) {
+				if (garage.getTechnician().getType() == techType) {
+					return garage;
+				}
+			}
+			return null;
+		}
+
 }
