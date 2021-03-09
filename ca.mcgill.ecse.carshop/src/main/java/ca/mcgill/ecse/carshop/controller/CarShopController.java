@@ -4,6 +4,9 @@ import java.util.List;
 
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.model.BookableService;
+import ca.mcgill.ecse.carshop.model.BusinessHour;
+import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
+import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse.carshop.model.CarShop;
 import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Owner;
@@ -60,6 +63,32 @@ public class CarShopController {
 			}
 		}
 		
+		return null;
+	}
+	
+	private static BusinessHour getBussinessHourOfDayByGarage(Garage g, DayOfWeek day) {
+		List<BusinessHour> businessHourPerGarage = g.getBusinessHours();
+		for(BusinessHour hours: businessHourPerGarage) {
+			if(hours.getDayOfWeek() == day) {
+				return hours;
+			}
+		}
+		
+		return null;
+	}
+	
+	private static Garage getGarageOfTechnician(TechnicianType techType) {
+		CarShop carshop = CarShopApplication.getCarShop();
+		if(carshop == null) {
+			return null;
+		}
+		
+		List<Garage> garages = carshop.getGarages();
+		for(Garage garage: garages) {
+			if (garage.getTechnician().getType() == techType) {
+				return garage;
+			}
+		}
 		return null;
 	}
 }
