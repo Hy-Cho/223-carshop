@@ -12,6 +12,7 @@ import ca.mcgill.ecse.carshop.controller.CarShopController;
 import ca.mcgill.ecse.carshop.controller.InvalidInputException;
 import ca.mcgill.ecse.carshop.model.Business;
 import ca.mcgill.ecse.carshop.model.CarShop;
+import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Owner;
 import ca.mcgill.ecse.carshop.model.Technician;
@@ -26,6 +27,8 @@ public class CucumberStepDefinitions {
 	private CarShop carshop;
 	private String error;
 	private int errorCnt;
+	private String username;
+	private String password;
 	
 	//This is the CucumberStepDefinitions code for signUpCustomer
 	
@@ -38,33 +41,44 @@ public class CucumberStepDefinitions {
 
 	@Given("there is no existing username {string}")
 	public void there_is_no_existing_username(String string) {
-		// Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
-		
+		for(Customer i : carshop.getCustomers()) {
+			if(i.getUsername().equals(string)) {
+				i.delete();
+			}
+		}
 	}
 
 	@When("the user provides a new username {string} and a password {string}")
 	public void the_user_provides_a_new_username_and_a_password(String string, String string2) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	    username=string;
+	    password=string2;
 	}
 
 	@Then("a new customer account shall be created")
 	public void a_new_customer_account_shall_be_created() {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+		int initialSize=carshop.getCustomers().size();
+		try{
+			CarShopController.signUpCustomerAccount(username,password);
+			assertEquals(initialSize+1, carshop.getCustomers().size());
+		}
+		catch(InvalidInputException e) {
+			error=e.getMessage();
+			errorCnt++;
+		}
 	}
 
 	@Then("the account shall have username {string} and password {string}")
 	public void the_account_shall_have_username_and_password(String string, String string2) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	    for(Customer i : carshop.getCustomers()) {
+	    	if(i.getUsername().equals(string)) {
+	    		assertEquals(string2,i.getPassword());
+	    	}
+	    }
 	}
 
 	@Then("no new account shall be created")
 	public void no_new_account_shall_be_created() {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	    
 	}
 
 	@Then("an error message {string} shall be raised")
@@ -86,14 +100,6 @@ public class CucumberStepDefinitions {
 	}
 
 	
-	/*
-	//Given clauses
-	@Given("a Carshop system exists")
-	public void thereIsACarShopSystem() {
-		carshop = CarShopApplication.getCarShop();
-		error = "";
-		errorCnt = 0;
-	}
 	
 	@Given("an owner account exists in the system")
 	public void thereIsAnOwner()  {
@@ -161,5 +167,4 @@ public class CucumberStepDefinitions {
 		}
 		return null;
 	}
-	*/
 }
