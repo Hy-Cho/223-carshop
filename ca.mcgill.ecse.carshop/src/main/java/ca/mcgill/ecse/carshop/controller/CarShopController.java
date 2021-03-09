@@ -4,7 +4,6 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.util.List;
-
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.Business;
@@ -75,6 +74,7 @@ public class CarShopController {
 			throw new InvalidInputException(e.getMessage());	
 		}
 	}
+	/*
 	public static void UpdateGarageOpeningHours(String username, DayOfWeek day, Time startTime, Time endTime, TechnicianType techType) throws InvalidInputException {
 		CarShop carShop = CarShopApplication.getCarShop();
 	    List<BusinessHour> bHour = carShop.getBusiness().getBusinessHours();
@@ -536,5 +536,5 @@ public class CarShopController {
 			}
 			return null;
 		}
-
+	*/
 }
