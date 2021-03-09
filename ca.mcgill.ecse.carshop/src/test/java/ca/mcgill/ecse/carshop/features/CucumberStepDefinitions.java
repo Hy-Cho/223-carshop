@@ -27,6 +27,66 @@ public class CucumberStepDefinitions {
 	private String error;
 	private int errorCnt;
 	
+	//This is the CucumberStepDefinitions code for signUpCustomer
+	
+	@Given("a Carshop system exists")
+	public void a_carshop_system_exists() {
+		carshop = CarShopApplication.getCarShop();
+		error = "";
+		errorCnt = 0;
+	}
+
+	@Given("there is no existing username {string}")
+	public void there_is_no_existing_username(String string) {
+		// Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+		
+	}
+
+	@When("the user provides a new username {string} and a password {string}")
+	public void the_user_provides_a_new_username_and_a_password(String string, String string2) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@Then("a new customer account shall be created")
+	public void a_new_customer_account_shall_be_created() {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@Then("the account shall have username {string} and password {string}")
+	public void the_account_shall_have_username_and_password(String string, String string2) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@Then("no new account shall be created")
+	public void no_new_account_shall_be_created() {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@Then("an error message {string} shall be raised")
+	public void an_error_message_shall_be_raised(String string) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@Given("there is an existing username {string}")
+	public void there_is_an_existing_username(String string) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@Given("the user is logged in to an account with username {string}")
+	public void the_user_is_logged_in_to_an_account_with_username(String string) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	
+	/*
 	//Given clauses
 	@Given("a Carshop system exists")
 	public void thereIsACarShopSystem() {
@@ -101,4 +161,5 @@ public class CucumberStepDefinitions {
 		}
 		return null;
 	}
+	*/
 }

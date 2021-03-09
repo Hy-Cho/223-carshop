@@ -74,7 +74,7 @@ public class CarShopController {
 			throw new InvalidInputException(e.getMessage());	
 		}
 	}
-	/*
+	
 	public static void UpdateGarageOpeningHours(String username, DayOfWeek day, Time startTime, Time endTime, TechnicianType techType) throws InvalidInputException {
 		CarShop carShop = CarShopApplication.getCarShop();
 	    List<BusinessHour> bHour = carShop.getBusiness().getBusinessHours();
@@ -536,5 +536,5 @@ public class CarShopController {
 			}
 			return null;
 		}
-	*/
+	
 }
