@@ -1,5 +1,6 @@
 package ca.mcgill.ecse.carshop.controller;
 
+
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
@@ -18,10 +19,25 @@ import ca.mcgill.ecse.carshop.model.Service;
 import ca.mcgill.ecse.carshop.model.TimeSlot;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.User;
+import java.util.List;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.Calendar;
+
+import ca.mcgill.ecse.carshop.application.CarShopApplication;
+import ca.mcgill.ecse.carshop.model.CarShop;
+import ca.mcgill.ecse.carshop.model.ComboItem;
+import ca.mcgill.ecse.carshop.model.User;
+import ca.mcgill.ecse.carshop.model.Owner;
+import ca.mcgill.ecse.carshop.model.Service;
+import ca.mcgill.ecse.carshop.model.ServiceCombo;
+import ca.mcgill.ecse.carshop.model.BookableService;
+
 
 public class CarShopController {
 	
 	private static User loggedInUser;
+
 	private static Date today = Date.valueOf(LocalDate.of(2021, 2, 1));
 	private static User Account;
 		
@@ -154,14 +170,55 @@ public class CarShopController {
 			throw new RuntimeException("You are not authorized to perform this operation");
 		}
 		
+		  CarShop carShop = CarShopApplication.getCarShop();
+		   
+		  try {
+	            Service service = new Service(name, carShop, duration, garage);
+	        }
+		catch(RuntimeException ex) {
+			throw new InvalidInputException(ex.getMessage());
+		}
+		  
+	private static int numOfCombos;
+
+	public static void defineCombo(String name, ComboItem mainService, List<ComboItem> services) throws RuntimeException, InvalidInputException {
+		int numServices = services.size();
+		int i=0;
+		
+		if(loggedInUser == null  || loggedInUser.getUsername() != "owner") {
+			throw new RuntimeException("You are not authorized to perform this operation");
+		}
+		
+		if(services.size()<2) {
+			throw new RuntimeException("A service Combo must contain at least 2 services");
+		}
+		
+		if(!mainService.getMandatory()) {
+			throw new RuntimeException("Main service must be mandatory");
+		}
+		
+		if(!services.contains(mainService)) {
+			throw new RuntimeException("Main service must be included in the services");
+		}
+		
+		if(!services.contains(BookableService)) {
+			throw new RuntimeException("An entered service does not exist");
+
+		}
+		
 		CarShop carShop = CarShopApplication.getCarShop();
 		
 		try {
-			Service service = new Service(name, carShop, duration, garage);
+
+			ServiceCombo serviceCombo = new ServiceCombo(name, carShop, mainService);
+			numOfCombos++;
+			carShop.addBookableService(serviceCombo);
+
 		}
 		catch(RuntimeException ex) {
 			throw new InvalidInputException(ex.getMessage());
 		}
+
 	}
 	
 	public static void updateService(String oldName, String newName, int newDuration, Garage newGarage) {
@@ -610,4 +667,39 @@ public class CarShopController {
 		  
 		  return null;
 	  }
+
+		
+		public static void updateCombo(String name, String updatedName, ComboItem mainService, List<ComboItem> services) throws RuntimeException, InvalidInputException {
+			if(loggedInUser == null  || loggedInUser.getUsername() != "owner") {
+				throw new RuntimeException("You are not authorized to perform this operation");
+			}
+			
+			if(!services.contains(mainService)) {
+				throw new RuntimeException("Main service must be included in the services");
+			}
+			
+			if(!mainService.getMandatory()) {
+				throw new RuntimeException("Main service must be mandatory");
+			}
+			
+			if(services.size()<2) {
+				throw new RuntimeException("A service Combo must contain at least 2 services");
+			}
+			
+			if(!services.contains(BookableService)) {
+				throw new RuntimeException("An entered service does not exist");
+			}
+			
+			try {
+				carShop.addBookableService(updateCombo)
+			}
+			catch(RuntimeException e) {
+				if(e.getMessage().startsWith("Cannot create due to duplicate")) {
+					throw new InvalidInputException("The service combo already exists");
+				}
+				throw new InvalidInputException(e.getMessage());
+			
+			
+		}
+	}
 }
