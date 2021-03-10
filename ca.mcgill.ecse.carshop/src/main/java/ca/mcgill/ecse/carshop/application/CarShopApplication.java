@@ -3,7 +3,11 @@
  */
 package ca.mcgill.ecse.carshop.application;
 
+import java.util.List;
+import ca.mcgill.ecse.carshop.model.Business;
+import ca.mcgill.ecse.carshop.model.BusinessHour;
 import ca.mcgill.ecse.carshop.model.CarShop;
+import ca.mcgill.ecse.carshop.model.TimeSlot;
 
 public class CarShopApplication {
 	
@@ -24,4 +28,5 @@ public class CarShopApplication {
     	
     	return carShop;
     }
+    
 }

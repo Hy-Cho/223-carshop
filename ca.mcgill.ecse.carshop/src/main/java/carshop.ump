@@ -20,6 +20,13 @@ class User {
 
 class Owner {
   isA User;
+  
+  
+  before constructor, setUsername {
+  	if(!aUsername.equals("owner")) {
+  		throw new RuntimeException("Owner account must have 'owner' username");
+  	}
+  }
 }
 
 class Customer {

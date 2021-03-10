@@ -4,7 +4,7 @@
 package ca.mcgill.ecse.carshop.model;
 import java.util.*;
 
-// line 74 "../../../../../carshop.ump"
+// line 81 "../../../../../carshop.ump"
 public abstract class BookableService
 {
 

@@ -22,6 +22,11 @@ public class Owner extends User
   public Owner(String aUsername, String aPassword, CarShop aCarShop)
   {
     super(aUsername, aPassword);
+    // line 26 "../../../../../carshop.ump"
+    if(!aUsername.equals("owner")) {
+      		throw new RuntimeException("Owner account must have 'owner' username");
+      }
+    // END OF UMPLE BEFORE INJECTION
     boolean didAddCarShop = setCarShop(aCarShop);
     if (!didAddCarShop)
     {
@@ -32,6 +37,18 @@ public class Owner extends User
   //------------------------
   // INTERFACE
   //------------------------
+  /* Code from template attribute_Set_subclass */
+  public boolean setUsername(String aUsername)
+  {
+    boolean wasSet = false;
+    // line 26 "../../../../../carshop.ump"
+    if(!aUsername.equals("owner")) {
+      		throw new RuntimeException("Owner account must have 'owner' username");
+      	}
+    // END OF UMPLE BEFORE INJECTION
+      wasSet = super.setUsername(aUsername);
+    return wasSet;
+  }
   /* Code from template association_GetOne */
   public CarShop getCarShop()
   {

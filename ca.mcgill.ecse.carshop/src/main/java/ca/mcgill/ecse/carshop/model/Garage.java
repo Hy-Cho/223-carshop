@@ -4,7 +4,7 @@
 package ca.mcgill.ecse.carshop.model;
 import java.util.*;
 
-// line 69 "../../../../../carshop.ump"
+// line 76 "../../../../../carshop.ump"
 public class Garage
 {
 

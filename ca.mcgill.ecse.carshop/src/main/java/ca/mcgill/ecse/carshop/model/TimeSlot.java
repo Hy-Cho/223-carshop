@@ -5,7 +5,7 @@ package ca.mcgill.ecse.carshop.model;
 import java.sql.Date;
 import java.sql.Time;
 
-// line 62 "../../../../../carshop.ump"
+// line 69 "../../../../../carshop.ump"
 public class TimeSlot
 {
 

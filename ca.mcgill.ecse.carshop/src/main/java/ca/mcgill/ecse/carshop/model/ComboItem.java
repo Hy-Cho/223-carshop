@@ -3,7 +3,7 @@
 
 package ca.mcgill.ecse.carshop.model;
 
-// line 98 "../../../../../carshop.ump"
+// line 105 "../../../../../carshop.ump"
 public class ComboItem
 {
 

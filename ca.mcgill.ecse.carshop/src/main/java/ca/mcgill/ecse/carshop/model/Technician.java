@@ -4,7 +4,7 @@
 package ca.mcgill.ecse.carshop.model;
 import java.util.*;
 
-// line 29 "../../../../../carshop.ump"
+// line 36 "../../../../../carshop.ump"
 public class Technician extends User
 {
 

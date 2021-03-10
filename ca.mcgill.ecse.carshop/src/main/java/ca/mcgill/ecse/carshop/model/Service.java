@@ -4,7 +4,7 @@
 package ca.mcgill.ecse.carshop.model;
 import java.util.*;
 
-// line 79 "../../../../../carshop.ump"
+// line 86 "../../../../../carshop.ump"
 public class Service extends BookableService
 {
 
@@ -26,7 +26,7 @@ public class Service extends BookableService
   public Service(String aName, CarShop aCarShop, int aDuration, Garage aGarage)
   {
     super(aName, aCarShop);
-    // line 84 "../../../../../carshop.ump"
+    // line 91 "../../../../../carshop.ump"
     if(aDuration <= 0) {
       	  throw new RuntimeException("Duration must be positive");
       	}
@@ -47,7 +47,7 @@ public class Service extends BookableService
   public boolean setDuration(int aDuration)
   {
     boolean wasSet = false;
-    // line 84 "../../../../../carshop.ump"
+    // line 91 "../../../../../carshop.ump"
     if(aDuration <= 0) {
       	  throw new RuntimeException("Duration must be positive");
       	}
