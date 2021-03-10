@@ -60,7 +60,7 @@ Feature: Make appointment
       # row 2: appointment in another garage
       | serviceName  | date       | startTime | endTime |
       | engine-check | 2021-02-02 | 9:40      | 10:40   |
-      | tire-change  | 2021-02-22 | 9:00      | 12:00   |
+      | tire-change  | 2021-02-22 | 9:00      | 11:00   |
 
   Scenario Outline: A customer attempts to make various valid appointments for service combos
     Given "customer1" is logged in to their account

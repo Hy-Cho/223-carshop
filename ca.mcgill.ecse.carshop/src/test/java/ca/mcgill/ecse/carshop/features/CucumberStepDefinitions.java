@@ -84,7 +84,8 @@ public class CucumberStepDefinitions {
 
 	@Then("no new account shall be created")
 	public void no_new_account_shall_be_created() {
-	    
+		// Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
 	}
 
 	@Then("an error message {string} shall be raised")
