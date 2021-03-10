@@ -33,14 +33,79 @@ public class CucumberStepDefinitions {
 	private CarShop carshop;
 	private String error;
 	private int errorCnt;
+	private String username;
+	private String password;
 	
-	//Given clauses
+	//This is the CucumberStepDefinitions code for signUpCustomer
+	
 	@Given("a Carshop system exists")
-	public void thereIsACarShopSystem() {
+	public void a_carshop_system_exists() {
 		carshop = CarShopApplication.getCarShop();
 		error = "";
 		errorCnt = 0;
 	}
+
+	@Given("there is no existing username {string}")
+	public void there_is_no_existing_username(String string) {
+		for(Customer i : carshop.getCustomers()) {
+			if(i.getUsername().equals(string)) {
+				i.delete();
+			}
+		}
+	}
+
+	@When("the user provides a new username {string} and a password {string}")
+	public void the_user_provides_a_new_username_and_a_password(String string, String string2) {
+	    username=string;
+	    password=string2;
+	}
+
+	@Then("a new customer account shall be created")
+	public void a_new_customer_account_shall_be_created() {
+		int initialSize=carshop.getCustomers().size();
+		try{
+			CarShopController.signUpCustomerAccount(username,password);
+			assertEquals(initialSize+1, carshop.getCustomers().size());
+		}
+		catch(InvalidInputException e) {
+			error=e.getMessage();
+			errorCnt++;
+		}
+	}
+
+	@Then("the account shall have username {string} and password {string}")
+	public void the_account_shall_have_username_and_password(String string, String string2) {
+	    for(Customer i : carshop.getCustomers()) {
+	    	if(i.getUsername().equals(string)) {
+	    		assertEquals(string2,i.getPassword());
+	    	}
+	    }
+	}
+
+	@Then("no new account shall be created")
+	public void no_new_account_shall_be_created() {
+	    
+	}
+
+	@Then("an error message {string} shall be raised")
+	public void an_error_message_shall_be_raised(String string) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@Given("there is an existing username {string}")
+	public void there_is_an_existing_username(String string) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@Given("the user is logged in to an account with username {string}")
+	public void the_user_is_logged_in_to_an_account_with_username(String string) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	
 	
 	@Given("an owner account exists in the system")
 	public void thereIsAnOwner()  {

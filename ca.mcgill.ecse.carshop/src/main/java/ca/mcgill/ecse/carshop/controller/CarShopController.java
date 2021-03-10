@@ -4,7 +4,6 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.util.List;
-
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.Business;
@@ -573,7 +572,6 @@ public class CarShopController {
 			}
 			return null;
 		}
-	  
 	  private static Customer getCustomerWithUsername(String username) {
 		  CarShop carShop = CarShopApplication.getCarShop();
 		  for(Customer c: carShop.getCustomers()) {
