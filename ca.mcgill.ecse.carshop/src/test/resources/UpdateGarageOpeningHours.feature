@@ -85,8 +85,8 @@ Feature: Update garage opening hours
       | customer1 |  1234567 |
     Given there are opening hours on "Monday" from "10:00" to "16:00" for garage belonging to the technician with type "Tire"
     Given the user is logged in to an account with username "<username>"
-    When the user tries to add new business hours on "<day>" from "<startTime>" to "<endTime>" to garage belonging to the technician with type "<type>"
-    Then the garage belonging to the technician with type "<type>" should not have opening hours on "<day>" from "<startTime>" to "<endTime>"
+    When the user tries to remove opening hours on "<day>" from "<startTime>" to "<endTime>" to garage belonging to the technician with type "<type>"
+    Then the garage belonging to the technician with type "<type>" should have opening hours on "<day>" from "<startTime>" to "<endTime>"
     Then an error message "<error>" shall be raised
 
     Examples: 
