@@ -178,6 +178,7 @@ public class CarShopController {
 		catch(RuntimeException ex) {
 			throw new InvalidInputException(ex.getMessage());
 		}
+	}
 		  
 	private static int numOfCombos;
 
@@ -691,7 +692,7 @@ public class CarShopController {
 			}
 			
 			try {
-				carShop.addBookableService(updateCombo)
+				carShop.addBookableService(updateCombo);
 			}
 			catch(RuntimeException e) {
 				if(e.getMessage().startsWith("Cannot create due to duplicate")) {

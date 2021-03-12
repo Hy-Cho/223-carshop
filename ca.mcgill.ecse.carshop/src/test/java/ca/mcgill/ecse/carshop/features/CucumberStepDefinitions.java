@@ -52,6 +52,7 @@ public class CucumberStepDefinitions {
 				i.delete();
 			}
 		}
+		//Loop over technicians and check for owner
 	}
 
 	@When("the user provides a new username {string} and a password {string}")
