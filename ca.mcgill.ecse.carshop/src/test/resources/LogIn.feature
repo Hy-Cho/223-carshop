@@ -47,4 +47,3 @@ Feature: Login as customer or owner
     When the user tries to log in with username "User1" and password "grape"
     Then the user should not be logged in
     Then an error message "Username/password not found" shall be raised
------*
