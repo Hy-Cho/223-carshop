@@ -50,26 +50,36 @@ public class CucumberStepDefinitions {
 
 	@Given("there is no existing username {string}")
 	public void there_is_no_existing_username(String string) {
-		for(Customer i : carshop.getCustomers()) {
-			if(i.getUsername().equals(string)) {
-				i.delete();
-			}
+		User i=getUserWithUsername(string);
+		if(i!=null) {
+			i.delete();
 		}
-		//Loop over technicians and check for owner
 	}
 
 	@When("the user provides a new username {string} and a password {string}")
 	public void the_user_provides_a_new_username_and_a_password(String string, String string2) {
 	    username=string;
 	    password=string2;
+	    /*
+	     * try{
+	     * 		CarShopController.signUpCustomerAccount(username,password);
+	     * }
+	     * catch(InvalidInputException e){
+	     * 	error=e.getMessage();
+			errorCnt++;
+	     * }
+	     */
+	    
 	}
 
 	@Then("a new customer account shall be created")
 	public void a_new_customer_account_shall_be_created() {
 		int initialSize=carshop.getCustomers().size();
 		try{
+			//SHOULD BE IN WHEN provides username
 			CarShopController.signUpCustomerAccount(username,password);
 			assertEquals(initialSize+1, carshop.getCustomers().size());
+			assertNotNull(getUserWithUsername(username));
 		}
 		catch(InvalidInputException e) {
 			error=e.getMessage();
@@ -82,20 +92,31 @@ public class CucumberStepDefinitions {
 	    for(Customer i : carshop.getCustomers()) {
 	    	if(i.getUsername().equals(string)) {
 	    		assertEquals(string2,i.getPassword());
+	    		return;
 	    	}
 	    }
+	    throw new AssertionError();
 	}
 
 	@Then("no new account shall be created")
 	public void no_new_account_shall_be_created() {
-		// Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+		int initialSize=carshop.getCustomers().size();
+		try{
+			//SHOULD BE IN WHEN provides username
+			CarShopController.signUpCustomerAccount(username,password);
+			assertEquals(initialSize, carshop.getCustomers().size());
+			assertNull(getUserWithUsername(username));
+		}
+		catch(InvalidInputException e) {
+			error=e.getMessage();
+			errorCnt++;
+		}
 	}
 
 	@Then("an error message {string} shall be raised")
 	public void an_error_message_shall_be_raised(String string) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	    assertEquals(this.error,string);
+	    error="";
 	}
 
 	@Given("there is an existing username {string}")
@@ -107,7 +128,17 @@ public class CucumberStepDefinitions {
 	@Given("the user is logged in to an account with username {string}")
 	public void the_user_is_logged_in_to_an_account_with_username(String string) {
 	    // Write code here that turns the phrase above into concrete actions
+		try {
+			User u = getUserWithUsername("owner");
+			CarShopController.logIn(u.getUsername(), u.getPassword());
+		}
+		catch(InvalidInputException e) {
+			error=e.getMessage();
+			errorCnt++;
+		}
+		
 	    throw new io.cucumber.java.PendingException();
+	    
 	}
 
 	
