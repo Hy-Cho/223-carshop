@@ -89,7 +89,7 @@ public class CarShopController {
 			
 		}
 		//Make sure to implement the case where the case for technicians
-		else if(techType != null && username.equals(password)) {
+		else if(techType != null) {
 			Technician existingTechAccount = getTechnicianWithTechType(techType);
 			if(existingTechAccount == null) {
 				existingTechAccount = new Technician(username, password, techType, carShop);
@@ -156,6 +156,15 @@ public class CarShopController {
 		
 		CarShop carShop = CarShopApplication.getCarShop();
 		
+		
+		if(duration <= 0) {
+			throw new RuntimeException("Duration must be positive");
+		}
+		if(getServiceFromName(name, carShop) != null) {
+			throw new InvalidInputException("Service "+name+ " already exists");
+		}
+		
+		
 		try {
 			Service service = new Service(name, carShop, duration, garage);
 		}
@@ -164,17 +173,33 @@ public class CarShopController {
 		}
 	}
 	
-	public static void updateService(String oldName, String newName, int newDuration, Garage newGarage) {
+	public static void updateService(String oldName, String newName, int newDuration, Garage newGarage) throws InvalidInputException {
 		if(loggedInUser == null  || loggedInUser.getUsername() != "owner" || !(loggedInUser instanceof Owner)) {
-			throw new RuntimeException("You are not autorized to perform this operation");
+			throw new RuntimeException("You are not authorized to perform this operation");
 		}
-
+		
 		CarShop carShop = CarShopApplication.getCarShop();
-		Service serviceToModify = getServiceFromName(oldName, carShop);
-		if(serviceToModify != null) {
-			serviceToModify.setName(newName);
-			serviceToModify.setDuration(newDuration);
-			serviceToModify.setGarage(newGarage);
+		
+		
+		try {
+			Service serviceToModify = getServiceFromName(oldName, carShop);
+			
+			if(!oldName.equals(newName) && getServiceFromName(newName, carShop) != null) {
+				throw new InvalidInputException("Service "+newName+ " already exists");
+			}
+			if(newDuration <= 0) {
+				throw new InvalidInputException("Duration must be positive");
+			}
+			
+			if(serviceToModify != null) {
+				serviceToModify.setName(newName);
+				serviceToModify.setDuration(newDuration);
+				serviceToModify.setGarage(newGarage);
+			}
+		}
+		catch(RuntimeException ex) {
+			throw new InvalidInputException(ex.getMessage());
+			
 		}
 	}
 

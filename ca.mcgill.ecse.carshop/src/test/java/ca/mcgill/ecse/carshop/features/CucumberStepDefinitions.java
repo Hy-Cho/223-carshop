@@ -22,6 +22,7 @@ import ca.mcgill.ecse.carshop.model.Owner;
 import ca.mcgill.ecse.carshop.model.Service;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
+import ca.mcgill.ecse.carshop.model.User;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -35,6 +36,8 @@ public class CucumberStepDefinitions {
 	private int errorCnt;
 	private String username;
 	private String password;
+	
+	private String oldServiceName;
 	
 	//This is the CucumberStepDefinitions code for signUpCustomer
 	
@@ -132,7 +135,7 @@ public class CucumberStepDefinitions {
 		}
 	}
 	@Given("each technician has their own garage")
-	public void eachTechnicianHasGarage() {
+	public   void eachTechnicianHasGarage() {
 		for(Technician tech: this.carshop.getTechnicians()) {
 			Garage garage = new Garage(this.carshop, tech);
 		}
@@ -161,8 +164,8 @@ public class CucumberStepDefinitions {
 	@Given("the user with username {string} is logged in")
 	public void userLoggedIn(String username) {
 		try {
-			Customer c = getCustomerWithUsername(username);
-			CarShopController.logIn(username, c.getPassword());
+			User u = getUserWithUsername(username);
+			CarShopController.logIn(username, u.getPassword());
 		} catch (InvalidInputException e) {
 			error = e.getMessage();
 			errorCnt++;
@@ -195,6 +198,29 @@ public class CucumberStepDefinitions {
 			errorCnt++;
 		}
 	}
+	@When("{string} initiates the update of the service {string} to name {string}, duration {string}, belonging to the garage of {string} technician")
+	public void updateService(String username, String oldName, String newName, String duration, String garageStr) throws Exception {
+		try	{
+			Garage garage = getGarageOfTechnician(getTechnicianTypeFromString(garageStr));
+			this.oldServiceName = oldName;
+			
+			System.out.println("here");
+			int durationValue = Integer.valueOf(duration);
+			System.out.println("here2");
+			
+			CarShopController.updateService(oldName, newName, Integer.valueOf(duration), garage);
+		}
+		catch(InvalidInputException ex) {
+			error = ex.getMessage();
+			errorCnt++;
+		}
+		catch(RuntimeException ex) {
+			error = ex.getMessage();
+			errorCnt++;
+		}
+	}
+	
+
 	@Then("the service {string} shall exist in the system")
 	public void checkServiceInSystem(String name) {
 		assertNotNull(getServiceFromName(name));
@@ -217,13 +243,32 @@ public class CucumberStepDefinitions {
 		assertNull(getServiceFromName(name));
 	}
 	@Then("the service {string} shall still preserve the following properties:")
-	public void checkServiceProperties(String name, String duration, String garage) {
-		Service service = getServiceFromName(name);
-		assertNotNull(service);
-		assertEquals(service.getDuration(), Integer.valueOf(duration));
-		Garage g = getGarageOfTechnician(getTechnicianTypeFromString(garage));
-		assertEquals(service.getGarage(), g);
+	public void checkServiceProperties(String name, DataTable table) {
+		List<Map<String, String>> maps = table.asMaps();
+		for(Map<String, String> map: maps) {
+			Service service = getServiceFromName(name);
+			assertNotNull(service);
+			assertEquals(service.getDuration(), Integer.valueOf(map.get("duration")));
+			Garage g = getGarageOfTechnician(getTechnicianTypeFromString(map.get("garage")));
+			assertEquals(service.getGarage(), g);
+		}
 		
+	}
+	
+	@Then("the service {string} shall be updated to name {string}, duration {string}")
+	public void checkServiceUpdated(String oldName, String newName, String newDuration) {
+		if(!oldName.equals(newName)) {
+			assertNotNull(this.oldServiceName);
+			assertNull(getServiceFromName(this.oldServiceName));
+		}
+		
+
+		assertEquals(oldName, this.oldServiceName);
+		
+		Service newService = getServiceFromName(newName);
+		assertNotNull(newService);
+		assertEquals(Integer.valueOf(newDuration), newService.getDuration());
+		this.oldServiceName = null;
 	}
 	
 	@After
@@ -309,12 +354,23 @@ public class CucumberStepDefinitions {
 		
 		return count;
 	}
-	private Customer getCustomerWithUsername(String username) {
+	private User getUserWithUsername(String username) {
 		for(Customer c: carshop.getCustomers()) {
 			if(c.getUsername().equals(username)) {
 				return c;
 			}
 		}
+		
+		for(Technician tech: carshop.getTechnicians()) {
+			if(tech.getUsername().equals(username)) {
+				return tech;
+			}
+		}
+		
+		if(username.equals("owner")) {
+			return carshop.getOwner() != null ? carshop.getOwner(): null;
+		}
+		
 		return null;
 	}
 }

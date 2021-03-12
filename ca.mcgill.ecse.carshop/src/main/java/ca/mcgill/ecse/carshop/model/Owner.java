@@ -25,7 +25,7 @@ public class Owner extends User
     // line 26 "../../../../../carshop.ump"
     if(!aUsername.equals("owner")) {
       		throw new RuntimeException("Owner account must have 'owner' username");
-      }
+      	}
     // END OF UMPLE BEFORE INJECTION
     boolean didAddCarShop = setCarShop(aCarShop);
     if (!didAddCarShop)
