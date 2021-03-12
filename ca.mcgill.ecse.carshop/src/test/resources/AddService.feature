@@ -54,9 +54,9 @@ Feature: Add Service
 
     Examples: 
       | name        | duration | garage | error                       |
-      | tire-change |      100 | Tire   | Service wash already exists |
-      | tire-change |       50 | Tire   | Service wash already exists |
-      | tire-change |       75 | Tire   | Service wash already exists |
+      | tire-change |      100 | Tire   | Service tire-change already exists |
+      | tire-change |       50 | Tire   | Service tire-change already exists |
+      | tire-change |       75 | Tire   | Service tire-change already exists |
 
   Scenario Outline: Unauthorized attempt to add a service
     Given the following customers exist in the system:
