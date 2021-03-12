@@ -269,6 +269,7 @@ public class CucumberStepDefinitions {
 	@Then("an error message with content {string} shall be raised")
 	public void checkErrorRaised(String errorMessage) {
 		assertEquals(errorMessage, this.error);
+		this.error = null;
 	}
 	@Then("the service {string} shall not exist in the system")
 	public void checkNotExistService(String name) {
