@@ -178,6 +178,7 @@ public class CarShopController {
 		catch(RuntimeException ex) {
 			throw new InvalidInputException(ex.getMessage());
 		}
+	}
 		  
 	private static int numOfCombos;
 
