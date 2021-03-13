@@ -36,7 +36,7 @@ public class CucumberStepDefinitions {
 	private int errorCnt;
 	private String username;
 	private String password;
-	
+	private int initialSize;
 	private String oldServiceName;
 	
 	//This is the CucumberStepDefinitions code for signUpCustomer
@@ -60,31 +60,20 @@ public class CucumberStepDefinitions {
 	public void the_user_provides_a_new_username_and_a_password(String string, String string2) {
 	    username=string;
 	    password=string2;
-	    /*
-	     * try{
-	     * 		CarShopController.signUpCustomerAccount(username,password);
-	     * }
-	     * catch(InvalidInputException e){
-	     * 	error=e.getMessage();
-			errorCnt++;
-	     * }
-	     */
-	    
+	    initialSize=carshop.getCustomers().size();
+	     try{
+	     	 CarShopController.signUpCustomerAccount(username,password);
+	     }
+	     catch(InvalidInputException e){
+	    	 error=e.getMessage();
+		 	 errorCnt++;
+	     }
 	}
 
 	@Then("a new customer account shall be created")
 	public void a_new_customer_account_shall_be_created() {
-		int initialSize=carshop.getCustomers().size();
-		try{
-			//SHOULD BE IN WHEN provides username
-			CarShopController.signUpCustomerAccount(username,password);
-			assertEquals(initialSize+1, carshop.getCustomers().size());
-			assertNotNull(getUserWithUsername(username));
-		}
-		catch(InvalidInputException e) {
-			error=e.getMessage();
-			errorCnt++;
-		}
+		assertEquals(initialSize+1, carshop.getCustomers().size());
+		assertNotNull(getUserWithUsername(username));	
 	}
 
 	@Then("the account shall have username {string} and password {string}")
@@ -100,17 +89,8 @@ public class CucumberStepDefinitions {
 
 	@Then("no new account shall be created")
 	public void no_new_account_shall_be_created() {
-		int initialSize=carshop.getCustomers().size();
-		try{
-			//SHOULD BE IN WHEN provides username
-			CarShopController.signUpCustomerAccount(username,password);
-			assertEquals(initialSize, carshop.getCustomers().size());
-			assertNull(getUserWithUsername(username));
-		}
-		catch(InvalidInputException e) {
-			error=e.getMessage();
-			errorCnt++;
-		}
+		assertEquals(initialSize, carshop.getCustomers().size());
+		assertNull(getUserWithUsername(username));
 	}
 
 	@Then("an error message {string} shall be raised")
@@ -121,23 +101,35 @@ public class CucumberStepDefinitions {
 
 	@Given("there is an existing username {string}")
 	public void there_is_an_existing_username(String string) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	    if(getUserWithUsername(string)==null) {
+	    	if(string.equals("owner")) {
+	    		carshop.setOwner(new Owner(string,string,carshop));
+	    	}
+	    	else if(string.equals("Tire-Technician") || string.equals("Engine-Technician") || string.equals("Fluids-Technician") || string.equals("Electronics-Technician") || string.equals("Transmission-Technician")) {
+	    		carshop.addTechnician(string,string,getTechTypeFromUsername(string));
+	    	}
+	    	else {
+	    		try {
+	    			CarShopController.signUpCustomerAccount(string, string);
+	    		}
+	    		catch(InvalidInputException e) {
+	    			error=e.getMessage();
+	    			errorCnt++;
+	    		}
+	    	}
+	    }
 	}
 
 	@Given("the user is logged in to an account with username {string}")
 	public void the_user_is_logged_in_to_an_account_with_username(String string) {
-	    // Write code here that turns the phrase above into concrete actions
 		try {
-			User u = getUserWithUsername("owner");
+			User u = getUserWithUsername(string);
 			CarShopController.logIn(u.getUsername(), u.getPassword());
 		}
 		catch(InvalidInputException e) {
 			error=e.getMessage();
 			errorCnt++;
 		}
-		
-	    throw new io.cucumber.java.PendingException();
 	    
 	}
 
@@ -406,4 +398,21 @@ public class CucumberStepDefinitions {
 		
 		return null;
 	}
+	
+	private static TechnicianType getTechTypeFromUsername(String username) {
+		  switch(username) {
+			case "Tire-Technician":
+				  return TechnicianType.Tire;
+			case "Engine-Technician":
+				  return TechnicianType.Engine;
+			case "Fluids-Technician":
+				return TechnicianType.Fluids;
+			case "Electronics-Technician":
+				return TechnicianType.Electronics;
+			case "Transmission-Technician":
+				return TechnicianType.Transmission;
+			default:
+				return null;
+		  }
+	  }
 }
