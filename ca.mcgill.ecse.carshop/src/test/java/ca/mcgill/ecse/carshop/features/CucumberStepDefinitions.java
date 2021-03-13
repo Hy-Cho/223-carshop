@@ -169,7 +169,7 @@ public class CucumberStepDefinitions {
 	}
 	//End of update account code
 	
-	/*
+	
 	@Given("an owner account exists in the system")
 	public void thereIsAnOwner()  {
 		Owner owner = new Owner("owner", "password", this.carshop);
@@ -179,7 +179,6 @@ public class CucumberStepDefinitions {
 	public void thereIsABusiness() {
 		Business business = new Business("Car Shop", "McGill", "mario.bouzakhm@mail.mcgill.ca", "(514) 123-1342", this.carshop);
 	}
-	*/
 	
 	@Given("the following technicians exist in the system:")
 	public void thereIsTechnicians(DataTable dataTable) {
@@ -203,7 +202,7 @@ public class CucumberStepDefinitions {
 			Garage garage = new Garage(this.carshop, tech);
 		}
 	}
-	/*
+	
 	@Given("the following services exist in the system:")
 	public void exisitingServiceInSystem(DataTable dataTable) {
 		List<Map<String, String>> listReresentation = dataTable.asMaps(String.class, String.class);
@@ -236,7 +235,7 @@ public class CucumberStepDefinitions {
 		}
 	}
 	
-   */
+   
 	
 	@Given("the following customers exist in the system:")
 	public void existingCustomer(DataTable dataTable) {
@@ -248,7 +247,7 @@ public class CucumberStepDefinitions {
 			Customer cust = new Customer(username, password, carshop);
 		}
 	}
-	/*
+	
 
 	@When("{string} initiates the addition of the service {string} with duration {string} belonging to the garage of {string} technician")
 	public void initiatesServiceAdded(String username, String name, String duration, String garageStr) {
@@ -339,7 +338,7 @@ public class CucumberStepDefinitions {
 		this.oldServiceName = null;
 	}
 	
-	*/
+	
 	
 	@After
 	public void tearDown() {
