@@ -36,6 +36,7 @@ public class CucumberStepDefinitions {
 	private int errorCnt;
 	private String username;
 	private String password;
+	private String oldUsername;
 	private String oldPassword;
 	private int initialSize;
 	private String oldServiceName;
@@ -84,6 +85,16 @@ public class CucumberStepDefinitions {
 	    		assertEquals(string2,i.getPassword());
 	    		return;
 	    	}
+	    }
+	    for(Technician i : carshop.getTechnicians()) {
+	    	if(i.getUsername().equals(string)) {
+	    		assertEquals(string2,i.getPassword());
+	    		return;
+	    	}
+	    }
+	    if(carshop.getOwner().getUsername().equals(string)) {
+	    	assertEquals(string2,carshop.getOwner().getPassword());
+	    	return;
 	    }
 	    throw new AssertionError();
 	}
@@ -146,14 +157,49 @@ public class CucumberStepDefinitions {
 	    	carshop.setOwner(new Owner(string,string2,carshop));
 	    }
 	}
-
+	/*
+	@Given("the following customers exist in the system:")
+	public void existingCustomer(DataTable dataTable) {
+		List<Map<String, String>> listReresentation = dataTable.asMaps(String.class, String.class);
+		for(Map<String, String> list: listReresentation) {
+			String username = list.get("username");
+			String password = list.get("password");
+			if(getUserWithUsername(username)==null) {
+				carshop.addCustomer(username, password);
+			}
+			else {
+				getUserWithUsername(username).setPassword(password);
+			}		
+		}
+	}
 	
+	
+	@Given("the following technicians exist in the system:")
+	public void thereIsTechnicians(DataTable dataTable) {
+		List<Map<String, String>> listReresentation = dataTable.asMaps(String.class, String.class);
+		for(Map<String, String> list: listReresentation) {
+			String username = list.get("username");
+			String password = list.get("password");
+			String type = list.get("type");
+			if(getUserWithUsername(username)==null) {
+				carshop.addTechnician(username, password, getTechnicianTypeFromString(type));
+			}
+			else {
+				getUserWithUsername(username).setPassword(password);
+			}
+
+		}
+	}
+	*/
 	
 	@When("the user tries to update account with a new username {string} and password {string}")
 	public void the_user_tries_to_update_account_with_a_new_username_and_password(String string, String string2) {
 		username=string;
 		password=string2;
-		oldPassword=getUserWithUsername(string).getPassword();
+		if(CarShopController.getLoggedInUser()!=null) {
+			oldUsername=CarShopController.getLoggedInUser().getUsername();
+			oldPassword=CarShopController.getLoggedInUser().getPassword();
+		}
 		try {
 			CarShopController.updateCustomerAccount(string, string2);
 		}
@@ -163,9 +209,12 @@ public class CucumberStepDefinitions {
 	    }
 	}
 	
+	
+	
 	@Then("the account shall not be updated")
 	public void the_account_shall_not_be_updated() {
-	    assertEquals(getUserWithUsername(username).getPassword(),oldPassword);
+		assertEquals(CarShopController.getLoggedInUser().getUsername(),oldUsername);
+	    assertEquals(CarShopController.getLoggedInUser().getPassword(),oldPassword);
 	}
 	//End of update account code
 	
@@ -179,6 +228,8 @@ public class CucumberStepDefinitions {
 	public void thereIsABusiness() {
 		Business business = new Business("Car Shop", "McGill", "mario.bouzakhm@mail.mcgill.ca", "(514) 123-1342", this.carshop);
 	}
+	
+	
 	
 	@Given("the following technicians exist in the system:")
 	public void thereIsTechnicians(DataTable dataTable) {
@@ -202,6 +253,8 @@ public class CucumberStepDefinitions {
 			Garage garage = new Garage(this.carshop, tech);
 		}
 	}
+	
+	
 	
 	@Given("the following services exist in the system:")
 	public void exisitingServiceInSystem(DataTable dataTable) {
@@ -247,6 +300,7 @@ public class CucumberStepDefinitions {
 			Customer cust = new Customer(username, password, carshop);
 		}
 	}
+	
 	
 
 	@When("{string} initiates the addition of the service {string} with duration {string} belonging to the garage of {string} technician")
@@ -437,10 +491,12 @@ public class CucumberStepDefinitions {
 			}
 		}
 		
-		if(username.equals("owner")) {
-			return carshop.getOwner() != null ? carshop.getOwner(): null;
+		if(carshop.getOwner()!=null) {
+			if(username.equals(carshop.getOwner().getUsername())) {
+				return carshop.getOwner();
+			}
 		}
-		
+	
 		return null;
 	}
 	

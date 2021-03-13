@@ -1,6 +1,4 @@
 package ca.mcgill.ecse.carshop.controller;
-
-
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
@@ -86,6 +84,7 @@ public class CarShopController {
 			if(loggedInUser.setUsername(newUsername)==false) {
 				throw new InvalidInputException("Username not available");
 			}
+			loggedInUser.setUsername(newUsername);
 			loggedInUser.setPassword(newPassword);
 		}
 		catch(RuntimeException e) {
@@ -93,18 +92,20 @@ public class CarShopController {
 		}
 	}
 	
+	
 	public static void logIn(String username, String password) throws InvalidInputException {
 		CarShop carShop = CarShopApplication.getCarShop();
 		TechnicianType techType = getTechTypeFromUsername(username);
-		if(username.equals("owner") && password.equals("owner")) {
+		//removed && password.equals("owner") because owner can have a different password
+		if(username.equals("owner")) {
 			Owner owner = carShop.getOwner();
 			
 			if(owner == null) {
 				owner = new Owner("owner", "owner", carShop);
 			}
 			loggedInUser = owner;
-			
 		}
+		
 		//Make sure to implement the case where the case for technicians
 		else if(techType != null) {
 			Technician existingTechAccount = getTechnicianWithTechType(techType);
@@ -261,10 +262,14 @@ public class CarShopController {
 			
 		}
 	}
-
+	
+	
+	
 	public static User getLoggedInUser() {
 		return loggedInUser;
 	}
+	
+	
 	private static Service getServiceFromName(String name, CarShop carShop) {
 		List<BookableService> bookableServices = carShop.getBookableServices();
 		for(BookableService bookableService: bookableServices) {
@@ -729,4 +734,5 @@ public class CarShopController {
 			
 		}
 	}
+	
 }
