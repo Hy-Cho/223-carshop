@@ -717,7 +717,7 @@ public class CarShopController {
 			}
 			
 			try {
-				carShop.addBookableService(updateCombo)
+				carShop.addBookableService(updateCombo);
 			}
 			catch(RuntimeException e) {
 				if(e.getMessage().startsWith("Cannot create due to duplicate")) {

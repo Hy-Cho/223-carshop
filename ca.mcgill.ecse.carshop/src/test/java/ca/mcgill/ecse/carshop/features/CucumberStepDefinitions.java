@@ -55,6 +55,7 @@ public class CucumberStepDefinitions {
 				i.delete();
 			}
 		}
+		//Loop over technicians and check for owner
 	}
 
 	@When("the user provides a new username {string} and a password {string}")
@@ -199,7 +200,7 @@ public class CucumberStepDefinitions {
 		}
 	}
 	@When("{string} initiates the update of the service {string} to name {string}, duration {string}, belonging to the garage of {string} technician")
-	public void updateService(String username, String oldName, String newName, String duration, String garageStr) throws Exception {
+	public void updateService(String username, String oldName, String newName, String duration, String garageStr) throws InvalidInputException {
 		try	{
 			Garage garage = getGarageOfTechnician(getTechnicianTypeFromString(garageStr));
 			this.oldServiceName = oldName;
