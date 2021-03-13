@@ -80,23 +80,13 @@ public class CucumberStepDefinitions {
 
 	@Then("the account shall have username {string} and password {string}")
 	public void the_account_shall_have_username_and_password(String string, String string2) {
-	    for(Customer i : carshop.getCustomers()) {
-	    	if(i.getUsername().equals(string)) {
-	    		assertEquals(string2,i.getPassword());
-	    		return;
-	    	}
+	    if(getUserWithUsername(string)!=null) {
+	    	assertEquals(string2,getUserWithUsername(string).getPassword());
 	    }
-	    for(Technician i : carshop.getTechnicians()) {
-	    	if(i.getUsername().equals(string)) {
-	    		assertEquals(string2,i.getPassword());
-	    		return;
-	    	}
+	    else {
+	    	throw new AssertionError();
 	    }
-	    if(carshop.getOwner().getUsername().equals(string)) {
-	    	assertEquals(string2,carshop.getOwner().getPassword());
-	    	return;
-	    }
-	    throw new AssertionError();
+	    
 	}
 
 	@Then("no new account shall be created")
