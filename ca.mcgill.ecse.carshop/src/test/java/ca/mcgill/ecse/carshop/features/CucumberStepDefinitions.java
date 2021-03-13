@@ -36,6 +36,7 @@ public class CucumberStepDefinitions {
 	private int errorCnt;
 	private String username;
 	private String password;
+	private String oldPassword;
 	private int initialSize;
 	private String oldServiceName;
 	
@@ -138,54 +139,37 @@ public class CucumberStepDefinitions {
 	
 	@Given("an owner account exists in the system with username {string} and password {string}")
 	public void an_owner_account_exists_in_the_system_with_username_and_password(String string, String string2) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	    if(getUserWithUsername(string)!=null) {
+	    	getUserWithUsername(string).setPassword(string2);
+	    }
+	    else {
+	    	carshop.setOwner(new Owner(string,string2,carshop));
+	    }
 	}
 
-	@Given("the following customers exist in the system:")
-	public void the_following_customers_exist_in_the_system(io.cucumber.datatable.DataTable dataTable) {
-	    // Write code here that turns the phrase above into concrete actions
-	    // For automatic transformation, change DataTable to one of
-	    // E, List<E>, List<List<E>>, List<Map<K,V>>, Map<K,V> or
-	    // Map<K, List<V>>. E,K,V must be a String, Integer, Float,
-	    // Double, Byte, Short, Long, BigInteger or BigDecimal.
-	    //
-	    // For other transformations you can register a DataTableType.
-	    throw new io.cucumber.java.PendingException();
-	}
-
-	@Given("the following technicians exist in the system:")
-	public void the_following_technicians_exist_in_the_system(io.cucumber.datatable.DataTable dataTable) {
-	    // Write code here that turns the phrase above into concrete actions
-	    // For automatic transformation, change DataTable to one of
-	    // E, List<E>, List<List<E>>, List<Map<K,V>>, Map<K,V> or
-	    // Map<K, List<V>>. E,K,V must be a String, Integer, Float,
-	    // Double, Byte, Short, Long, BigInteger or BigDecimal.
-	    //
-	    // For other transformations you can register a DataTableType.
-	    throw new io.cucumber.java.PendingException();
-	}
-
-	@Given("each technician has their own garage")
-	public void each_technician_has_their_own_garage() {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
-	}
-
+	
+	
 	@When("the user tries to update account with a new username {string} and password {string}")
 	public void the_user_tries_to_update_account_with_a_new_username_and_password(String string, String string2) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+		username=string;
+		password=string2;
+		oldPassword=getUserWithUsername(string).getPassword();
+		try {
+			CarShopController.updateCustomerAccount(string, string2);
+		}
+	    catch(InvalidInputException e) {
+	    	error=e.getMessage();
+	    	errorCnt++;
+	    }
 	}
-
+	
 	@Then("the account shall not be updated")
 	public void the_account_shall_not_be_updated() {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+	    assertEquals(getUserWithUsername(username).getPassword(),oldPassword);
 	}
 	//End of update account code
 	
-	
+	/*
 	@Given("an owner account exists in the system")
 	public void thereIsAnOwner()  {
 		Owner owner = new Owner("owner", "password", this.carshop);
@@ -195,6 +179,7 @@ public class CucumberStepDefinitions {
 	public void thereIsABusiness() {
 		Business business = new Business("Car Shop", "McGill", "mario.bouzakhm@mail.mcgill.ca", "(514) 123-1342", this.carshop);
 	}
+	*/
 	
 	@Given("the following technicians exist in the system:")
 	public void thereIsTechnicians(DataTable dataTable) {
@@ -209,12 +194,16 @@ public class CucumberStepDefinitions {
 			Technician technician = new Technician(username, password, techType, this.carshop);
 		}
 	}
+	
+	
+	
 	@Given("each technician has their own garage")
 	public   void eachTechnicianHasGarage() {
 		for(Technician tech: this.carshop.getTechnicians()) {
 			Garage garage = new Garage(this.carshop, tech);
 		}
 	}
+	/*
 	@Given("the following services exist in the system:")
 	public void exisitingServiceInSystem(DataTable dataTable) {
 		List<Map<String, String>> listReresentation = dataTable.asMaps(String.class, String.class);
@@ -247,6 +236,8 @@ public class CucumberStepDefinitions {
 		}
 	}
 	
+   */
+	
 	@Given("the following customers exist in the system:")
 	public void existingCustomer(DataTable dataTable) {
 		List<Map<String, String>> listReresentation = dataTable.asMaps(String.class, String.class);
@@ -257,7 +248,8 @@ public class CucumberStepDefinitions {
 			Customer cust = new Customer(username, password, carshop);
 		}
 	}
-	
+	/*
+
 	@When("{string} initiates the addition of the service {string} with duration {string} belonging to the garage of {string} technician")
 	public void initiatesServiceAdded(String username, String name, String duration, String garageStr) {
 		try {
@@ -347,7 +339,7 @@ public class CucumberStepDefinitions {
 		this.oldServiceName = null;
 	}
 	
-	
+	*/
 	
 	@After
 	public void tearDown() {
