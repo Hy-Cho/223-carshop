@@ -55,7 +55,7 @@ Feature: Update Service
       | name        | duration | garage |
       | tire-change |      120 | Tire   |
     Given the user with username "<username>" is logged in
-    When "<username>" initiates the update of the service "tire-change" to name "<name>", duration "<duration>", belonging to the garage of "<garage>" technician
+    When "<username>" initiates the update of the service "tire-change" to name "tire-change", duration "10", belonging to the garage of "Tire" technician
     Then an error message with content "<error>" shall be raised
     Then the service "tire-change" shall still preserve the following properties:
       | name        | duration | garage |
