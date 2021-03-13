@@ -50,12 +50,13 @@ public class CarShopController {
 			throw new InvalidInputException("The password cannot be empty");
 		}
 		
-		if(loggedInUser.getUsername().equals("owner")) {
-			throw new InvalidInputException("You must log out of the owner account before creating a customer account");
-		}
-		
-		if(loggedInUser.getUsername().equals("Tire-Technician") || loggedInUser.getUsername().equals("Engine-Technician") || loggedInUser.getUsername().equals("Transmission-Technician") || loggedInUser.getUsername().equals("Electronics-Technician") || loggedInUser.getUsername().equals("Fluids-Technician") ) {
-			throw new InvalidInputException("You must log out of the technician account before creating a customer account");
+		if(loggedInUser!=null) {
+			if(loggedInUser.getUsername().equals("owner")) {
+				throw new InvalidInputException("You must log out of the owner account before creating a customer account");
+			}
+			if(loggedInUser.getUsername().equals("Tire-Technician") || loggedInUser.getUsername().equals("Engine-Technician") || loggedInUser.getUsername().equals("Transmission-Technician") || loggedInUser.getUsername().equals("Electronics-Technician") || loggedInUser.getUsername().equals("Fluids-Technician") ) {
+				throw new InvalidInputException("You must log out of the technician account before creating a customer account");
+			}
 		}
 		
 		try {

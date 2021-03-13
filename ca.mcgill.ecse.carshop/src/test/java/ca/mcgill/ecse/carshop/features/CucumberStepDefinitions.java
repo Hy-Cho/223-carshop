@@ -90,7 +90,6 @@ public class CucumberStepDefinitions {
 	@Then("no new account shall be created")
 	public void no_new_account_shall_be_created() {
 		assertEquals(initialSize, carshop.getCustomers().size());
-		assertNull(getUserWithUsername(username));
 	}
 
 	@Then("an error message {string} shall be raised")
@@ -133,8 +132,9 @@ public class CucumberStepDefinitions {
 	    
 	}
 
+	// end of sign up code
 	
-	
+	/*
 	@Given("an owner account exists in the system")
 	public void thereIsAnOwner()  {
 		Owner owner = new Owner("owner", "password", this.carshop);
@@ -296,10 +296,13 @@ public class CucumberStepDefinitions {
 		this.oldServiceName = null;
 	}
 	
+	*/
+	
 	@After
 	public void tearDown() {
 		carshop.delete();
 	}
+	
 	
 	private TechnicianType getTechnicianTypeFromString(String type) {
 		TechnicianType techType;
