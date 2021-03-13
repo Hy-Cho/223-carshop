@@ -74,14 +74,14 @@ public class CarShopController {
 		if(newPassword==null || newPassword.length()==0) {
 			throw new InvalidInputException("The password cannot be empty");
 		}
-		if(loggedInUser instanceof Owner) {
+		if(loggedInUser instanceof Owner && !newUsername.equals("owner")) {
 			throw new InvalidInputException("Changing username of owner is not allowed");
 		}
-		if(loggedInUser instanceof Technician) {
+		if(loggedInUser instanceof Technician && !(loggedInUser.getUsername().equals(newUsername))) {
 			throw new InvalidInputException("Changing username of technician is not allowed");
 		}
 		try {
-			if(loggedInUser.setUsername(newUsername)==false) {
+			if(loggedInUser.setUsername(newUsername)==false && !newUsername.equals("owner") && !(loggedInUser.getUsername().equals(newUsername))) {
 				throw new InvalidInputException("Username not available");
 			}
 			loggedInUser.setUsername(newUsername);
