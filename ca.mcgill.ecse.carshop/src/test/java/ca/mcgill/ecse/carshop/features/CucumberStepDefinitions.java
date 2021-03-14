@@ -41,7 +41,7 @@ public class CucumberStepDefinitions {
 	private int initialSize;
 	private String oldServiceName;
 	
-	//This is the CucumberStepDefinitions code for signUpCustomer
+	//This is the CucumberStepDefinitions code for signUpCustomer. Coded by Sami Ait Ouahmane
 	
 	@Given("a Carshop system exists")
 	public void a_carshop_system_exists() {
@@ -134,9 +134,9 @@ public class CucumberStepDefinitions {
 	    
 	}
 
-	// end of sign up code
+	// end of sign up code coded by Sami Ait Ouahmane
 	
-	//Start of Update account code
+	//Start of Update account coded by Sami Ait Ouahmane
 	
 	@Given("an owner account exists in the system with username {string} and password {string}")
 	public void an_owner_account_exists_in_the_system_with_username_and_password(String string, String string2) {
@@ -173,7 +173,8 @@ public class CucumberStepDefinitions {
 		assertEquals(CarShopController.getLoggedInUser().getUsername(),oldUsername);
 	    assertEquals(CarShopController.getLoggedInUser().getPassword(),oldPassword);
 	}
-	//End of update account code
+	
+	//End of update account coded by Sami Ait Ouahmane
 	
 	
 	@Given("an owner account exists in the system")

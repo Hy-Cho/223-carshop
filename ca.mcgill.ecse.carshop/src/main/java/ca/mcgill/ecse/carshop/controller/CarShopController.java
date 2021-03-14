@@ -38,15 +38,20 @@ public class CarShopController {
 
 	private static Date today = Date.valueOf(LocalDate.of(2021, 2, 1));
 		
+	// signUpCustomerAccount was coded by Sami Ait Ouahmane
+	// It it doesn't find any exceptions, it signs up the user for a new customer account
 	public static void signUpCustomerAccount(String username, String password) throws InvalidInputException {
 		CarShop carShop=CarShopApplication.getCarShop();
+		//If the username string is null or empty, throw an exception 
 		if(username == null || username.length()==0) {
 			throw new InvalidInputException("The user name cannot be empty");
 		}
+		//If the password string is null or empty, throw an exception 
 		if( password == null || password.length()==0) {
 			throw new InvalidInputException("The password cannot be empty");
 		}
 		
+		//If the loggedInUser isn't null, verify whether it represents the owner or a technician. If it does, throw an error
 		if(loggedInUser!=null) {
 			if(loggedInUser.getUsername().equals("owner")) {
 				throw new InvalidInputException("You must log out of the owner account before creating a customer account");
@@ -56,6 +61,7 @@ public class CarShopController {
 			}
 		}
 		
+		//Add the customer. Catch the error if any is thrown.
 		try {
 			carShop.addCustomer(username, password);
 		}
@@ -66,23 +72,38 @@ public class CarShopController {
 			throw new InvalidInputException(e.getMessage());
 		}
 	}
+	
+	//updateCustomerAccount was coded by Sami Ait Ouahmane
 	public static void updateCustomerAccount(String newUsername, String newPassword) throws InvalidInputException {
+		
+		//If the new username string is null or empty, throw an exception 
 		if(newUsername==null || newUsername.length()==0) {
 			throw new InvalidInputException("The user name cannot be empty");
 		}
+		
+		//If the new password string is null or empty, throw an exception 
 		if(newPassword==null || newPassword.length()==0) {
 			throw new InvalidInputException("The password cannot be empty");
 		}
+		
+		//If the logged-in user is the owner and that the new username is different from "owner", throw an error
 		if(loggedInUser instanceof Owner && !newUsername.equals("owner")) {
 			throw new InvalidInputException("Changing username of owner is not allowed");
 		}
+		
+		//If the logged-in user is a technician and that the new username is different from that technician old username, throw an error
 		if(loggedInUser instanceof Technician && !(loggedInUser.getUsername().equals(newUsername))) {
 			throw new InvalidInputException("Changing username of technician is not allowed");
 		}
+		
+		//Ty updating username and password and throw an error message if a runtime exception occurs
 		try {
-			if(loggedInUser.setUsername(newUsername)==false && !newUsername.equals("owner") && !(loggedInUser.getUsername().equals(newUsername))) {
+			//If setUsername returns false, then the username is already taken by somebody else
+			if(loggedInUser.setUsername(newUsername)==false ) {
 				throw new InvalidInputException("Username not available");
 			}
+			
+			//set Username and passowrd
 			loggedInUser.setUsername(newUsername);
 			loggedInUser.setPassword(newPassword);
 		}
@@ -95,7 +116,6 @@ public class CarShopController {
 	public static void logIn(String username, String password) throws InvalidInputException {
 		CarShop carShop = CarShopApplication.getCarShop();
 		TechnicianType techType = getTechTypeFromUsername(username);
-		//removed && password.equals("owner") because owner can have a different password
 		if(username.equals("owner")) {
 			Owner owner = carShop.getOwner();
 			
