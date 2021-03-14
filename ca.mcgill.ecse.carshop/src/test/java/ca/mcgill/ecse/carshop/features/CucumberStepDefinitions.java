@@ -147,40 +147,7 @@ public class CucumberStepDefinitions {
 	    	carshop.setOwner(new Owner(string,string2,carshop));
 	    }
 	}
-	/*
-	@Given("the following customers exist in the system:")
-	public void existingCustomer(DataTable dataTable) {
-		List<Map<String, String>> listReresentation = dataTable.asMaps(String.class, String.class);
-		for(Map<String, String> list: listReresentation) {
-			String username = list.get("username");
-			String password = list.get("password");
-			if(getUserWithUsername(username)==null) {
-				carshop.addCustomer(username, password);
-			}
-			else {
-				getUserWithUsername(username).setPassword(password);
-			}		
-		}
-	}
 	
-	
-	@Given("the following technicians exist in the system:")
-	public void thereIsTechnicians(DataTable dataTable) {
-		List<Map<String, String>> listReresentation = dataTable.asMaps(String.class, String.class);
-		for(Map<String, String> list: listReresentation) {
-			String username = list.get("username");
-			String password = list.get("password");
-			String type = list.get("type");
-			if(getUserWithUsername(username)==null) {
-				carshop.addTechnician(username, password, getTechnicianTypeFromString(type));
-			}
-			else {
-				getUserWithUsername(username).setPassword(password);
-			}
-
-		}
-	}
-	*/
 	
 	@When("the user tries to update account with a new username {string} and password {string}")
 	public void the_user_tries_to_update_account_with_a_new_username_and_password(String string, String string2) {

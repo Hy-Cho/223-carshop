@@ -37,7 +37,6 @@ public class CarShopController {
 	private static User loggedInUser;
 
 	private static Date today = Date.valueOf(LocalDate.of(2021, 2, 1));
-	private static User Account;
 		
 	public static void signUpCustomerAccount(String username, String password) throws InvalidInputException {
 		CarShop carShop=CarShopApplication.getCarShop();
