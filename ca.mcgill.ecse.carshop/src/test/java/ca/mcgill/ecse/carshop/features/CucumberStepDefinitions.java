@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
+import java.sql.Time;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import ca.mcgill.ecse.carshop.controller.CarShopController;
 import ca.mcgill.ecse.carshop.controller.InvalidInputException;
 import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.Business;
+import ca.mcgill.ecse.carshop.model.BusinessHour;
 import ca.mcgill.ecse.carshop.model.CarShop;
 import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Garage;
@@ -23,6 +25,7 @@ import ca.mcgill.ecse.carshop.model.Service;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse.carshop.model.User;
+import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -40,21 +43,36 @@ public class CucumberStepDefinitions {
 	private String oldPassword;
 	private int initialSize;
 	private String oldServiceName;
+	private Time startTime;
+	private Time endTime;
+	
 	
 	// Step Definitions for UpdateGarageOpeningHours
 	
 	@Given("a business exists with the following information:")
 	public void a_business_exists_with_the_following_information(io.cucumber.datatable.DataTable dataTable) {
-		Business business = new Business("Car Center", "507 Henderson Dr", "dizzy@dizzy.com ", "(514) 123-4567", this.carshop);
-		assertEquals(business, carshop.getBusiness());
+		List<Map<String, String>> listRepresentation = dataTable.asMaps(String.class, String.class);
+		for(Map<String, String> list: listRepresentation) {
+			String name = list.get("name");
+			String address = list.get("address");
+			String phoneNumber = list.get("phoneNumber");
+			String email = list.get("email");
+						
+			Business business = new Business(name, address, email, phoneNumber, carshop);
+
+		}
 	}
 
 	@Given("the business has the following opening hours:")
 	public void the_business_has_the_following_opening_hours(io.cucumber.datatable.DataTable dataTable) {
 		List<Map<String, String>> listRepresentation = dataTable.asMaps(String.class, String.class);
-		for(Map<String, String> list: listRepresentation) {
-
-
+		for(Map<String, String> list: listRepresentation) {;
+			 DayOfWeek dayOfWeek = getDayOfWeek("dayOfWeek");
+			 Time startTime = getStartTime("startTime");
+			 Time endTime = getEndTime("endTime");
+			 
+			 BusinessHour b = new BusinessHour(dayOfWeek, startTime, endTime, carshop);
+			 
 	    throw new io.cucumber.java.PendingException();
 		}
 	}
@@ -88,7 +106,7 @@ public class CucumberStepDefinitions {
 	    // Write code here that turns the phrase above into concrete actions
 	    throw new io.cucumber.java.PendingException();
 	}
-	// LogIn
+	// Step Definitions for LogIn
 	@When("the user tries to log in with username {string} and password {string}")
 	public void the_user_tries_to_log_in_with_username_and_password(String string, String string2) {
 		username=string;
@@ -122,10 +140,13 @@ public class CucumberStepDefinitions {
 
 	@Then("a new account shall be created")
 	public void a_new_account_shall_be_created() {
-		assertEquals(carshop.getOwner(), CarShopController.getLoggedInUser());
-		assertEquals(carshop.getTechnicians(), CarShopController.getLoggedInUser());
-		assertNotNull(getUserWithUsername(username));	
-		
+		try {
+			CarShopController.logIn(username, password);
+		} catch (InvalidInputException e) {
+			error = e.getMessage();
+			errorCnt++;
+		}
+
 	}
 
 	@Then("the user shall be successfully logged in")
@@ -138,10 +159,10 @@ public class CucumberStepDefinitions {
 	}
 
 	@Then("the account shall have username {string}, password {string} and technician type {string}")
-	public void the_account_shall_have_username_password_and_technician_type(String string, String string2, String string3) {
-	    if(getUserWithUsername(string)!=null) {
-	    	assertEquals(string2,getUserWithUsername(string).getPassword());
-	    	assertEquals(string3,getTechnicianTypeFromString(string));
+	public void the_account_shall_have_username_password_and_technician_type(String username, String password, String type) {
+	    if(getUserWithUsername(username)!=null) {
+	    	assertEquals(password,getUserWithUsername(username).getPassword());
+	    	assertEquals(getTechTypeFromUsername(username),getTechnicianTypeFromString(type));
 	    }
 	    else {
 	    	throw new AssertionError();
@@ -150,14 +171,15 @@ public class CucumberStepDefinitions {
 
 	@Then("the corresponding garage for the technician shall be created")
 	public void the_corresponding_garage_for_the_technician_shall_be_created() {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+		for(Technician tech: this.carshop.getTechnicians()) {
+			Garage garage = new Garage(this.carshop, tech);
+		}
 	}
 
 	@Then("the garage should have the same opening hours as the business")
 	public void the_garage_should_have_the_same_opening_hours_as_the_business() {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
+		for(Garage garage : this.carshop.getGarages()) {
+		}
 	}
 	
 	//This is the CucumberStepDefinitions code for signUpCustomer. Coded by Sami Ait Ouahmane
@@ -416,7 +438,6 @@ public class CucumberStepDefinitions {
 			errorCnt++;
 		}
 	}
-	
 
 	@Then("the service {string} shall exist in the system")
 	public void checkServiceInSystem(String name) {
@@ -526,7 +547,28 @@ public class CucumberStepDefinitions {
 		
 		return count;
 	}
-	
+	private DayOfWeek getDayOfWeek(String string) {
+		return null;
+	}
+
+	private Time getStartTime(String name) {
+		for(BusinessHour StartHour : carshop.getHours()) {
+			if (StartHour instanceof BusinessHour && StartHour.getStartTime().equals(startTime)) {
+				return startTime;
+			}
+		}
+		return null;
+		
+	}
+	private Time getEndTime(String name) {
+		for(BusinessHour EndHour : carshop.getHours()) {
+			if (EndHour instanceof BusinessHour && EndHour.getEndTime().equals(endTime)) {
+				return endTime;
+			}
+		}
+		return null;
+		
+	}
 	private Service getServiceFromName(String name) {
 		for(BookableService bookableService: carshop.getBookableServices()) {
 			if(bookableService instanceof Service && bookableService.getName().equals(name)) {
