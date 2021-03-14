@@ -41,6 +41,125 @@ public class CucumberStepDefinitions {
 	private int initialSize;
 	private String oldServiceName;
 	
+	// Step Definitions for UpdateGarageOpeningHours
+	
+	@Given("a business exists with the following information:")
+	public void a_business_exists_with_the_following_information(io.cucumber.datatable.DataTable dataTable) {
+		Business business = new Business("Car Center", "507 Henderson Dr", "dizzy@dizzy.com ", "(514) 123-4567", this.carshop);
+		assertEquals(business, carshop.getBusiness());
+	}
+
+	@Given("the business has the following opening hours:")
+	public void the_business_has_the_following_opening_hours(io.cucumber.datatable.DataTable dataTable) {
+		List<Map<String, String>> listRepresentation = dataTable.asMaps(String.class, String.class);
+		for(Map<String, String> list: listRepresentation) {
+
+
+	    throw new io.cucumber.java.PendingException();
+		}
+	}
+
+	@When("the user tries to add new business hours on {string} from {string} to {string} to garage belonging to the technician with type {string}")
+	public void the_user_tries_to_add_new_business_hours_on_from_to_to_garage_belonging_to_the_technician_with_type(String string, String string2, String string3, String string4) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@Then("the garage belonging to the technician with type {string} should have opening hours on {string} from {string} to {string}")
+	public void the_garage_belonging_to_the_technician_with_type_should_have_opening_hours_on_from_to(String string, String string2, String string3, String string4) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@Given("there are opening hours on {string} from {string} to {string} for garage belonging to the technician with type {string}")
+	public void there_are_opening_hours_on_from_to_for_garage_belonging_to_the_technician_with_type(String string, String string2, String string3, String string4) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@When("the user tries to remove opening hours on {string} from {string} to {string} to garage belonging to the technician with type {string}")
+	public void the_user_tries_to_remove_opening_hours_on_from_to_to_garage_belonging_to_the_technician_with_type(String string, String string2, String string3, String string4) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@Then("the garage belonging to the technician with type {string} should not have opening hours on {string} from {string} to {string}")
+	public void the_garage_belonging_to_the_technician_with_type_should_not_have_opening_hours_on_from_to(String string, String string2, String string3, String string4) {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+	// LogIn
+	@When("the user tries to log in with username {string} and password {string}")
+	public void the_user_tries_to_log_in_with_username_and_password(String string, String string2) {
+		username=string;
+		password=string2;
+		try{
+	     	 CarShopController.logIn(username,password);
+	     }
+	     catch(InvalidInputException e){
+	    	 error=e.getMessage();
+		 	 errorCnt++;
+	     }
+	}
+
+	@Then("the user should be successfully logged in")
+	public void the_user_should_be_successfully_logged_in() {
+		try {
+			CarShopController.logIn(username,password);
+		} catch (InvalidInputException e) {
+			e.printStackTrace();
+		}
+		}
+
+	@Then("the user should not be logged in")
+	public void the_user_should_not_be_logged_in() {
+		try {
+			CarShopController.logIn(username,password);
+		} catch (InvalidInputException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Then("a new account shall be created")
+	public void a_new_account_shall_be_created() {
+		assertEquals(carshop.getOwner(), CarShopController.getLoggedInUser());
+		assertEquals(carshop.getTechnicians(), CarShopController.getLoggedInUser());
+		assertNotNull(getUserWithUsername(username));	
+		
+	}
+
+	@Then("the user shall be successfully logged in")
+	public void the_user_shall_be_successfully_logged_in() {
+		try {
+			CarShopController.logIn(username,password);
+		} catch (InvalidInputException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Then("the account shall have username {string}, password {string} and technician type {string}")
+	public void the_account_shall_have_username_password_and_technician_type(String string, String string2, String string3) {
+	    if(getUserWithUsername(string)!=null) {
+	    	assertEquals(string2,getUserWithUsername(string).getPassword());
+	    	assertEquals(string3,getTechnicianTypeFromString(string));
+	    }
+	    else {
+	    	throw new AssertionError();
+	    }
+	}
+
+	@Then("the corresponding garage for the technician shall be created")
+	public void the_corresponding_garage_for_the_technician_shall_be_created() {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+
+	@Then("the garage should have the same opening hours as the business")
+	public void the_garage_should_have_the_same_opening_hours_as_the_business() {
+	    // Write code here that turns the phrase above into concrete actions
+	    throw new io.cucumber.java.PendingException();
+	}
+	
 	//This is the CucumberStepDefinitions code for signUpCustomer. Coded by Sami Ait Ouahmane
 	
 	@Given("a Carshop system exists")
