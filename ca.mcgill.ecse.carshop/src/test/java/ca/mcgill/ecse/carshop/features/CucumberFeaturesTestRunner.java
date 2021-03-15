@@ -5,6 +5,7 @@ import io.cucumber.junit.CucumberOptions;
 import org.junit.runner.RunWith;
 
 @RunWith(Cucumber.class)
-@CucumberOptions(plugin = "pretty", features = "src/test/resources/UpdateService.feature")
+@CucumberOptions(plugin = "pretty", features = "src/test/resources/AddService.feature")
 public class CucumberFeaturesTestRunner {
+	
 }

@@ -39,7 +39,6 @@ public class CarShopController {
 	private static User loggedInUser;
 
 	private static Date today = Date.valueOf(LocalDate.of(2021, 2, 1));
-	private static User Account;
 		
 	public static void signUpCustomerAccount(String username, String password) throws InvalidInputException {
 		CarShop carShop=CarShopApplication.getCarShop();
@@ -95,11 +94,11 @@ public class CarShopController {
 	public static void logIn(String username, String password) throws InvalidInputException {
 		CarShop carShop = CarShopApplication.getCarShop();
 		TechnicianType techType = getTechTypeFromUsername(username);
-		if(username.equals("owner") && password.equals("owner")) {
+		if(username.equals("owner")) {
 			Owner owner = carShop.getOwner();
 			
 			if(owner == null) {
-				owner = new Owner("owner", "owner", carShop);
+				owner = new Owner("owner", password, carShop);
 			}
 			loggedInUser = owner;
 			
@@ -110,6 +109,12 @@ public class CarShopController {
 			if(existingTechAccount == null) {
 				existingTechAccount = new Technician(username, password, techType, carShop);
 			}
+			Garage garage = new Garage(carShop, existingTechAccount);
+			for(DayOfWeek day: DayOfWeek.values()) {
+				BusinessHour dayBusinessHour = getBusinessHoursOfShopByDay(day);
+				CarShopController.updateGarageOpeningHours(day, dayBusinessHour.getStartTime(), dayBusinessHour.getEndTime());
+			}
+			
 			loggedInUser = existingTechAccount;
 		}
 		else {
@@ -121,60 +126,59 @@ public class CarShopController {
 					return;
 				}
 				
-				throw new InvalidInputException("Username/password not found");
 			}
 			
+			loggedInUser = null;
 			throw new InvalidInputException("Username/password not found");
 		}
 	}
 	
-	public static void updateGarageOpeningHours(String username, DayOfWeek day, Time startTime, Time endTime, TechnicianType techType) throws InvalidInputException {
+	public static void updateGarageOpeningHours(DayOfWeek day, Time startTime, Time endTime) throws InvalidInputException {
 		CarShop carShop = CarShopApplication.getCarShop();
 	    List<BusinessHour> bHour = carShop.getBusiness().getBusinessHours();
-	    if (!(loggedInUser instanceof Technician) || ((Technician)loggedInUser).getType() != techType) {
+	    if (!(loggedInUser instanceof Technician)) {
 	      throw new InvalidInputException("You are not authorized to perform this operation");
 	    }
 	    if (startTime.after(endTime)) {
 	      throw new InvalidInputException("Start time must be before end time");
 	    }
-	    for (BusinessHour b: bHour) {
-	        if (b.getDayOfWeek() == day) {
-	          if (!(b.getStartTime().before(startTime) && b.getEndTime().after(endTime))) {
-	            throw new InvalidInputException("The opening hours cannot overlap");        
-	          }
-	        }
+	    
+	    Technician tech = (Technician) loggedInUser;
+	    
+	    BusinessHour b = getBusinessHoursOfShopByDay(day);
+	    if (!(b.getStartTime().before(startTime) && b.getEndTime().after(endTime))) {
+	    	throw new InvalidInputException("The opening hours cannot overlap");        
 	    }
-	    BusinessHour bHourGarage = getBussinessHourOfDayByGarage(getGarageOfTechnician(techType),day);
+	    
+	    Garage g = tech.getGarage();
+	    
+	    BusinessHour bHourGarage = getBussinessHourOfDayByGarage(g,day);
 	    if (bHourGarage == null) {
 	    	bHourGarage = new BusinessHour(day, startTime, endTime, carShop);
-	    	getGarageOfTechnician(techType).addBusinessHour(bHourGarage);
+	    	g.addBusinessHour(bHourGarage);
 	    }
 	    else {
-	    bHourGarage.setStartTime(startTime);
-	    bHourGarage.setEndTime(endTime);
+	    	bHourGarage.setStartTime(startTime);
+	    	bHourGarage.setEndTime(endTime);
 	    }
 	}
-//	public static void logIn(String username, String password, TechnicianType techType ) throws InvalidInputException {
-//		if (username != Account.getUsername() || password != Account.getPassword())
-//			throw new InvalidInputException("Username/password not found");
-//		if (username == "owner") {
-//			Account.setPassword("owner");
-//		if (username == "Tire-Technician" || username == "Engine-Technician" || username == "Transmission-Technician" || username == "Electronics-Technician" || username == "Fluids-Technician") {
-//			Account.setPassword(username);
-//			((Technician) Account).setType(techType);
-//		}
-//		}
-//	}
+	
 	public static void createService(String name, int duration, Garage garage) throws RuntimeException, InvalidInputException {
 		if(loggedInUser == null  || loggedInUser.getUsername() != "owner" || !(loggedInUser instanceof Owner)) {
 			throw new RuntimeException("You are not authorized to perform this operation");
 		}
 		
-		  CarShop carShop = CarShopApplication.getCarShop();
+		CarShop carShop = CarShopApplication.getCarShop();
+		if(duration <= 0) {
+			throw new RuntimeException("Duration must be positive");
+		}
+		if(getServiceFromName(name, carShop) != null) {
+			throw new InvalidInputException("Service "+name+ " already exists");
+		}
 		   
-		  try {
-	            Service service = new Service(name, carShop, duration, garage);
-	        }
+		try {
+	        Service service = new Service(name, carShop, duration, garage);
+	    }
 		catch(RuntimeException ex) {
 			throw new InvalidInputException(ex.getMessage());
 		}
@@ -210,12 +214,7 @@ public class CarShopController {
 		CarShop carShop = CarShopApplication.getCarShop();
 		
 		
-		if(duration <= 0) {
-			throw new RuntimeException("Duration must be positive");
-		}
-		if(getServiceFromName(name, carShop) != null) {
-			throw new InvalidInputException("Service "+name+ " already exists");
-		}
+
 		
 		
 		try {
@@ -693,39 +692,50 @@ public class CarShopController {
 		  
 		  return null;
 	  }
+	  
+	private static BusinessHour getBusinessHoursOfShopByDay(DayOfWeek day) {
+		CarShop carShop = CarShopApplication.getCarShop();
+		for(BusinessHour bh: carShop.getBusiness().getBusinessHours()) {
+			if(bh.getDayOfWeek() == day) {
+				return bh;
+			}
+		}
+		
+		return null;
+	}
 
 		
-		public static void updateCombo(String name, String updatedName, ComboItem mainService, List<ComboItem> services) throws RuntimeException, InvalidInputException {
-			if(loggedInUser == null  || loggedInUser.getUsername() != "owner") {
-				throw new RuntimeException("You are not authorized to perform this operation");
+	public static void updateCombo(String name, String updatedName, ComboItem mainService, List<ComboItem> services) throws RuntimeException, InvalidInputException {
+		if(loggedInUser == null  || loggedInUser.getUsername() != "owner") {
+			throw new RuntimeException("You are not authorized to perform this operation");
+		}
+		
+		if(!services.contains(mainService)) {
+			throw new RuntimeException("Main service must be included in the services");
+		}
+		
+		if(!mainService.getMandatory()) {
+			throw new RuntimeException("Main service must be mandatory");
+		}
+		
+		if(services.size()<2) {
+			throw new RuntimeException("A service Combo must contain at least 2 services");
+		}
+		
+		if(!services.contains(BookableService)) {
+			throw new RuntimeException("An entered service does not exist");
+		}
+		
+		try {
+			carShop.addBookableService(updateCombo);
+		}
+		catch(RuntimeException e) {
+			if(e.getMessage().startsWith("Cannot create due to duplicate")) {
+				throw new InvalidInputException("The service combo already exists");
 			}
-			
-			if(!services.contains(mainService)) {
-				throw new RuntimeException("Main service must be included in the services");
-			}
-			
-			if(!mainService.getMandatory()) {
-				throw new RuntimeException("Main service must be mandatory");
-			}
-			
-			if(services.size()<2) {
-				throw new RuntimeException("A service Combo must contain at least 2 services");
-			}
-			
-			if(!services.contains(BookableService)) {
-				throw new RuntimeException("An entered service does not exist");
-			}
-			
-			try {
-				carShop.addBookableService(updateCombo);
-			}
-			catch(RuntimeException e) {
-				if(e.getMessage().startsWith("Cannot create due to duplicate")) {
-					throw new InvalidInputException("The service combo already exists");
-				}
-				throw new InvalidInputException(e.getMessage());
-			
-			
+			throw new InvalidInputException(e.getMessage());
+		
+		
 		}
 	}
 }

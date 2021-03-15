@@ -138,7 +138,9 @@ public class CucumberStepDefinitions {
 	@Given("each technician has their own garage")
 	public   void eachTechnicianHasGarage() {
 		for(Technician tech: this.carshop.getTechnicians()) {
-			Garage garage = new Garage(this.carshop, tech);
+			if(tech.getGarage() == null) {
+				Garage garage = new Garage(carshop, tech);
+			}
 		}
 	}
 	@Given("the following services exist in the system:")
@@ -205,9 +207,7 @@ public class CucumberStepDefinitions {
 			Garage garage = getGarageOfTechnician(getTechnicianTypeFromString(garageStr));
 			this.oldServiceName = oldName;
 			
-			System.out.println("here");
 			int durationValue = Integer.valueOf(duration);
-			System.out.println("here2");
 			
 			CarShopController.updateService(oldName, newName, Integer.valueOf(duration), garage);
 		}
@@ -374,5 +374,15 @@ public class CucumberStepDefinitions {
 		}
 		
 		return null;
+	}
+	private int getCountOfUsers() {
+		int count = 0;
+		count += carshop.getCustomers().size();
+		count += carshop.getTechnicians().size();
+		if(carshop.getOwner() != null) {
+			count += 1;
+		}
+		
+		return count;
 	}
 }
