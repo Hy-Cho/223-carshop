@@ -53,6 +53,7 @@ public class CucumberStepDefinitions {
 	private Time startTime;
 	private Time endTime;
 	private List<String> businessInfo;
+	private boolean res;
 	
 	
 	// Step Definitions for UpdateGarageOpeningHours
@@ -542,7 +543,6 @@ public class CucumberStepDefinitions {
     @Then("an error message {string} shall {string} raised")
     public void anErrorMessageIsRaised(String errorMsg, String result) {
       if (!result.contains("not")) {
-        System.out.println(error);
         assertTrue(error.contains(errorMsg));
       } else {
         System.out.println(error);
@@ -667,9 +667,209 @@ public class CucumberStepDefinitions {
       
     }
     
+    @When("the user tries to update the business information with new {string} and {string} and {string} and {string}")
+    public void theUserTriesToUpdateTheBusinessInfoWith(String name, String address, String phoneNumber, String email) {
+      try {
+        CarShopController.updateBusinessInfo(name, address, phoneNumber, email);
+      } catch (InvalidUserException e) {
+        error += e.getMessage();
+        errorCnt++;
+      } catch (InvalidInputException e) {
+        error += e.getMessage();
+        errorCnt++;
+      }
+    }
     
+    @Then("the business information shall {string} updated with new {string} and {string} and {string} and {string}")
+    public void theBusinessInfoShallBeUpdatedWith(String result, String name, String address, String phoneNumber, String email) {
+      if (!result.contains("not")) { // be
+        assertEquals(name, carshop.getBusiness().getName());
+        assertEquals(address, carshop.getBusiness().getAddress());
+        assertEquals(phoneNumber, carshop.getBusiness().getPhoneNumber());
+        assertEquals(email, carshop.getBusiness().getEmail());       
+      } else {
+        assertNotEquals(name, carshop.getBusiness().getName());
+        assertNotEquals(address, carshop.getBusiness().getAddress());
+        assertNotEquals(phoneNumber, carshop.getBusiness().getPhoneNumber());
+        assertNotEquals(email, carshop.getBusiness().getEmail());
+      }
+    }
     
+    @When("the user tries to change the business hour {string} at {string} to be on {string} starting at {string} and ending at {string}")
+    public void theUserTriesToChangeTheBusinessHourAt(String day, String startTime, String newDay, String newStartTime, String newEndTime) {
+      DayOfWeek day1 = DayOfWeek.valueOf(day);
+      DayOfWeek day2 = DayOfWeek.valueOf(newDay);
+      Time oldStartTime = convertToTime(startTime);
+      Time nStartTime = convertToTime(newStartTime);
+      Time nEndTime = convertToTime(newEndTime);
+      res = false;
+      try {
+        CarShopController.updateBusinessHour(day1, oldStartTime, day2, nStartTime, nEndTime);
+        res = true;
+      } catch (InvalidUserException e) {
+        error += e.getMessage();
+        errorCnt++;
+      } catch (InvalidInputException e) {
+        error += e.getMessage();
+        errorCnt++;
+      }
+    }
     
+    @Then("the business hour shall {string} be updated")
+    public void theBusinessHourShallBeUpdated(String result) {
+      if (!result.contains("not")) { //be
+        assertTrue(res);
+      } else {
+        assertFalse(res);
+      }
+    }
+    
+    @When("the user tries to remove the business hour starting {string} at {string}")
+    public void theUserTriesToRemoveTheBusinessHourStarting(String day, String startTime) {
+      DayOfWeek day1 = DayOfWeek.valueOf(day);
+      Time sTime = convertToTime(startTime);
+      try {
+        CarShopController.removeBusinessHour(day1, sTime);
+      } catch (InvalidUserException e) {
+        error += e.getMessage();
+        errorCnt++;
+      } catch (InvalidInputException e) {
+        error += e.getMessage();
+        errorCnt++;
+      }
+    }
+    
+    @Then("the business hour starting {string} at {string} shall {string} exist")
+    public void theBusinessHourStartingShallExist(String day, String startTime, String result) {
+      List<BusinessHour> bHours = carshop.getBusiness().getBusinessHours();
+      res = false;
+      DayOfWeek day1 = DayOfWeek.valueOf(day);
+      Time sTime = convertToTime(startTime);
+      for (BusinessHour b: bHours) {
+        if (b.getDayOfWeek().equals(day1) && b.getStartTime().equals(sTime)) {
+          res = true;
+          break;
+        }
+      }
+      if (!result.contains("not")) { // be
+        assertTrue(res);
+      } else {
+        assertFalse(res);
+      }
+    }
+    
+    @Then("an error message {string} shall {string} be raised")
+    public void anErrorMessageShallBeRaised(String errorMsg, String result) {
+      if (!result.contains("not")) { // be
+        assertTrue(error.contains(errorMsg));
+      } else {
+        assertTrue(error=="");
+      }
+    }
+    
+    @When("the user tries to change the {string} on {string} at {string} to be with start date {string} at {string} and end date {string} at {string}")
+    public void theUserTriesToChangeTheTimeSlotOn(String type, String oldStartDate, String oldStartTime, String newStartDate, String newStartTime, String newEndDate, String newEndTime) {
+      Date oStartDate = convertToDate(oldStartDate);
+      Date nStartDate = convertToDate(newStartDate);
+      Date nEndDate = convertToDate(newEndDate);
+      Time oStartTime = convertToTime(oldStartTime);
+      Time nStartTime = convertToTime(newStartTime);
+      Time nEndTime = convertToTime(newEndTime);
+      try {
+        if (type.contains("vacation")) {
+          CarShopController.updateVacation(oStartDate, oStartTime, nStartDate, nStartTime, nEndDate, nEndTime);
+        } else if (type.contains("holiday")) {
+          CarShopController.updateHoliday(oStartDate, oStartTime, nStartDate, nStartTime, nEndDate, nEndTime);
+        }
+      } catch (InvalidUserException e) {
+        error += e.getMessage();
+        errorCnt++;
+      } catch (InvalidInputException e) {
+        error += e.getMessage();
+        errorCnt++;
+      }
+    }
+    
+    @Then("the {string} shall {string} updated with start date {string} at {string} and end date {string} at {string}")
+    public void theTimeSlotShallBeUpdatedWith(String type, String result, String newStartDate, String newStartTime, String newEndDate, String newEndTime) {
+      Date nStartDate = convertToDate(newStartDate);
+      Date nEndDate = convertToDate(newEndDate);
+      Time nStartTime = convertToTime(newStartTime);
+      Time nEndTime = convertToTime(newEndTime);
+      res = false;
+      List<TimeSlot> tSlots;
+      
+      if (type.contains("holiday")) {
+        tSlots = carshop.getBusiness().getHolidays();
+        for (TimeSlot ts: tSlots) {
+          if (ts.getStartDate().equals(nStartDate) && ts.getStartTime().equals(nStartTime) && ts.getEndDate().equals(nEndDate) && ts.getEndTime().equals(nEndTime)) {
+            res = true;
+            break;
+          }
+        }
+      } else {
+        tSlots = carshop.getBusiness().getVacations();
+        for (TimeSlot ts: tSlots) {
+          if (ts.getStartDate().equals(nStartDate) && ts.getStartTime().equals(nStartTime) && ts.getEndDate().equals(nEndDate) && ts.getEndTime().equals(nEndTime)) {
+            res = true;
+            break;
+          }
+        }
+      }
+      
+      if (!result.contains("not")) { // be
+        assertTrue(res);
+      } else {
+        assertFalse(res);
+      }
+    }
+    
+    @When("the user tries to remove an existing {string} with start date {string} at {string} and end date {string} at {string}")
+    public void theUserTriesToRemoveAnExistingTimeSlotWith(String type, String startDate, String startTime, String endDate, String endTime) {
+      Date sDate = convertToDate(startDate);
+      Date eDate = convertToDate(endDate);
+      Time sTime = convertToTime(startTime);
+      Time eTime = convertToTime(endTime);
+      try {
+        CarShopController.removeTimeSlot(type, sDate, sTime, eDate, eTime);
+      } catch (InvalidUserException e) {
+        error += e.getMessage();
+        errorCnt++;
+      } catch (InvalidInputException e) {
+        error += e.getMessage();
+        errorCnt++;
+      }
+    }
+    
+    @Then("the {string} with start date {string} at {string} shall {string} exist")
+    public void theTimeSlotWithShallExist(String type, String startDate, String startTime, String result) {
+      Date sDate = convertToDate(startDate);
+      Time sTime = convertToTime(startTime);
+      res = false;
+      List<TimeSlot> tSlots;
+      if (type.contains("holiday")) {
+        tSlots = carshop.getBusiness().getHolidays();
+        for (TimeSlot ts: tSlots) {
+          if (ts.getStartDate().equals(sDate) && ts.getStartTime().equals(sTime)) {
+            res = true;
+            break;
+          }
+        }
+      } else {
+        tSlots = carshop.getBusiness().getVacations();
+        for (TimeSlot ts: tSlots) {
+          if (ts.getStartDate().equals(sDate) && ts.getStartTime().equals(sTime)) {
+            res = true;
+            break;
+          }
+        }
+      }
+      if (!result.contains("not")) { // be
+        assertTrue(res);
+      } else {
+        assertFalse(res);
+      }
+    }
     
     private static Time convertToTime(String t) {
       int hour;
