@@ -332,6 +332,7 @@ public class CarShopController {
 	    business.setName(aName);
 	    business.setAddress(aAddress);
 	    business.setPhoneNumber(aPhoneNumber);
+	    business.setEmail(aEmail);
 	    }
 	  
 	  
@@ -345,7 +346,7 @@ public class CarShopController {
 	      throw new InvalidInputException("Start time must be before end time");
 	    }
 	    for (BusinessHour b: bHour) {
-	      if (b.getDayOfWeek() == day) {
+	      if (b.getDayOfWeek().equals(day)) {
 	        if (newStartTime.before(b.getEndTime()) && newEndTime.after(b.getStartTime())) {
 	          throw new InvalidInputException("The business hours cannot overlap");
 	        }
@@ -359,43 +360,49 @@ public class CarShopController {
 	  
 	  public static void updateBusinessHour (DayOfWeek oldDay, Time oldStartTime, DayOfWeek day, Time newStartTime, Time newEndTime) throws InvalidInputException, InvalidUserException {
 	    Business business = CarShopApplication.getCarShop().getBusiness();
-        List<BusinessHour> bHour = business.getBusinessHours();
+        List<BusinessHour> bHours = business.getBusinessHours();
+        BusinessHour bHour = null;
 	    if (CarShopController.getLoggedInUser() != CarShopApplication.getCarShop().getOwner()) {
 	      throw new InvalidUserException("No permission to update business information");
 	    } else if (newStartTime.after(newEndTime)) {
 	      throw new InvalidInputException("Start time must be before end time");
 	    }
-	    for (BusinessHour b: bHour) {
-	      if (b.getDayOfWeek() == day) {
+	    for (BusinessHour b: bHours) {
+	      if (b.getDayOfWeek().equals(day)) {
 	        if (newStartTime.before(b.getEndTime()) && newEndTime.after(b.getStartTime())) {
-	          throw new InvalidInputException("The business hours cannot overlap");
+	          if (!oldDay.equals(b.getDayOfWeek()) && !oldStartTime.equals(b.getStartTime())) {
+	            throw new InvalidInputException("The business hours cannot overlap");
+	          }
 	        }
 	      }
 	    }
 	    
-	    for (BusinessHour b: bHour) {
-	      if (b.getDayOfWeek() == oldDay && b.getStartTime() == oldStartTime) {
-	        b.setStartTime(newStartTime);
-	        b.setEndTime(newEndTime);
+	    for (BusinessHour b: bHours) {
+	      if (oldDay.equals(b.getDayOfWeek()) && oldStartTime.equals(b.getStartTime())) {
+	        bHour = b;
 	      }
 	    }
-	    
+	    if (bHour != null) {
+	      bHour.setStartTime(newStartTime);
+	      bHour.setEndTime(newEndTime);
+	    }
 	  }
 	  
 	  
 	  public static void removeBusinessHour (DayOfWeek day, Time startTime) throws InvalidInputException, InvalidUserException {
 	    Business business = CarShopApplication.getCarShop().getBusiness();
-        List<BusinessHour> bHour = business.getBusinessHours();
+        List<BusinessHour> bHours = business.getBusinessHours();
+        BusinessHour bHour = null;
 	    if (CarShopController.getLoggedInUser() != CarShopApplication.getCarShop().getOwner()) {
 	      throw new InvalidUserException("No permission to update business information");
 	    }
 	    
-	    for (BusinessHour b: bHour) {
-	      if (b.getDayOfWeek() == day && b.getStartTime() == startTime) {
-	        business.removeBusinessHour(b);
+	    for (BusinessHour b: bHours) {
+	      if (b.getDayOfWeek().equals(day) && b.getStartTime().equals(startTime)) {
+	        bHour = b;
 	      }
 	    }
-	    
+	    if (bHour != null) business.removeBusinessHour(bHour);
 	  }
 	  
 	  public static List<String> getBusinessInfo(){
@@ -418,7 +425,7 @@ public class CarShopController {
 	    }
 	    if (endDate.before(startDate)) {
 	      throw new InvalidInputException("Start time must be before end time");
-	    } else if ((startDate == endDate) && (endTime.before(startTime))) { // same day
+	    } else if ((startDate.equals(endDate)) && (endTime.before(startTime))) { // same day
 	      throw new InvalidInputException("Start time must be before end time");
 	    } else if (!type.contains("holiday") && !type.contains("vacation")) {
 	      throw new InvalidInputException("Invalild type");
@@ -441,7 +448,7 @@ public class CarShopController {
 	          } else { // vacation
 	            throw new InvalidInputException("Holiday and vacation times cannot overlap");
 	          }
-	        } else if (endDate == h.getStartDate()) { // ends at start date of holiday
+	        } else if (endDate.equals(h.getStartDate())) { // ends at start date of holiday
 	          if (endTime.after(h.getStartTime())) { // end time after start time of holiday
 	            if (type.contains("holiday")) {
 	              throw new InvalidInputException("Holiday times cannot overlap");
@@ -462,7 +469,7 @@ public class CarShopController {
 	          } else { // holiday
 	            throw new InvalidInputException("Holiday and vacation times cannot overlap");
 	          }
-	        } else if (endDate == v.getStartDate()) { // ends at start date of vacation
+	        } else if (endDate.equals(v.getStartDate())) { // ends at start date of vacation
 	          if (endTime.after(v.getStartTime())) { // end time after start time of vacation
 	            if (type.contains("vacation")) {
 	              throw new InvalidInputException("Vacation times cannot overlap");
@@ -495,7 +502,7 @@ public class CarShopController {
 	    }
 	    if (endDate.before(startDate)) {
 	      throw new InvalidInputException("Start time must be before end time");
-	    } else if ((startDate == endDate) && (endTime.before(startTime))) { // same day
+	    } else if ((startDate.equals(endDate)) && (endTime.before(startTime))) { // same day
 	      throw new InvalidInputException("Start time must be before end time");
 	    } else if (startDate.before(today)) {
 	      throw new InvalidInputException("Vacation cannot start in the past");
@@ -509,7 +516,7 @@ public class CarShopController {
 	        if (endDate.after(h.getStartDate())) { // new end date is after start date of holiday
 	          // overlap with holiday
 	          throw new InvalidInputException("Holiday and vacation times cannot overlap");
-	        } else if (endDate == h.getStartDate()) { // ends at start date of holiday
+	        } else if (endDate.equals(h.getStartDate())) { // ends at start date of holiday
 	          if (endTime.after(h.getStartTime())) { // end time after start time of holiday
 	            throw new InvalidInputException("Holiday and vacation times cannot overlap");
 	          }
@@ -518,14 +525,14 @@ public class CarShopController {
 	    }
 	    
 	    for (TimeSlot v: vacations) {
-	      if (oldDate == v.getStartDate() && oldStartTime == v.getStartTime()) {
+	      if (oldDate.equals(v.getStartDate()) && oldStartTime.equals(v.getStartTime())) {
 	        vacation = v;
 	        continue;
 	      }
 	      if (startDate.before(v.getEndDate())) { // new start date is before end date of v
 	        if (endDate.after(v.getStartDate())) { // new end date is after start date of v
 	          throw new InvalidInputException("Vacation times cannot overlap");
-	        } else if (endDate == v.getStartDate()) { // ends at start date of v
+	        } else if (endDate.equals(v.getStartDate())) { // ends at start date of v
 	          if (endTime.after(v.getStartTime())) { // end time after start time of v
 	            throw new InvalidInputException("Vacation times cannot overlap");
 	          }
@@ -553,7 +560,7 @@ public class CarShopController {
 	    }
 	    if (endDate.before(startDate)) {
 	      throw new InvalidInputException("Start time must be before end time");
-	    } else if ((startDate == endDate) && (endTime.before(startTime))) { // same day
+	    } else if ((startDate.equals(endDate)) && (endTime.before(startTime))) { // same day
 	      throw new InvalidInputException("Start time must be before end time");
 	    } else if (startDate.before(today)) {
 	      throw new InvalidInputException("Holiday cannot start in the past");
@@ -567,7 +574,7 @@ public class CarShopController {
 	        if (endDate.after(v.getStartDate())) { // new end date is after start date of holiday
 	          // overlap with holiday
 	          throw new InvalidInputException("Holiday and vacation times cannot overlap");
-	        } else if (endDate == v.getStartDate()) { // ends at start date of holiday
+	        } else if (endDate.equals(v.getStartDate())) { // ends at start date of holiday
 	          if (endTime.after(v.getStartTime())) { // end time after start time of holiday
 	            throw new InvalidInputException("Holiday and vacation times cannot overlap");
 	          }
@@ -576,14 +583,14 @@ public class CarShopController {
 	    }
 	    
 	    for (TimeSlot h: holidays) {
-	      if (oldDate == h.getStartDate() && oldStartTime == h.getStartTime()) {
+	      if (oldDate.equals(h.getStartDate()) && oldStartTime.equals(h.getStartTime())) {
 	        holiday = h;
 	        continue;
 	      }
 	      if (startDate.before(h.getEndDate())) { // new start date is before end date of v
 	        if (endDate.after(h.getStartDate())) { // new end date is after start date of v
 	          throw new InvalidInputException("Holiday times cannot overlap");
-	        } else if (endDate == h.getStartDate()) { // ends at start date of v
+	        } else if (endDate.equals(h.getStartDate())) { // ends at start date of v
 	          if (endTime.after(h.getStartTime())) { // end time after start time of v
 	            throw new InvalidInputException("Holiday times cannot overlap");
 	          }
@@ -614,7 +621,7 @@ public class CarShopController {
 	    if (type.contains("holiday")) {
 	      holidays = business.getHolidays();
 	      for (TimeSlot h: holidays) {
-	        if (h.getStartDate() == startDate && h.getStartTime() == startTime && h.getEndDate() == endDate && h.getEndTime() == endTime) {
+	        if (h.getStartDate().equals(startDate) && h.getStartTime().equals(startTime) && h.getEndDate().equals(endDate) && h.getEndTime().equals(endTime)) {
 	          holiday = h;
 	          break;
 	        }
@@ -628,7 +635,7 @@ public class CarShopController {
 	    } else { // vacation
 	      vacations = business.getVacations();
 	      for (TimeSlot v: vacations) {
-	        if (v.getStartDate() == startDate && v.getStartTime() == startTime && v.getEndDate() == endDate && v.getEndTime() == endTime) {
+	        if (v.getStartDate().equals(startDate) && v.getStartTime().equals(startTime) && v.getEndDate().equals(endDate) && v.getEndTime().equals(endTime)) {
 	          vacation =v;
 	          break;
 	        }
