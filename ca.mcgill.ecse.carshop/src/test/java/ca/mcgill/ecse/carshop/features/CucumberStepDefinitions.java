@@ -51,12 +51,9 @@ public class CucumberStepDefinitions {
 	private int initialSize;
 	private String oldServiceName;
 	private List<String> businessInfo;
-<<<<<<< HEAD
 	private String endTime;
 	private String startTime;
     private String day;
-=======
->>>>>>> 1177d00319f0eb4f74ec45b1e795ad6b4376eecf
 	private boolean res;
 	
 	
@@ -700,7 +697,6 @@ public class CucumberStepDefinitions {
         errorCnt++;
       }
     }
-<<<<<<< HEAD
     
     @Then("the business information shall {string} updated with new {string} and {string} and {string} and {string}")
     public void theBusinessInfoShallBeUpdatedWith(String result, String name, String address, String phoneNumber, String email) {
@@ -761,106 +757,6 @@ public class CucumberStepDefinitions {
       }
     }
     
-    @Then("the business hour starting {string} at {string} shall {string} exist")
-    public void theBusinessHourStartingShallExist(String day, String startTime, String result) {
-      List<BusinessHour> bHours = carshop.getBusiness().getBusinessHours();
-      res = false;
-      DayOfWeek day1 = DayOfWeek.valueOf(day);
-      Time sTime = convertToTime(startTime);
-      for (BusinessHour b: bHours) {
-        if (b.getDayOfWeek().equals(day1) && b.getStartTime().equals(sTime)) {
-          res = true;
-          break;
-        }
-      }
-      if (!result.contains("not")) { // be
-        assertTrue(res);
-      } else {
-        assertFalse(res);
-      }
-    }
-    
-=======
-    
-    @Then("the business information shall {string} updated with new {string} and {string} and {string} and {string}")
-    public void theBusinessInfoShallBeUpdatedWith(String result, String name, String address, String phoneNumber, String email) {
-      if (!result.contains("not")) { // be
-        assertEquals(name, carshop.getBusiness().getName());
-        assertEquals(address, carshop.getBusiness().getAddress());
-        assertEquals(phoneNumber, carshop.getBusiness().getPhoneNumber());
-        assertEquals(email, carshop.getBusiness().getEmail());       
-      } else {
-        assertNotEquals(name, carshop.getBusiness().getName());
-        assertNotEquals(address, carshop.getBusiness().getAddress());
-        assertNotEquals(phoneNumber, carshop.getBusiness().getPhoneNumber());
-        assertNotEquals(email, carshop.getBusiness().getEmail());
-      }
-    }
-    
-    @When("the user tries to change the business hour {string} at {string} to be on {string} starting at {string} and ending at {string}")
-    public void theUserTriesToChangeTheBusinessHourAt(String day, String startTime, String newDay, String newStartTime, String newEndTime) {
-      DayOfWeek day1 = DayOfWeek.valueOf(day);
-      DayOfWeek day2 = DayOfWeek.valueOf(newDay);
-      Time oldStartTime = convertToTime(startTime);
-      Time nStartTime = convertToTime(newStartTime);
-      Time nEndTime = convertToTime(newEndTime);
-      res = false;
-      try {
-        CarShopController.updateBusinessHour(day1, oldStartTime, day2, nStartTime, nEndTime);
-        res = true;
-      } catch (InvalidUserException e) {
-        error += e.getMessage();
-        errorCnt++;
-      } catch (InvalidInputException e) {
-        error += e.getMessage();
-        errorCnt++;
-      }
-    }
-    
-    @Then("the business hour shall {string} be updated")
-    public void theBusinessHourShallBeUpdated(String result) {
-      if (!result.contains("not")) { //be
-        assertTrue(res);
-      } else {
-        assertFalse(res);
-      }
-    }
-    
-    @When("the user tries to remove the business hour starting {string} at {string}")
-    public void theUserTriesToRemoveTheBusinessHourStarting(String day, String startTime) {
-      DayOfWeek day1 = DayOfWeek.valueOf(day);
-      Time sTime = convertToTime(startTime);
-      try {
-        CarShopController.removeBusinessHour(day1, sTime);
-      } catch (InvalidUserException e) {
-        error += e.getMessage();
-        errorCnt++;
-      } catch (InvalidInputException e) {
-        error += e.getMessage();
-        errorCnt++;
-      }
-    }
-    
-    @Then("the business hour starting {string} at {string} shall {string} exist")
-    public void theBusinessHourStartingShallExist(String day, String startTime, String result) {
-      List<BusinessHour> bHours = carshop.getBusiness().getBusinessHours();
-      res = false;
-      DayOfWeek day1 = DayOfWeek.valueOf(day);
-      Time sTime = convertToTime(startTime);
-      for (BusinessHour b: bHours) {
-        if (b.getDayOfWeek().equals(day1) && b.getStartTime().equals(sTime)) {
-          res = true;
-          break;
-        }
-      }
-      if (!result.contains("not")) { // be
-        assertTrue(res);
-      } else {
-        assertFalse(res);
-      }
-    }
-    
->>>>>>> 1177d00319f0eb4f74ec45b1e795ad6b4376eecf
     @Then("an error message {string} shall {string} be raised")
     public void anErrorMessageShallBeRaised(String errorMsg, String result) {
       if (!result.contains("not")) { // be
