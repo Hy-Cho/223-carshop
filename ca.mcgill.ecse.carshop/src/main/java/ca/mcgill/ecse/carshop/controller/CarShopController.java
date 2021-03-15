@@ -306,7 +306,7 @@ public class CarShopController {
 	}
 	
 	
-	// Author: Hyunbum Cho
+	// Author: Hyunbum Cho -----------------------------------------------------
 	public static void setBusinessInfo (String aName, String aAddress, String aPhoneNumber, String aEmail) throws InvalidInputException, InvalidUserException {
 	    if (CarShopController.getLoggedInUser() != CarShopApplication.getCarShop().getOwner()) {
 	      throw new InvalidUserException("No permission to set up business information");
@@ -321,7 +321,7 @@ public class CarShopController {
 	  
 	  public static void updateBusinessInfo (String aName, String aAddress, String aPhoneNumber, String aEmail) throws InvalidInputException, InvalidUserException {
 	    if (CarShopController.getLoggedInUser() != CarShopApplication.getCarShop().getOwner()) {
-	      throw new InvalidUserException("No permission to set up business information");
+	      throw new InvalidUserException("No permission to update business information");
 	    } else if (!isValidEmailAddress(aEmail)) {
 	      throw new InvalidInputException("Invalid email");
 	    } else if (aPhoneNumber.length()!=13) {
@@ -340,7 +340,7 @@ public class CarShopController {
 	    List<BusinessHour> bHour = business.getBusinessHours();
 	    BusinessHour newBHour;
 	    if (CarShopController.getLoggedInUser() != CarShopApplication.getCarShop().getOwner()) {
-	      throw new InvalidUserException("No permission to set up business information");
+	      throw new InvalidUserException("No permission to update business information");
 	    } else if (newStartTime.after(newEndTime)) {
 	      throw new InvalidInputException("Start time must be before end time");
 	    }
@@ -361,7 +361,7 @@ public class CarShopController {
 	    Business business = CarShopApplication.getCarShop().getBusiness();
         List<BusinessHour> bHour = business.getBusinessHours();
 	    if (CarShopController.getLoggedInUser() != CarShopApplication.getCarShop().getOwner()) {
-	      throw new InvalidUserException("No permission to set up business information");
+	      throw new InvalidUserException("No permission to update business information");
 	    } else if (newStartTime.after(newEndTime)) {
 	      throw new InvalidInputException("Start time must be before end time");
 	    }
@@ -387,7 +387,7 @@ public class CarShopController {
 	    Business business = CarShopApplication.getCarShop().getBusiness();
         List<BusinessHour> bHour = business.getBusinessHours();
 	    if (CarShopController.getLoggedInUser() != CarShopApplication.getCarShop().getOwner()) {
-	      throw new InvalidUserException("No permission to set up business information");
+	      throw new InvalidUserException("No permission to update business information");
 	    }
 	    
 	    for (BusinessHour b: bHour) {
@@ -400,12 +400,11 @@ public class CarShopController {
 	  
 	  public static List<String> getBusinessInfo(){
 	    Business business = CarShopApplication.getCarShop().getBusiness();
-	    ArrayList<String> businessInfo = new ArrayList<String>();
+	    ArrayList<String> businessInfo = new ArrayList<String>(4);
 	    businessInfo.add(business.getName());
 	    businessInfo.add(business.getAddress());
 	    businessInfo.add(business.getPhoneNumber());
 	    businessInfo.add(business.getEmail());
-	    
 	    return businessInfo;
 	  }
 	  
@@ -415,16 +414,16 @@ public class CarShopController {
 	    List<TimeSlot> vacations;
 	    
 	    if (CarShopController.getLoggedInUser() != CarShopApplication.getCarShop().getOwner()) {
-	      throw new InvalidUserException("No permission to set up business information");
+	      throw new InvalidUserException("No permission to update business information");
 	    }
 	    if (endDate.before(startDate)) {
 	      throw new InvalidInputException("Start time must be before end time");
 	    } else if ((startDate == endDate) && (endTime.before(startTime))) { // same day
 	      throw new InvalidInputException("Start time must be before end time");
-	    } else if (type != "holiday" && type != "vacation") {
+	    } else if (!type.contains("holiday") && !type.contains("vacation")) {
 	      throw new InvalidInputException("Invalild type");
 	    } else if (startDate.before(today)) {
-	      if (type == "holiday") {
+	      if (type.contains("holiday")) {
 	        throw new InvalidInputException("Holiday cannot start in the past");
 	      } else {
 	        throw new InvalidInputException("Vacation cannot start in the past ");
@@ -437,14 +436,14 @@ public class CarShopController {
 	      if (startDate.before(h.getEndDate())) { // new start date is before end date of holiday
 	        if (endDate.after(h.getStartDate())) { // new end date is after start date of holiday
 	          // overlap with holiday
-	          if (type == "holiday") {
+	          if (type.contains("holiday")) {
 	            throw new InvalidInputException("Holiday times cannot overlap");
 	          } else { // vacation
 	            throw new InvalidInputException("Holiday and vacation times cannot overlap");
 	          }
 	        } else if (endDate == h.getStartDate()) { // ends at start date of holiday
 	          if (endTime.after(h.getStartTime())) { // end time after start time of holiday
-	            if (type == "holiday") {
+	            if (type.contains("holiday")) {
 	              throw new InvalidInputException("Holiday times cannot overlap");
 	            } else { // vacation
 	              throw new InvalidInputException("Holiday and vacation times cannot overlap");
@@ -458,14 +457,14 @@ public class CarShopController {
 	      if (startDate.before(v.getEndDate())) { // new start date is before end date of vacation
 	        if (endDate.after(v.getStartDate())) { // new end date is after start date of vacation
 	          // overlap with vacation
-	          if (type == "vacation") {
+	          if (type.contains("vacation")) {
 	            throw new InvalidInputException("Vacation times cannot overlap");
 	          } else { // holiday
 	            throw new InvalidInputException("Holiday and vacation times cannot overlap");
 	          }
 	        } else if (endDate == v.getStartDate()) { // ends at start date of vacation
 	          if (endTime.after(v.getStartTime())) { // end time after start time of vacation
-	            if (type == "vacation") {
+	            if (type.contains("vacation")) {
 	              throw new InvalidInputException("Vacation times cannot overlap");
 	            } else { // holiday
 	              throw new InvalidInputException("Holiday and vacation times cannot overlap");
@@ -477,7 +476,7 @@ public class CarShopController {
 	    
 	    // no overlaps
 	    TimeSlot ts = new TimeSlot(startDate, startTime, endDate, endTime, CarShopApplication.getCarShop());
-	    if (type == "holiday") {
+	    if (type.contains("holiday")) {
 	      business.addHoliday(ts);
 	    } else {
 	      business.addVacation(ts);
@@ -492,7 +491,7 @@ public class CarShopController {
 	    TimeSlot vacation = null;
 	    
 	    if (CarShopController.getLoggedInUser() != CarShopApplication.getCarShop().getOwner()) {
-	      throw new InvalidUserException("No permission to set up business information");
+	      throw new InvalidUserException("No permission to update business information");
 	    }
 	    if (endDate.before(startDate)) {
 	      throw new InvalidInputException("Start time must be before end time");
@@ -550,7 +549,7 @@ public class CarShopController {
 	    TimeSlot holiday = null;
 	    
 	    if (CarShopController.getLoggedInUser() != CarShopApplication.getCarShop().getOwner()) {
-	      throw new InvalidUserException("No permission to set up business information");
+	      throw new InvalidUserException("No permission to update business information");
 	    }
 	    if (endDate.before(startDate)) {
 	      throw new InvalidInputException("Start time must be before end time");
@@ -607,12 +606,12 @@ public class CarShopController {
 	    TimeSlot holiday = null;
 	    TimeSlot vacation = null;
 	    if (CarShopController.getLoggedInUser() != CarShopApplication.getCarShop().getOwner()) {
-	      throw new InvalidUserException("No permission to set up business information");
-	    } else if (type != "holiday" && type != "vacation") {
+	      throw new InvalidUserException("No permission to update business information");
+	    } else if (!type.contains("holiday") && !type.contains("vacation")) {
 	      throw new InvalidInputException("Invalild type");
 	    }
 	    
-	    if (type == "holiday") {
+	    if (type.contains("holiday")) {
 	      holidays = business.getHolidays();
 	      for (TimeSlot h: holidays) {
 	        if (h.getStartDate() == startDate && h.getStartTime() == startTime && h.getEndDate() == endDate && h.getEndTime() == endTime) {
@@ -672,7 +671,7 @@ public class CarShopController {
 	    return valid;
 	  }
 	  
-	  // End of Hyunbum's code
+	  // End of Hyunbum's code -------------------------------------------------------------------------
 	  
 	  private static BusinessHour getBussinessHourOfDayByGarage(Garage g, DayOfWeek day) {
 			List<BusinessHour> businessHourPerGarage = g.getBusinessHours();

@@ -1,6 +1,8 @@
 package ca.mcgill.ecse.carshop.features;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,6 +30,7 @@ import ca.mcgill.ecse.carshop.model.Owner;
 import ca.mcgill.ecse.carshop.model.Service;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
+import ca.mcgill.ecse.carshop.model.TimeSlot;
 import ca.mcgill.ecse.carshop.model.User;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import io.cucumber.datatable.DataTable;
@@ -49,6 +52,7 @@ public class CucumberStepDefinitions {
 	private String oldServiceName;
 	private Time startTime;
 	private Time endTime;
+	private List<String> businessInfo;
 	
 	
 	// Step Definitions for UpdateGarageOpeningHours
@@ -59,10 +63,10 @@ public class CucumberStepDefinitions {
 		for(Map<String, String> list: listRepresentation) {
 			String name = list.get("name");
 			String address = list.get("address");
-			String phoneNumber = list.get("phoneNumber");
+			String phoneNumber = list.get("phone number");
 			String email = list.get("email");
 						
-			Business business = new Business(name, address, email, phoneNumber, carshop);
+			Business business = new Business(name, address, phoneNumber, email, carshop);
 
 		}
 	}
@@ -524,18 +528,170 @@ public class CucumberStepDefinitions {
     }
     
     @Then("a new business with new {string} and {string} and {string} and {string} shall {string} created")
-    public void aNewBuisnessWithNameAddressPhoneNumberEmailIsCreated(String name, String address, String phoneNumber, String email) {
-      assertEquals(name, carshop.getBusiness().getName());
-      assertEquals(address, carshop.getBusiness().getAddress());
-      assertEquals(phoneNumber, carshop.getBusiness().getPhoneNumber());
-      assertEquals(email, carshop.getBusiness().getEmail());
+    public void aNewBuisnessWithNameAddressPhoneNumberEmailIsCreated(String name, String address, String phoneNumber, String email, String result) {
+      if (!result.contains("not")) {
+        assertEquals(name, carshop.getBusiness().getName());
+        assertEquals(address, carshop.getBusiness().getAddress());
+        assertEquals(phoneNumber, carshop.getBusiness().getPhoneNumber());
+        assertEquals(email, carshop.getBusiness().getEmail());
+      } else {
+        assertEquals(null, carshop.getBusiness());
+      }
     }
     
     @Then("an error message {string} shall {string} raised")
-    public void anErrorMessageIsRaised(String errorMsg) {
-      assertTrue(error.contains(errorMsg));
+    public void anErrorMessageIsRaised(String errorMsg, String result) {
+      if (!result.contains("not")) {
+        System.out.println(error);
+        assertTrue(error.contains(errorMsg));
+      } else {
+        System.out.println(error);
+        assertTrue(error=="");
+      }
     }
     
+    @Given("the business has a business hour on {string} with start time {string} and end time {string}")
+    public void theBusinessHasABusinessHourOn(String day, String startTime, String endTime) {
+      DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+      Time sTime = convertToTime(startTime);
+      Time eTime = convertToTime(endTime);
+      BusinessHour bH = new BusinessHour(dayOfWeek, sTime, eTime, carshop);
+      carshop.getBusiness().addBusinessHour(bH);
+      initialSize = carshop.getBusiness().getBusinessHours().size();
+    }
+    
+    @When("the user tries to add a new business hour on {string} with start time {string} and end time {string}")
+    public void theUserTriesToAddANewBusinessHourOn(String day, String startTime, String endTime) {
+      Time sTime = convertToTime(startTime);
+      Time eTime = convertToTime(endTime);
+      DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+      try {
+        initialSize = carshop.getBusiness().getBusinessHours().size();
+        CarShopController.addBusinessHour(dayOfWeek, sTime, eTime);
+      } catch (InvalidUserException e) {
+        error += e.getMessage();
+        errorCnt++;
+      } catch (InvalidInputException e) {
+        error += e.getMessage();
+        errorCnt++;
+      }
+    }
+    
+    @Then("a new business hour shall {string} created")
+    public void aNewBusinessHourShallbeCreated(String result) {
+      if (!result.contains("not")) {
+        assertEquals(initialSize + 1, carshop.getBusiness().getBusinessHours().size());
+      } else {
+        assertEquals(initialSize, carshop.getBusiness().getBusinessHours().size());
+      }  
+    }
+    
+    @When("the user tries to access the business information")
+    public void theUserTriesToAccessTheBusinessInfo() {
+      businessInfo = CarShopController.getBusinessInfo();
+    }
+    
+    @Then("the {string} and {string} and {string} and {string} shall be provided to the user")
+    public void businessInforShallbeProvidedToTheUser(String name, String address, String phoneNumber, String email) {
+      assertEquals(name, businessInfo.get(0));
+      assertEquals(address, businessInfo.get(1));
+      assertEquals(phoneNumber, businessInfo.get(2));
+      assertEquals(email, businessInfo.get(3));
+    }
+
+    
+    @Given("a {string} time slot exists with start time {string} at {string} and end time {string} at {string}")
+    public void aTimeSlotExistsWithStartTimeAndEndTime(String type, String startDate, String startTime, String endDate, String endTime) {
+      Date sDate = convertToDate(startDate);
+      Date eDate = convertToDate(endDate);
+      Time sTime = convertToTime(startTime);
+      Time eTime = convertToTime(endTime);
+
+      TimeSlot tSlot = new TimeSlot(sDate,sTime,eDate,eTime,carshop);
+      if (type.contains("holiday")) {
+        carshop.getBusiness().addHoliday(tSlot);
+      } else if (type.contains("vacation")) {
+        carshop.getBusiness().addVacation(tSlot);
+      }
+      
+    }
+    
+    @When("the user tries to add a new {string} with start date {string} at {string} and end date {string} at {string}")
+    public void theUserTriesToAddANewTimeslot(String type, String startDate, String startTime, String endDate, String endTime) {
+      Date sDate = convertToDate(startDate);
+      Date eDate = convertToDate(endDate);
+      Time sTime = convertToTime(startTime);
+      Time eTime = convertToTime(endTime);
+      
+      try {
+        CarShopController.addNewTimeSlot(type, sDate, sTime, eDate, eTime);
+      } catch (InvalidUserException e) {
+        error += e.getMessage();
+        errorCnt++;
+      } catch (InvalidInputException e) {
+        error += e.getMessage();
+        errorCnt++;
+      } 
+    }
+    
+    @Then("a new {string} shall {string} be added with start date {string} at {string} and end date {string} at {string}")
+    public void aNewTimeslotShallBeAddedWith(String type, String result, String startDate, String startTime, String endDate, String endTime) {
+      boolean contains = false;
+      List<TimeSlot> timeslots;
+      Date sDate = convertToDate(startDate);
+      Date eDate = convertToDate(endDate);
+      Time sTime = convertToTime(startTime);
+      Time eTime = convertToTime(endTime);
+      if (type.contains("holiday")) {
+        timeslots = carshop.getBusiness().getHolidays();
+        for (TimeSlot t: timeslots) {
+          if (t.getStartDate().equals(sDate) && t.getStartTime().equals(sTime) && t.getEndDate().equals(eDate) && t.getEndTime().equals(eTime)) {
+            contains = true;
+            break;
+          }
+        }
+      } else if (type.contains("vacation")) {
+        timeslots = carshop.getBusiness().getVacations();
+        for (TimeSlot t: timeslots) {
+          if (t.getStartDate().equals(sDate) && t.getStartTime().equals(sTime) && t.getEndDate().equals(eDate) && t.getEndTime().equals(eTime)) {
+            contains = true;
+            break;
+          }
+        }
+      }
+      if (!result.contains("not")) {
+        assertTrue(contains);
+      } else { // not be
+        assertFalse(contains);
+      }
+      
+    }
+    
+    
+    
+    
+    
+    private static Time convertToTime(String t) {
+      int hour;
+      int minute;
+      String[] tokens = t.split(":");
+      hour = Integer.parseInt(tokens[0]);
+      minute = Integer.parseInt(tokens[1]);
+      Time myTime = Time.valueOf(LocalTime.of(hour, minute));
+      return myTime;
+    }
+    
+    private static Date convertToDate(String d) {
+      int year;
+      int month;
+      int date;
+      String[] tokens = d.split("-");
+      year = Integer.parseInt(tokens[0]);
+      month = Integer.parseInt(tokens[1]);
+      date = Integer.parseInt(tokens[2]);
+      Date myDate = Date.valueOf(LocalDate.of(year, month, date));
+      return myDate;
+    }
     
     // end of Hyunbum's code ------------------------------------------------------
 	
