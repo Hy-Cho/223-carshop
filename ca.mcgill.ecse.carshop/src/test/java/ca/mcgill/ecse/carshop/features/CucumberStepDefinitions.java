@@ -494,7 +494,50 @@ public class CucumberStepDefinitions {
 		this.oldServiceName = null;
 	}
 	
-	
+	// Author: Hyunbum Cho ----------------------------------------------------------
+    @Given("no business exists")
+    public void noBuisnessExists() {
+      if (carshop.hasBusiness()) {
+        carshop.getBusiness().delete();
+      }
+    }
+    
+    @Given("the system's time and date is \"2021-02-01+11:00\"")
+    public void systemTimeAndDateIs() {
+      Date d = Date.valueOf(LocalDate.of(2021, 2, 1));
+      Time t = Time.valueOf(LocalTime.of(11, 0));
+      CarShopController.setToday(d);
+      CarShopController.setTime(t);
+    }
+    
+    @When("the user tries to set up the business information with new {string} and {string} and {string} and {string}")
+    public void userTriesToSetUpTheBusinessInfo(String name, String address, String phoneNumber, String email) {
+      try {
+        CarShopController.setBusinessInfo(name, address, phoneNumber, email);
+      } catch (InvalidUserException e) {
+        error += e.getMessage();
+        errorCnt++;
+      } catch (InvalidInputException e) {
+        error += e.getMessage();
+        errorCnt++;
+      }
+    }
+    
+    @Then("a new business with new {string} and {string} and {string} and {string} shall {string} created")
+    public void aNewBuisnessWithNameAddressPhoneNumberEmailIsCreated(String name, String address, String phoneNumber, String email) {
+      assertEquals(name, carshop.getBusiness().getName());
+      assertEquals(address, carshop.getBusiness().getAddress());
+      assertEquals(phoneNumber, carshop.getBusiness().getPhoneNumber());
+      assertEquals(email, carshop.getBusiness().getEmail());
+    }
+    
+    @Then("an error message {string} shall {string} raised")
+    public void anErrorMessageIsRaised(String errorMsg) {
+      assertTrue(error.contains(errorMsg));
+    }
+    
+    
+    // end of Hyunbum's code ------------------------------------------------------
 	
 	@After
 	public void tearDown() {
@@ -640,40 +683,5 @@ public class CucumberStepDefinitions {
 		  }
 	  }
 	
-	// Hyunbum Cho
-	@Given("no business exists")
-	public void noBuisnessExists() {
-	  if (carshop.hasBusiness()) {
-	    carshop.getBusiness().delete();
-	  }
-	}
-	
-	@Given("the system's time and date is \"2021-02-01+11:00\"")
-	public void systemTimeAndDateIs() {
-	  Date d = Date.valueOf(LocalDate.of(2021, 2, 1));
-	  Time t = Time.valueOf(LocalTime.of(11, 0));
-	  CarShopController.setToday(d);
-	  CarShopController.setTime(t);
-	}
-	
-	@When("the user tries to set up the business information with new {string} and {string} and {string} and {string}")
-	public void userTriesToSetUpTheBusinessInfo(String name, String address, String phoneNumber, String email) {
-	  try {
-	    CarShopController.setBusinessInfo(name, address, phoneNumber, email);
-	  } catch (InvalidUserException e) {
-	    error += e.getMessage();
-	    errorCnt++;
-	  } catch (InvalidInputException e) {
-	    error += e.getMessage();
-        errorCnt++;
-	  }
-	}
-	
-	@Then("a new business with new {string} and {string} and {string} and {string} shall {string} created")
-	public void aNewBuisnessWithNameAddressPhoneNumberEmailIsCreated(String name, String address, String phoneNumber, String email) {
-	  assertEquals(name, carshop.getBusiness().getName());
-	  assertEquals(address, carshop.getBusiness().getAddress());
-	  assertEquals(phoneNumber, carshop.getBusiness().getPhoneNumber());
-	  assertEquals(email, carshop.getBusiness().getEmail());
-	}
+
 }
