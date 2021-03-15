@@ -2,6 +2,7 @@ package ca.mcgill.ecse.carshop.controller;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.model.BookableService;
@@ -37,6 +38,7 @@ public class CarShopController {
 	private static User loggedInUser;
 
 	private static Date today = Date.valueOf(LocalDate.of(2021, 2, 1));
+	private static Time now = Time.valueOf(LocalTime.of(11, 0));
 		
 	// signUpCustomerAccount was coded by Sami Ait Ouahmane
 	// It it doesn't find any exceptions, it signs up the user for a new customer account
@@ -303,6 +305,8 @@ public class CarShopController {
 		return null;
 	}
 	
+	
+	// Author: Hyunbum Cho
 	public static void setBusinessInfo (String aName, String aAddress, String aPhoneNumber, String aEmail) throws InvalidInputException, InvalidUserException {
 	    if (CarShopController.getLoggedInUser() != CarShopApplication.getCarShop().getOwner()) {
 	      throw new InvalidUserException("No permission to set up business information");
@@ -394,11 +398,15 @@ public class CarShopController {
 	    
 	  }
 	  
-	  public static TOBusinessInfo getBusinessInfo(){
+	  public static List<String> getBusinessInfo(){
 	    Business business = CarShopApplication.getCarShop().getBusiness();
-	    TOBusinessInfo TOBusiness = new TOBusinessInfo(business.getName(), business.getAddress(), business.getPhoneNumber(), business.getEmail());
+	    ArrayList<String> businessInfo = new ArrayList<String>();
+	    businessInfo.add(business.getName());
+	    businessInfo.add(business.getAddress());
+	    businessInfo.add(business.getPhoneNumber());
+	    businessInfo.add(business.getEmail());
 	    
-	    return TOBusiness;
+	    return businessInfo;
 	  }
 	  
 	  public static void addNewTimeSlot(String type, Date startDate, Time startTime, Date endDate, Time endTime) throws InvalidInputException, InvalidUserException {
@@ -635,6 +643,13 @@ public class CarShopController {
 	    }
 	  }
 	  
+	  public static void setToday (Date d) {
+	    today = d;
+	  }
+	  
+	  public static void setTime (Time t) {
+	    now = t;
+	  }
 	  
 	  private static boolean isValidEmailAddress(String email) {
 	    boolean valid = true;
@@ -656,6 +671,9 @@ public class CarShopController {
 	    
 	    return valid;
 	  }
+	  
+	  // End of Hyunbum's code
+	  
 	  private static BusinessHour getBussinessHourOfDayByGarage(Garage g, DayOfWeek day) {
 			List<BusinessHour> businessHourPerGarage = g.getBusinessHours();
 			for(BusinessHour hours: businessHourPerGarage) {
@@ -666,6 +684,8 @@ public class CarShopController {
 			
 			return null;
 		}
+	  
+	  
 	  private static Garage getGarageOfTechnician(TechnicianType techType) {
 			CarShop carshop = CarShopApplication.getCarShop();
 			if(carshop == null) {

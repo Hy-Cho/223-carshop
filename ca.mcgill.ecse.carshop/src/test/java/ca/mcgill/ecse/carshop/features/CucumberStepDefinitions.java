@@ -7,13 +7,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
+import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.controller.CarShopController;
 import ca.mcgill.ecse.carshop.controller.InvalidInputException;
+import ca.mcgill.ecse.carshop.controller.InvalidUserException;
 import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.Business;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
@@ -635,4 +639,41 @@ public class CucumberStepDefinitions {
 				return null;
 		  }
 	  }
+	
+	// Hyunbum Cho
+	@Given("no business exists")
+	public void noBuisnessExists() {
+	  if (carshop.hasBusiness()) {
+	    carshop.getBusiness().delete();
+	  }
+	}
+	
+	@Given("the system's time and date is \"2021-02-01+11:00\"")
+	public void systemTimeAndDateIs() {
+	  Date d = Date.valueOf(LocalDate.of(2021, 2, 1));
+	  Time t = Time.valueOf(LocalTime.of(11, 0));
+	  CarShopController.setToday(d);
+	  CarShopController.setTime(t);
+	}
+	
+	@When("the user tries to set up the business information with new {string} and {string} and {string} and {string}")
+	public void userTriesToSetUpTheBusinessInfo(String name, String address, String phoneNumber, String email) {
+	  try {
+	    CarShopController.setBusinessInfo(name, address, phoneNumber, email);
+	  } catch (InvalidUserException e) {
+	    error += e.getMessage();
+	    errorCnt++;
+	  } catch (InvalidInputException e) {
+	    error += e.getMessage();
+        errorCnt++;
+	  }
+	}
+	
+	@Then("a new business with new {string} and {string} and {string} and {string} shall {string} created")
+	public void aNewBuisnessWithNameAddressPhoneNumberEmailIsCreated(String name, String address, String phoneNumber, String email) {
+	  assertEquals(name, carshop.getBusiness().getName());
+	  assertEquals(address, carshop.getBusiness().getAddress());
+	  assertEquals(phoneNumber, carshop.getBusiness().getPhoneNumber());
+	  assertEquals(email, carshop.getBusiness().getEmail());
+	}
 }
