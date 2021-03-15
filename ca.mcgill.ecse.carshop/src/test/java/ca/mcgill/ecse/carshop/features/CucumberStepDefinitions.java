@@ -57,7 +57,7 @@ public class CucumberStepDefinitions {
 	private boolean res;
 	
 	
-	// Step Definitions for UpdateGarageOpeningHours
+	// Step Definitions for UpdateGarageOpeningHours. Written by Hadi Ghaddar
 	
 	@Given("a business exists with the following information:")
 	public void a_business_exists_with_the_following_information(io.cucumber.datatable.DataTable dataTable) {
@@ -80,11 +80,16 @@ public class CucumberStepDefinitions {
 		Time sTime = convertToTime(startTime);
 	    Time eTime = convertToTime(endTime);
 		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
-		
-		BusinessHour businessOpeninghours = new BusinessHour(dayOfWeek, sTime, eTime, carshop);
-
+		try {
+			CarShopController.addBusinessHour(dayOfWeek, sTime, eTime);
+		} catch (InvalidInputException e) {
+			error += e.getMessage();
+		    errorCnt++;	
+		} catch (InvalidUserException e) {
+			error += e.getMessage();
+		    errorCnt++;	
 		}
-
+		}
 		}
 
 	@When("the user tries to add new business hours on {string} from {string} to {string} to garage belonging to the technician with type {string}")
@@ -93,24 +98,17 @@ public class CucumberStepDefinitions {
 	      Time eTime = convertToTime(endTime);
 	      DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
 	      TechnicianType techType = getTechnicianTypeFromString(type);
-	      try {
-	        initialSize = carshop.getBusiness().getBusinessHours().size();
-	        try {
-				CarShopController.addBusinessHour(dayOfWeek, sTime, eTime, techType);
-			} catch (InvalidInputException e) {
-		        error += e.getMessage();
-		        errorCnt++;			}
-	      }
-	       catch (InvalidUserException e) {
-	        error += e.getMessage();
-	        errorCnt++;
-	       }
+		try {
+			CarShopController.updateGarageOpeningHours(dayOfWeek, sTime, eTime);
+		} catch (InvalidInputException e) {
+		    error += e.getMessage();
+		    errorCnt++;			
+		    }
 	      }
 	        
-
 	@Then("the garage belonging to the technician with type {string} should have opening hours on {string} from {string} to {string}")
 	public void the_garage_belonging_to_the_technician_with_type_should_have_opening_hours_on_from_to(String string, String string2, String string3, String string4) {
-	    // Write code here that turns the phrase above into concrete actions
+		assertEquals();
 	    throw new io.cucumber.java.PendingException();
 	}
 
@@ -131,12 +129,14 @@ public class CucumberStepDefinitions {
 	    // Write code here that turns the phrase above into concrete actions
 	    throw new io.cucumber.java.PendingException();
 	}
-	// Step Definitions for LogIn
+	// End of the UpdateGarageOpeningHours
+	// Step Definitions for LogIn. Written by Hadi Ghaddar
 	
 	@When("the user tries to log in with username {string} and password {string}")
 	public void the_user_tries_to_log_in_with_username_and_password(String string, String string2) {
 		username=string;
 		password=string2;
+		initialSize=getCountOfUsers();
 		try{
 	     	 CarShopController.logIn(username,password);
 	     }
@@ -148,48 +148,37 @@ public class CucumberStepDefinitions {
 
 	@Then("the user should be successfully logged in")
 	public void the_user_should_be_successfully_logged_in() {
-		try {
-			CarShopController.logIn(username,password);
-		} catch (InvalidInputException e) {
-			e.printStackTrace();
-		}
-		}
-
+		assertNotNull(CarShopController.getLoggedInUser());
+		assertEquals(username,CarShopController.getLoggedInUser().getUsername());
+		assertEquals(password,CarShopController.getLoggedInUser().getPassword());
+	}
 	@Then("the user should not be logged in")
 	public void the_user_should_not_be_logged_in() {
-		try {
-			CarShopController.logIn(username,password);
-		} catch (InvalidInputException e) {
-			e.printStackTrace();
-		}
+		assertNull(CarShopController.getLoggedInUser());
 	}
-
 	@Then("a new account shall be created")
 	public void a_new_account_shall_be_created() {
-		try {
-			CarShopController.logIn(username, password);
-		} catch (InvalidInputException e) {
-			error = e.getMessage();
-			errorCnt++;
-		}
-
+		assertEquals(getCountOfUsers(),initialSize+1);
 	}
 
 	@Then("the user shall be successfully logged in")
 	public void the_user_shall_be_successfully_logged_in() {
-		try {
-			CarShopController.logIn(username,password);
-		} catch (InvalidInputException e) {
-			e.printStackTrace();
+		assertNotNull(CarShopController.getLoggedInUser());
+		assertEquals(username,CarShopController.getLoggedInUser().getUsername());
+		assertEquals(password,CarShopController.getLoggedInUser().getPassword());
 		}
-	}
 
 	@Then("the account shall have username {string}, password {string} and technician type {string}")
 	public void the_account_shall_have_username_password_and_technician_type(String username, String password, String type) {
 	    if(getUserWithUsername(username)!=null) {
-	    	assertEquals(password,getUserWithUsername(username).getPassword());
-	    	assertEquals(getTechTypeFromUsername(username),getTechnicianTypeFromString(type));
-	    }
+			assertNotNull(CarShopController.getLoggedInUser());
+			assertEquals(username,CarShopController.getLoggedInUser().getUsername());
+			assertEquals(password,CarShopController.getLoggedInUser().getPassword());
+			User u = CarShopController.getLoggedInUser();
+			assertTrue(u instanceof Technician);
+			Technician tech = (Technician) u;
+			assertEquals(tech.getType(), getTechnicianTypeFromString(type));
+	    }    
 	    else {
 	    	throw new AssertionError();
 	    }
@@ -197,18 +186,18 @@ public class CucumberStepDefinitions {
 
 	@Then("the corresponding garage for the technician shall be created")
 	public void the_corresponding_garage_for_the_technician_shall_be_created() {
-		for(Technician tech: this.carshop.getTechnicians()) {
-			
-			Garage garage = new Garage(this.carshop, tech);
+		assertNotNull(CarShopController.getLoggedInUser());
+		User u = CarShopController.getLoggedInUser();
+		assertTrue(u instanceof Technician);
+		Technician tech = (Technician) u;
+		assertNotNull(tech.getGarage());
 		}
-	}
 
 	@Then("the garage should have the same opening hours as the business")
 	public void the_garage_should_have_the_same_opening_hours_as_the_business() {
-		for(Garage garage : this.carshop.getGarages()) {
 		}
-	}
 	
+	//End of the LogIn code
 	//This is the CucumberStepDefinitions code for signUpCustomer. Coded by Sami Ait Ouahmane
 	
 	@Given("a Carshop system exists")
@@ -1017,6 +1006,16 @@ public class CucumberStepDefinitions {
 				return null;
 		  }
 	  }
-	
+	private int getCountOfUsers() {
+		int count = 0;
+		count += carshop.getCustomers().size();
+		count += carshop.getTechnicians().size();
+		if(carshop.getOwner() != null) {
+			count += 1;
+		}
+		
+		return count;
+	}
+
 
 }
