@@ -195,27 +195,34 @@ public class CarShopController {
 		   
 		  try {
 	            Service service = new Service(name, carShop, duration, garage);
+	 	       
+	            if(duration <= 0) {
+	    			throw new RuntimeException("Duration must be positive");
+	    		}
+	    		if(getServiceFromName(name, carShop) != null) {
+	    			throw new InvalidInputException("Service "+name+ " already exists");
+	    		}
 	        }
 		catch(RuntimeException ex) {
 			throw new InvalidInputException(ex.getMessage());
 		}
 	}
 		  
-	private static int numOfCombos;
 
-	public static void defineCombo(String name, ComboItem mainService, List<ComboItem> services) throws RuntimeException, InvalidInputException {
-		int numServices = services.size();
-		int i=0;
-		
-		if(loggedInUser == null  || loggedInUser.getUsername() != "owner") {
+	public static void defineCombo(String name, Service mainService, List<Service> services, List<Boolean> mandatory) throws RuntimeException, InvalidInputException {
+		CarShop carShop = CarShopApplication.getCarShop();
+		if(loggedInUser == null  || loggedInUser.getUsername() != "owner"|| !(loggedInUser instanceof Owner)) {
 			throw new RuntimeException("You are not authorized to perform this operation");
 		}
 		
-		if(services.size()<2) {
+		if(services.size()<ServiceCombo.minimumNumberOfServices()) {
 			throw new RuntimeException("A service Combo must contain at least 2 services");
 		}
 		
-		if(!mainService.getMandatory()) {
+		
+		int indexOfMain = services.indexOf(mainService);
+		boolean mandatoryOfMain = mandatory.get(indexOfMain);
+		if(!mandatoryOfMain) {
 			throw new RuntimeException("Main service must be mandatory");
 		}
 		
@@ -223,26 +230,16 @@ public class CarShopController {
 			throw new RuntimeException("Main service must be included in the services");
 		}
 		
-		if(!services.contains(BookableService)) {
-			throw new RuntimeException("An entered service does not exist");
-
-		}
-		
-		CarShop carShop = CarShopApplication.getCarShop();
-		
-		
-		if(duration <= 0) {
-			throw new RuntimeException("Duration must be positive");
-		}
-		if(getServiceFromName(name, carShop) != null) {
-			throw new InvalidInputException("Service "+name+ " already exists");
+		for(BookableService bookableService: carShop.getBookableServices()) {
+			if(!services.contains(bookableService)) {
+				throw new RuntimeException("An entered service does not exist");
+			}
 		}
 		
 		
 		try {
 
-			ServiceCombo serviceCombo = new ServiceCombo(name, carShop, mainService);
-			numOfCombos++;
+			ServiceCombo serviceCombo = new ServiceCombo(name, carShop);
 			carShop.addBookableService(serviceCombo);
 
 		}
@@ -288,7 +285,19 @@ public class CarShopController {
 		return loggedInUser;
 	}
 	
-	
+	private static ServiceCombo getServiceComboFromName(String name, CarShop carShop) {
+		List<BookableService> bookableServices = carShop.getBookableServices();
+		for(BookableService bookableService: bookableServices) {
+			if(bookableService instanceof ServiceCombo) {
+				ServiceCombo serviceCombo = (ServiceCombo) bookableService;
+				if(serviceCombo.getName().equals(name)) {
+					return serviceCombo;
+				}
+			}
+		}
+
+		return null;
+	}
 	private static Service getServiceFromName(String name, CarShop carShop) {
 		List<BookableService> bookableServices = carShop.getBookableServices();
 		for(BookableService bookableService: bookableServices) {
@@ -753,29 +762,41 @@ public class CarShopController {
 			
 			return null;
 		}
-		public static void updateCombo(String name, String updatedName, ComboItem mainService, List<ComboItem> services) throws RuntimeException, InvalidInputException {
-			if(loggedInUser == null  || loggedInUser.getUsername() != "owner") {
+	  public static void updateCombo(String name, String updatedName, Service updatedMainService, List<Service> updatedServices, List<Boolean> updatedMandatory) throws RuntimeException, InvalidInputException {
+			CarShop carShop=CarShopApplication.getCarShop();
+			if(loggedInUser == null  || loggedInUser.getUsername() != "owner"|| !(loggedInUser instanceof Owner)) {
 				throw new RuntimeException("You are not authorized to perform this operation");
 			}
 			
-			if(!services.contains(mainService)) {
+			if(!updatedServices.contains(updatedMainService)) {
 				throw new RuntimeException("Main service must be included in the services");
 			}
 			
-			if(!mainService.getMandatory()) {
+			int indexOfMain = updatedServices.indexOf(updatedMainService);
+			boolean mandatoryOfMain = updatedMandatory.get(indexOfMain);
+			if(!mandatoryOfMain) {
 				throw new RuntimeException("Main service must be mandatory");
 			}
 			
-			if(services.size()<2) {
+			if(updatedServices.size()<ServiceCombo.minimumNumberOfServices()) {
 				throw new RuntimeException("A service Combo must contain at least 2 services");
 			}
 			
-			if(!services.contains(BookableService)) {
+			for(BookableService bookableService: carShop.getBookableServices()) {
+			if(!updatedServices.contains(bookableService)) {
 				throw new RuntimeException("An entered service does not exist");
 			}
 			
 			try {
-				carShop.addBookableService(updateCombo);
+				ServiceCombo oldCombo = getServiceComboFromName(name, carShop);
+				if(!name.equals(updatedName) && getServiceComboFromName(updatedName, carShop) != null) {
+					throw new InvalidInputException("Service "+ updatedName + " already exists");
+				}
+				if(oldCombo != null) {
+					oldCombo.setName(updatedName);
+					ComboItem mainService = new ComboItem(true, updatedMainService, oldCombo);
+					oldCombo.setMainService(mainService); //Don't think this is correct at all
+				}
 			}
 			catch(RuntimeException e) {
 				if(e.getMessage().startsWith("Cannot create due to duplicate")) {
@@ -786,5 +807,5 @@ public class CarShopController {
 			
 		}
 	}
-	
+	  }
 }
