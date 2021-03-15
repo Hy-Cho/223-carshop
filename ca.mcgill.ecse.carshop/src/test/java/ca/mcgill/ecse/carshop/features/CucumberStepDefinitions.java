@@ -50,9 +50,11 @@ public class CucumberStepDefinitions {
 	private String oldPassword;
 	private int initialSize;
 	private String oldServiceName;
-	private Time startTime;
-	private Time endTime;
 	private List<String> businessInfo;
+	private String endTime;
+	private String startTime;
+    private String day;
+
 	
 	
 	// Step Definitions for UpdateGarageOpeningHours
@@ -75,21 +77,36 @@ public class CucumberStepDefinitions {
 	public void the_business_has_the_following_opening_hours(io.cucumber.datatable.DataTable dataTable) {
 		List<Map<String, String>> listRepresentation = dataTable.asMaps(String.class, String.class);
 		for(Map<String, String> list: listRepresentation) {;
-			 DayOfWeek dayOfWeek = getDayOfWeek("dayOfWeek");
-			 Time startTime = getStartTime("startTime");
-			 Time endTime = getEndTime("endTime");
-			 
-			 BusinessHour b = new BusinessHour(dayOfWeek, startTime, endTime, carshop);
-			 
-	    throw new io.cucumber.java.PendingException();
+		Time sTime = convertToTime(startTime);
+	    Time eTime = convertToTime(endTime);
+		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+		
+		BusinessHour businessOpeninghours = new BusinessHour(dayOfWeek, sTime, eTime, carshop);
+
 		}
-	}
+
+		}
 
 	@When("the user tries to add new business hours on {string} from {string} to {string} to garage belonging to the technician with type {string}")
-	public void the_user_tries_to_add_new_business_hours_on_from_to_to_garage_belonging_to_the_technician_with_type(String string, String string2, String string3, String string4) {
-	    // Write code here that turns the phrase above into concrete actions
-	    throw new io.cucumber.java.PendingException();
-	}
+	public void the_user_tries_to_add_new_business_hours_on_from_to_to_garage_belonging_to_the_technician_with_type(String day, String type, String startTime, String endTime) {
+	      Time sTime = convertToTime(startTime);
+	      Time eTime = convertToTime(endTime);
+	      DayOfWeek dayOfWeek = DayOfWeek.valueOf(day);
+	      TechnicianType techType = getTechnicianTypeFromString(type);
+	      try {
+	        initialSize = carshop.getBusiness().getBusinessHours().size();
+	        try {
+				CarShopController.addBusinessHour(dayOfWeek, sTime, eTime, techType);
+			} catch (InvalidInputException e) {
+		        error += e.getMessage();
+		        errorCnt++;			}
+	      }
+	       catch (InvalidUserException e) {
+	        error += e.getMessage();
+	        errorCnt++;
+	       }
+	      }
+	        
 
 	@Then("the garage belonging to the technician with type {string} should have opening hours on {string} from {string} to {string}")
 	public void the_garage_belonging_to_the_technician_with_type_should_have_opening_hours_on_from_to(String string, String string2, String string3, String string4) {
@@ -115,6 +132,7 @@ public class CucumberStepDefinitions {
 	    throw new io.cucumber.java.PendingException();
 	}
 	// Step Definitions for LogIn
+	
 	@When("the user tries to log in with username {string} and password {string}")
 	public void the_user_tries_to_log_in_with_username_and_password(String string, String string2) {
 		username=string;
@@ -180,6 +198,7 @@ public class CucumberStepDefinitions {
 	@Then("the corresponding garage for the technician shall be created")
 	public void the_corresponding_garage_for_the_technician_shall_be_created() {
 		for(Technician tech: this.carshop.getTechnicians()) {
+			
 			Garage garage = new Garage(this.carshop, tech);
 		}
 	}
@@ -750,28 +769,8 @@ public class CucumberStepDefinitions {
 		
 		return count;
 	}
-	private DayOfWeek getDayOfWeek(String string) {
-		return null;
-	}
-
-	private Time getStartTime(String name) {
-		for(BusinessHour StartHour : carshop.getHours()) {
-			if (StartHour instanceof BusinessHour && StartHour.getStartTime().equals(startTime)) {
-				return startTime;
-			}
-		}
-		return null;
-		
-	}
-	private Time getEndTime(String name) {
-		for(BusinessHour EndHour : carshop.getHours()) {
-			if (EndHour instanceof BusinessHour && EndHour.getEndTime().equals(endTime)) {
-				return endTime;
-			}
-		}
-		return null;
-		
-	}
+	
+	
 	private Service getServiceFromName(String name) {
 		for(BookableService bookableService: carshop.getBookableServices()) {
 			if(bookableService instanceof Service && bookableService.getName().equals(name)) {
