@@ -263,6 +263,8 @@ public class CucumberStepDefinitions {
 	}
 	
 	//End of the LogIn code
+	
+	
 	//This is the CucumberStepDefinitions code for signUpCustomer. Coded by Sami Ait Ouahmane
 	
 	@Given("a Carshop system exists")
