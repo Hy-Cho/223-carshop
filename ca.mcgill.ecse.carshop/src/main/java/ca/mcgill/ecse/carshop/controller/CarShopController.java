@@ -98,7 +98,7 @@ public class CarShopController {
 			throw new InvalidInputException("Changing username of technician is not allowed");
 		}
 		
-		//Ty updating username and password and throw an error message if a runtime exception occurs
+		//Try updating username and password and throw an error message if a runtime exception occurs
 		try {
 			//If setUsername returns false, then the username is already taken by somebody else
 			if(loggedInUser.setUsername(newUsername)==false ) {
