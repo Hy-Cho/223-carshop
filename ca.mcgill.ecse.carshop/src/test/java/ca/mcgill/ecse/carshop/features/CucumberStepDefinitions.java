@@ -277,6 +277,7 @@ public class CucumberStepDefinitions {
 
 	@Given("there is no existing username {string}")
 	public void there_is_no_existing_username(String string) {
+		CarShopController.logOut();
 		User i=getUserWithUsername(string);
 		if(i!=null) {
 			i.delete();
@@ -327,6 +328,7 @@ public class CucumberStepDefinitions {
 
 	@Given("there is an existing username {string}")
 	public void there_is_an_existing_username(String string) {
+		CarShopController.logOut();
 	    if(getUserWithUsername(string)==null) {
 	    	if(string.equals("owner")) {
 	    		carshop.setOwner(new Owner(string,string,carshop));

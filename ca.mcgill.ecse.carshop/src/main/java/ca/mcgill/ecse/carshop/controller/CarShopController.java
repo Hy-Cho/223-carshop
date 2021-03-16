@@ -1118,7 +1118,9 @@ public class CarShopController {
 			
 			return null;
 	 	}
-
+	  public static void logOut() {
+		  loggedInUser=null;
+	  }
 		
 
 }
