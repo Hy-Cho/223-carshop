@@ -1005,200 +1005,210 @@ public class CucumberStepDefinitions {
     
     // end of Hyunbum's code -------------------------------------------------------------------------
 	
-  //This is the start of Youssef's CucumberStepDefinitions code for defineServiceCombo
-	
-  	@When("{string} initiates the definition of a service combo {string} with main service {string}, services {string} and mandatory setting {string}")
-  	public void initiates_the_definition_of_a_service_combo_with_main_service_services_and_mandatory_setting(String username, String name, String mainServiceStr, String servicesStr, String mandatoryStr) {
-  	    try {
-  	    	String comboName = name;
-  	    	List<String> servicesString = Arrays.asList(servicesStr.split(","));
-  	    	List<Boolean> servicesBoolean = new ArrayList<>();
-  	    	String[] booleanStr = mandatoryStr.split(",");
-  	    	for(String s: booleanStr) {
-  	    		servicesBoolean.add(Boolean.valueOf(s));
-  	    	}
-  	    	
-  	    	CarShopController.defineCombo(comboName, mainServiceStr, servicesString, servicesBoolean);
-  	    }
-  	    catch(InvalidInputException ex) {
-  	        error += ex.getMessage();
-  	        errorCnt++;
-  	    }
-  	    catch(RuntimeException ex) {
-  	    	error += ex.getMessage();
-  	        errorCnt++;
-  	    }
-  	}
-
-  	@Then("the service combo {string} shall exist in the system")
-  	public void the_service_combo_shall_exist_in_the_system(String name) {
-  		assertNotNull(getServiceComboFromName(name));
-  	}
-
-  	@Then("the service combo {string} shall contain the services {string} with mandatory setting {string}")
-  	public void the_service_combo_shall_contain_the_services_with_mandatory_setting(String name, String servicesStr, String mandatoryStr) {
-  		ServiceCombo serviceCombo = getServiceComboFromName(name);
-  		List<String> servicesString = Arrays.asList(servicesStr.split(","));
-    	List<Boolean> servicesBoolean = new ArrayList<>();
-    	String[] booleanStr = mandatoryStr.split(",");
-    	for(String s: booleanStr) {
-    		servicesBoolean.add(Boolean.valueOf(s));
+    //This is the start of Youssef's CucumberStepDefinitions code for DefineServiceCombo
+  	//Initiates the definition of a service combo with its corresponding name, main service, services and mandatory settings for the services
+    	@When("{string} initiates the definition of a service combo {string} with main service {string}, services {string} and mandatory setting {string}")
+    	public void initiates_the_definition_of_a_service_combo_with_main_service_services_and_mandatory_setting(String username, String name, String mainServiceStr, String servicesStr, String mandatoryStr) {
+    	    try {
+    	    	String comboName = name;
+    	    	List<String> servicesString = Arrays.asList(servicesStr.split(","));
+    	    	List<Boolean> servicesBoolean = new ArrayList<>();
+    	    	String[] booleanStr = mandatoryStr.split(",");
+    	    	for(String s: booleanStr) {
+    	    		servicesBoolean.add(Boolean.valueOf(s));
+    	    	}
+    	    	
+    	    	CarShopController.defineCombo(comboName, mainServiceStr, servicesString, servicesBoolean);
+    	    }
+    	    catch(InvalidInputException ex) {
+    	        error += ex.getMessage();
+    	        errorCnt++;
+    	    }
+    	    catch(RuntimeException ex) {
+    	    	error += ex.getMessage();
+    	        errorCnt++;
+    	    }
     	}
     	
-    	int checkedItems = 0;
-    	List<ComboItem> comboItems = serviceCombo.getServices();
-    	for(ComboItem co: comboItems) {
-    		int index = servicesString.indexOf(co.getService().getName());
-    		if(index == -1) {
-    			fail();
+    //Makes sure that the service combo exists
+    	@Then("the service combo {string} shall exist in the system")
+    	public void the_service_combo_shall_exist_in_the_system(String name) {
+    		assertNotNull(getServiceComboFromName(name));
+    	}
+
+    	//Makes sure that the service combo contains existing services with their respective mandatory settings
+    	@Then("the service combo {string} shall contain the services {string} with mandatory setting {string}")
+    	public void the_service_combo_shall_contain_the_services_with_mandatory_setting(String name, String servicesStr, String mandatoryStr) {
+    		ServiceCombo serviceCombo = getServiceComboFromName(name);
+    		List<String> servicesString = Arrays.asList(servicesStr.split(","));
+      	List<Boolean> servicesBoolean = new ArrayList<>();
+      	String[] booleanStr = mandatoryStr.split(",");
+      	for(String s: booleanStr) {
+      		servicesBoolean.add(Boolean.valueOf(s));
+      	}
+      	
+      	int checkedItems = 0;
+      	List<ComboItem> comboItems = serviceCombo.getServices();
+      	for(ComboItem co: comboItems) {
+      		int index = servicesString.indexOf(co.getService().getName());
+      		if(index == -1) {
+      			fail();
+      		}
+      		
+      		if(co.getMandatory() == Boolean.valueOf(servicesBoolean.get(index))) {
+      			checkedItems++;
+      		}
+      	}
+      	
+      	assertEquals(checkedItems, comboItems.size());
+    	}
+    	
+    	//Makes sure the entered service is the service combo's main service
+    	@Then("the main service of the service combo {string} shall be {string}")
+    	public void the_main_service_of_the_service_combo_shall_be(String name, String mainService) {
+    	    assertEquals(getServiceFromName(mainService), getMainServiceFromComboName(name).getService());
+    	}
+    	
+    	//Makes sure the the combo and service exist then checks if the latter is mandatory
+    	@Then("the service {string} in service combo {string} shall be mandatory")
+    	public void the_service_in_service_combo_shall_be_mandatory(String serviceName, String comboName) {
+    		Service service = getServiceFromName(serviceName);
+    		ServiceCombo combo = getServiceComboFromName(comboName);
+    		
+    		assertNotNull(service);
+    		assertNotNull(combo);
+    		
+    		for(ComboItem co: combo.getServices()) {
+    			if(co.getService().equals(service)) {
+    				assertTrue(co.getMandatory());
+    				return;
+    			}
     		}
     		
-    		if(co.getMandatory() == Boolean.valueOf(servicesBoolean.get(index))) {
-    			checkedItems++;
-    		}
+    		fail();
+    		
+    	}
+
+    	//Makes sure the service combos are registered in the system
+    	@Then("the number of service combos in the system shall be {string}")
+    	public void the_number_of_service_combos_in_the_system_shall_be(String number) {
+    	    assertEquals(Integer.valueOf(number), getNumberOfServiceCombosInSystem());
     	}
     	
-    	assertEquals(checkedItems, comboItems.size());
-  	}
+    	//Creates service combos in the system while assigning them their main service and combo items
+    	@Given("the following service combos exist in the system:")
+    	public void the_following_service_combos_exist_in_the_system(DataTable dataTable) {
+    		
+    		List<Map<String, String>> listReresentation = dataTable.asMaps(String.class, String.class);
+    		for(Map<String, String> list: listReresentation) {
+    			String name = list.get("name");
+    			String mainServiceStr = list.get("mainService");
+    			String services = list.get("services");
+    			String mandatory = list.get("mandatory");
+    			
+    			ServiceCombo serviceCombo = new ServiceCombo(name, this.carshop);
+    			
+    	    	List<String> servicesString = Arrays.asList(services.split(","));
+    	    	List<Boolean> servicesBoolean = new ArrayList<>();
+    	    	String[] booleanStr = mandatory.split(",");
+    	    	for(String s: booleanStr) {
+    	    		servicesBoolean.add(Boolean.valueOf(s));
+    	    	}
+    	    	
+    	    	Service mainService = getServiceFromName(mainServiceStr);
+    	    	
+    	    	for(int i = 0; i < servicesString.size(); i++) {
+    	    		Service service = getServiceFromName(servicesString.get(i));
+    	    		ComboItem co = new ComboItem(servicesBoolean.get(i), service, serviceCombo);
+    	    		if(service.equals(mainService)) {
+    	    			serviceCombo.setMainService(co);
+    	    		}
+    	    	}
+    		}
+    	}
 
-  	@Then("the main service of the service combo {string} shall be {string}")
-  	public void the_main_service_of_the_service_combo_shall_be(String name, String mainService) {
-  	    assertEquals(getServiceFromName(mainService), getMainServiceFromComboName(name).getService());
-  	}
+    	//Makes sure the service combo does not exist
+    	@Then("the service combo {string} shall not exist in the system")
+    	public void the_service_combo_shall_not_exist_in_the_system(String name) {
+    		assertNull(getServiceComboFromName(name));
+    	}
 
-  	@Then("the service {string} in service combo {string} shall be mandatory")
-  	public void the_service_in_service_combo_shall_be_mandatory(String serviceName, String comboName) {
-  		Service service = getServiceFromName(serviceName);
-  		ServiceCombo combo = getServiceComboFromName(comboName);
-  		
-  		assertNotNull(service);
-  		assertNotNull(combo);
-  		
-  		for(ComboItem co: combo.getServices()) {
-  			if(co.getService().equals(service)) {
-  				assertTrue(co.getMandatory());
-  				return;
-  			}
-  		}
-  		
-  		fail();
-  		
-  	}
-
-  	@Then("the number of service combos in the system shall be {string}")
-  	public void the_number_of_service_combos_in_the_system_shall_be(String number) {
-  	    assertEquals(Integer.valueOf(number), getNumberOfServiceCombosInSystem());
-  	}
-
-  	@Given("the following service combos exist in the system:")
-  	public void the_following_service_combos_exist_in_the_system(DataTable dataTable) {
-  		
-  		List<Map<String, String>> listReresentation = dataTable.asMaps(String.class, String.class);
-  		for(Map<String, String> list: listReresentation) {
-  			String name = list.get("name");
-  			String mainServiceStr = list.get("mainService");
-  			String services = list.get("services");
-  			String mandatory = list.get("mandatory");
+    	//Makes sure the service combo maintains its properties i.e name, main service, combo items, combo items mandatory settings
+    	@Then("the service combo {string} shall preserve the following properties:")
+    	public void the_service_combo_shall_preserve_the_following_properties(String name, DataTable dataTable) {
+    		List<Map<String, String>> maps = dataTable.asMaps();
+    		for(Map<String, String> map: maps) {
+    			ServiceCombo combo = getServiceComboFromName(name);
+    	  		assertNotNull(combo);
+    			
+    			String mainServiceName = map.get("mainService");
+    			assertEquals(combo.getMainService().getService().getName(), mainServiceName);
+    			
+    			List<String> servicesString = Arrays.asList(map.get("services").split(","));
+    	    	List<Boolean> servicesBoolean = new ArrayList<>();
+    	    	String[] booleanStr = map.get("mandatory").split(",");
+    	    	for(String s: booleanStr) {
+    	    		servicesBoolean.add(Boolean.valueOf(s));
+    	    	}
+    	    	
+    	    	
+    	    	int checkedItems = 0;
+    	    	List<ComboItem> comboItems = combo.getServices();
+    	    	for(ComboItem co: comboItems) {
+    	    		int index = servicesString.indexOf(co.getService().getName());
+    	    		if(index == -1) {
+    	    			fail();
+    	    		}
+    	    		
+    	    		if(co.getMandatory() == Boolean.valueOf(servicesBoolean.get(index))) {
+    	    			checkedItems++;
+    	    		}
+    	    	}
+    	    	
+    	    	assertEquals(checkedItems, comboItems.size());
+    		}
+    	}
+      // End of DefineServiceCombo
+    	
+    	//This is the start of Youssef's CucumberStepDefinitions code for UpdateServiceCombo
+    	
+    	//Initiates the update of an existing service combo into a new one with an updated name, main service, services and mandatory settings
+    	@When("{string} initiates the update of service combo {string} to name {string}, main service {string} and services {string} and mandatory setting {string}")
+    	public void initiates_the_update_of_service_combo_to_name_main_service_and_services_and_mandatory_setting(String username, String oldName, String newName, String mainServiceStr, String servicesStr, String mandatoryStr) {
+  		try {
+  			List<String> servicesString = Arrays.asList(servicesStr.split(","));
+    	    	List<Boolean> servicesBoolean = new ArrayList<>();
+    	    	String[] booleanStr = mandatoryStr.split(",");
+    	    	for(String s: booleanStr) {
+    	    		servicesBoolean.add(Boolean.valueOf(s));
+    	    	}
   			
-  			ServiceCombo serviceCombo = new ServiceCombo(name, this.carshop);
-  			
-  	    	List<String> servicesString = Arrays.asList(services.split(","));
-  	    	List<Boolean> servicesBoolean = new ArrayList<>();
-  	    	String[] booleanStr = mandatory.split(",");
-  	    	for(String s: booleanStr) {
-  	    		servicesBoolean.add(Boolean.valueOf(s));
-  	    	}
-  	    	
-  	    	Service mainService = getServiceFromName(mainServiceStr);
-  	    	
-  	    	for(int i = 0; i < servicesString.size(); i++) {
-  	    		Service service = getServiceFromName(servicesString.get(i));
-  	    		ComboItem co = new ComboItem(servicesBoolean.get(i), service, serviceCombo);
-  	    		if(service.equals(mainService)) {
-  	    			serviceCombo.setMainService(co);
-  	    		}
-  	    	}
+  			this.oldServiceComboName = oldName;
+  			CarShopController.updateCombo(oldName, newName, mainServiceStr, servicesString, servicesBoolean);
   		}
-  	}
-
-  	@Then("the service combo {string} shall not exist in the system")
-  	public void the_service_combo_shall_not_exist_in_the_system(String name) {
-  		assertNull(getServiceComboFromName(name));
-  	}
-
-  	@Then("the service combo {string} shall preserve the following properties:")
-  	public void the_service_combo_shall_preserve_the_following_properties(String name, DataTable dataTable) {
-  		List<Map<String, String>> maps = dataTable.asMaps();
-  		for(Map<String, String> map: maps) {
-  			ServiceCombo combo = getServiceComboFromName(name);
-  	  		assertNotNull(combo);
-  			
-  			String mainServiceName = map.get("mainService");
-  			assertEquals(combo.getMainService().getService().getName(), mainServiceName);
-  			
-  			List<String> servicesString = Arrays.asList(map.get("services").split(","));
-  	    	List<Boolean> servicesBoolean = new ArrayList<>();
-  	    	String[] booleanStr = map.get("mandatory").split(",");
-  	    	for(String s: booleanStr) {
-  	    		servicesBoolean.add(Boolean.valueOf(s));
-  	    	}
-  	    	
-  	    	
-  	    	int checkedItems = 0;
-  	    	List<ComboItem> comboItems = combo.getServices();
-  	    	for(ComboItem co: comboItems) {
-  	    		int index = servicesString.indexOf(co.getService().getName());
-  	    		if(index == -1) {
-  	    			fail();
-  	    		}
-  	    		
-  	    		if(co.getMandatory() == Boolean.valueOf(servicesBoolean.get(index))) {
-  	    			checkedItems++;
-  	    		}
-  	    	}
-  	    	
-  	    	assertEquals(checkedItems, comboItems.size());
+  		catch(InvalidInputException ex) {
+  			error = ex.getMessage();
+  			errorCnt++;
   		}
-  	}
-    // End of DefineServiceCombo
-  	
-  	//Start of UpdateServiceCombo
-  	
-  	@When("{string} initiates the update of service combo {string} to name {string}, main service {string} and services {string} and mandatory setting {string}")
-  	public void initiates_the_update_of_service_combo_to_name_main_service_and_services_and_mandatory_setting(String username, String oldName, String newName, String mainServiceStr, String servicesStr, String mandatoryStr) {
-		try {
-			List<String> servicesString = Arrays.asList(servicesStr.split(","));
-  	    	List<Boolean> servicesBoolean = new ArrayList<>();
-  	    	String[] booleanStr = mandatoryStr.split(",");
-  	    	for(String s: booleanStr) {
-  	    		servicesBoolean.add(Boolean.valueOf(s));
-  	    	}
-			
-			this.oldServiceComboName = oldName;
-			CarShopController.updateCombo(oldName, newName, mainServiceStr, servicesString, servicesBoolean);
-		}
-		catch(InvalidInputException ex) {
-			error = ex.getMessage();
-			errorCnt++;
-		}
-		catch(RuntimeException ex) {
-			error = ex.getMessage();
-			errorCnt++;
-		}
-  	}
-
-  	@Then("the service combo {string} shall be updated to name {string}")
-  	public void the_service_combo_shall_be_updated_to_name(String oldName, String newName) {
-  		if(!oldName.equals(newName)) {
-  			assertNotNull(this.oldServiceComboName);
-  			assertNull(getServiceComboFromName(this.oldServiceComboName));
+  		catch(RuntimeException ex) {
+  			error = ex.getMessage();
+  			errorCnt++;
   		}
-  		
-  		assertNotNull(getServiceComboFromName(newName));
-  		this.oldServiceComboName = null;
-  	}
-  	
-  	//End of UpdateServiceCombo
+    	}
+
+    	//Makes sure a service combo exists then updates its name
+    	@Then("the service combo {string} shall be updated to name {string}")
+    	public void the_service_combo_shall_be_updated_to_name(String oldName, String newName) {
+    		if(!oldName.equals(newName)) {
+    			assertNotNull(this.oldServiceComboName);
+    			assertNull(getServiceComboFromName(this.oldServiceComboName));
+    		}
+    		
+    		assertNotNull(getServiceComboFromName(newName));
+    		this.oldServiceComboName = null;
+    	}
+    	
+    	//End of UpdateServiceCombo
   	
 	@After
 	public void tearDown() {
