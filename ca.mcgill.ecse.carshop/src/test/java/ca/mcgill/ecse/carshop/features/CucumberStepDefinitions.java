@@ -244,10 +244,10 @@ public class CucumberStepDefinitions {
 		}
 		else {
 			for(DayOfWeek dayOfWeek: DayOfWeek.values()) {
-				List<BusinessHour> hoursOfShop = CarShopController.getBusinessHoursOfShopByDay(dayOfWeek);
+				List<BusinessHour> hoursOfShop = getBusinessHoursOfShopByDay(dayOfWeek);
 				if(hoursOfShop.size() != 0) {
 					for(BusinessHour bHour: hoursOfShop) {
-						List<BusinessHour> hoursOfGarage = CarShopController.getBussinessHoursOfDayByGarage(g, dayOfWeek);
+						List<BusinessHour> hoursOfGarage = getBussinessHoursOfDayByGarage(g, dayOfWeek);
 						boolean found = false;
 						for(BusinessHour bHourGarage: hoursOfGarage) {
 							if(bHour.getStartTime().equals(bHourGarage.getStartTime()) && bHour.getEndTime().equals(bHourGarage.getEndTime())) {
@@ -405,6 +405,7 @@ public class CucumberStepDefinitions {
 	
 	//End of update account coded by Sami Ait Ouahmane
 	
+	//Start of code written by Mario Bouzakhm
 	
 	@Given("an owner account exists in the system")
 	public void thereIsAnOwner()  {
@@ -419,6 +420,7 @@ public class CucumberStepDefinitions {
 	@Given("the following technicians exist in the system:")
 	public void thereIsTechnicians(DataTable dataTable) {
 		List<Map<String, String>> listReresentation = dataTable.asMaps(String.class, String.class);
+		//Converts the Datatable to a List of Maps and then adds the technicians one by one to the system.
 		for(Map<String, String> list: listReresentation) {
 			String username = list.get("username");
 			String password = list.get("password");
@@ -432,6 +434,7 @@ public class CucumberStepDefinitions {
 	
 	@Given("each technician has their own garage")
 	public   void eachTechnicianHasGarage() {
+		//Makes sure to create a corresponding garage for each technician.
 		for(Technician tech: this.carshop.getTechnicians()) {
 			if(tech.getGarage() == null) {
 				Garage garage = new Garage(carshop, tech);
@@ -442,6 +445,7 @@ public class CucumberStepDefinitions {
 	@Given("the following services exist in the system:")
 	public void exisitingServiceInSystem(DataTable dataTable) {
 		List<Map<String, String>> listReresentation = dataTable.asMaps(String.class, String.class);
+		//Convert the datatable to a List of Maps and add the services mentioned to the system.
 		for(Map<String, String> list: listReresentation) {
 			String username = list.get("name");
 			int duration = Integer.valueOf(list.get("duration"));
@@ -462,6 +466,7 @@ public class CucumberStepDefinitions {
 	}
 	@Given("the user with username {string} is logged in")
 	public void userLoggedIn(String username) {
+		//Makes sure that the user with username is logged into the system (can be customer, technician or Owner).
 		try {
 			User u = getUserWithUsername(username);
 			CarShopController.logIn(username, u.getPassword());
@@ -471,11 +476,10 @@ public class CucumberStepDefinitions {
 		}
 	}
 	
-   
-	
 	@Given("the following customers exist in the system:")
 	public void existingCustomer(DataTable dataTable) {
 		List<Map<String, String>> listReresentation = dataTable.asMaps(String.class, String.class);
+		//Convert the datatable to a list of maps and then adds the corresponding customers to the system.
 		for(Map<String, String> list: listReresentation) {
 			String username = list.get("username");
 			String password = list.get("password");
@@ -487,6 +491,7 @@ public class CucumberStepDefinitions {
 	@When("{string} initiates the addition of the service {string} with duration {string} belonging to the garage of {string} technician")
 	public void initiatesServiceAdded(String username, String name, String duration, String garageStr) {
 		try {
+			//Initiates the creation of a new service to the corresponding garage.
 			Garage garage = getGarageOfTechnician(getTechnicianTypeFromString(garageStr));
 			CarShopController.createService(name, Integer.valueOf(duration), garage);
 		}
@@ -502,10 +507,10 @@ public class CucumberStepDefinitions {
 	@When("{string} initiates the update of the service {string} to name {string}, duration {string}, belonging to the garage of {string} technician")
 	public void updateService(String username, String oldName, String newName, String duration, String garageStr) throws InvalidInputException {
 		try	{
+			//Initiates the update of the service to the new parameters.
 			Garage garage = getGarageOfTechnician(getTechnicianTypeFromString(garageStr));
+			//Used to keep track of the old name of the service for later testing.
 			this.oldServiceName = oldName;
-			
-			int durationValue = Integer.valueOf(duration);
 			
 			CarShopController.updateService(oldName, newName, Integer.valueOf(duration), garage);
 		}
@@ -543,6 +548,7 @@ public class CucumberStepDefinitions {
 	}
 	@Then("the service {string} shall still preserve the following properties:")
 	public void checkServiceProperties(String name, DataTable table) {
+		//Convert the Datatable to a list of maps and then check that the system with name 'name' has the properties mentioned in the table.
 		List<Map<String, String>> maps = table.asMaps();
 		for(Map<String, String> map: maps) {
 			Service service = getServiceFromName(name);
@@ -556,6 +562,7 @@ public class CucumberStepDefinitions {
 	
 	@Then("the service {string} shall be updated to name {string}, duration {string}")
 	public void checkServiceUpdated(String oldName, String newName, String newDuration) {
+		//Makes sure that the service with oldname was update to the new name (if it is not the same) and to its new duration.
 		if(!oldName.equals(newName)) {
 			assertNotNull(this.oldServiceName);
 			assertNull(getServiceFromName(this.oldServiceName));
@@ -569,6 +576,7 @@ public class CucumberStepDefinitions {
 		assertEquals(Integer.valueOf(newDuration), newService.getDuration());
 		this.oldServiceName = null;
 	}
+	//End of code written by Mario Bouzakhm.
 	
 	// Author: Hyunbum Cho (below this until specified is all Hyunbum's code)----------------------------------------------------------
 	// set up and update business info
@@ -1338,5 +1346,28 @@ public class CucumberStepDefinitions {
 		
 		return null;
  	}
+	
+	private List<BusinessHour> getBussinessHoursOfDayByGarage(Garage g, DayOfWeek day) {
+		List<BusinessHour> businessHourPerGarage = g.getBusinessHours();
+		List<BusinessHour> dayBusinessHours = new ArrayList<BusinessHour>();
+		for(BusinessHour hours: businessHourPerGarage) {
+			if(hours.getDayOfWeek() == day) {
+				dayBusinessHours.add(hours);
+			}
+		}
+		
+		return dayBusinessHours;
+	}
+	
+	private List<BusinessHour> getBusinessHoursOfShopByDay(DayOfWeek day) {
+		List<BusinessHour> dayHours = new ArrayList<BusinessHour>();
+		for(BusinessHour bh: carshop.getBusiness().getBusinessHours()) {
+			if(bh.getDayOfWeek() == day) {
+				dayHours.add(bh);
+			}
+		}
+		
+		return dayHours;
+	}
 	
 }

@@ -253,27 +253,34 @@ public class CarShopController {
 	
 	//Code Written by Mario Bouzakhm
 	public static void createService(String name, int duration, Garage garage) throws RuntimeException, InvalidInputException {
+		//Checks that the logged in User is the owner
 		if(loggedInUser == null  || loggedInUser.getUsername() != "owner" || !(loggedInUser instanceof Owner)) {
 			throw new RuntimeException("You are not authorized to perform this operation");
 		}
 		
 		CarShop carShop = CarShopApplication.getCarShop();
+		
+		// Takes care of ensuring the duration is positive.
 		if(duration <= 0) {
 			throw new RuntimeException("Duration must be positive");
 		}
+		// Makes sure that we are not creating a duplicate piece of code.
 		if(getServiceFromName(name, carShop) != null) {
 			throw new InvalidInputException("Service "+name+ " already exists");
 		}
 		   
 		try {
+			//Creates a new service with the garage mentioned (using referential integrity)
 	        Service service = new Service(name, carShop, duration, garage);
 	    }
 		catch(RuntimeException ex) {
+			//Catches any invalid inputs and raises the corresponding error
 			throw new InvalidInputException(ex.getMessage());
 		}
 	}
 	
 	public static void updateService(String oldName, String newName, int newDuration, Garage newGarage) throws InvalidInputException {
+		//Checks that the logged in User is the owner
 		if(loggedInUser == null  || loggedInUser.getUsername() != "owner" || !(loggedInUser instanceof Owner)) {
 			throw new RuntimeException("You are not authorized to perform this operation");
 		}
@@ -282,22 +289,27 @@ public class CarShopController {
 		
 		
 		try {
+			
 			Service serviceToModify = getServiceFromName(oldName, carShop);
 			
+			//Makes sure that the new name we are choosing is not already taken.
 			if(!oldName.equals(newName) && getServiceFromName(newName, carShop) != null) {
 				throw new InvalidInputException("Service "+newName+ " already exists");
 			}
+			//Makes sure we don't have a service with negative/zero duration.
 			if(newDuration <= 0) {
 				throw new InvalidInputException("Duration must be positive");
 			}
 			
 			if(serviceToModify != null) {
+				//Makes the necessary changes to the service, (new name, new duration, new garage if needed).
 				serviceToModify.setName(newName);
 				serviceToModify.setDuration(newDuration);
 				serviceToModify.setGarage(newGarage);
 			}
 		}
 		catch(RuntimeException ex) {
+			//Catches any error and adds the appropriate message.
 			throw new InvalidInputException(ex.getMessage());
 			
 		}
@@ -562,9 +574,6 @@ public class CarShopController {
 //		}
 //	}
 //}
-	
-	
-	
 	
 	
 	public static User getLoggedInUser() {
@@ -983,7 +992,7 @@ public class CarShopController {
 	  
 	  // End of Hyunbum's code -------------------------------------------------------------------------
 	  
-	  public static List<BusinessHour> getBussinessHoursOfDayByGarage(Garage g, DayOfWeek day) {
+	  private static List<BusinessHour> getBussinessHoursOfDayByGarage(Garage g, DayOfWeek day) {
 			List<BusinessHour> businessHourPerGarage = g.getBusinessHours();
 			List<BusinessHour> dayBusinessHours = new ArrayList<BusinessHour>();
 			for(BusinessHour hours: businessHourPerGarage) {
@@ -1051,7 +1060,7 @@ public class CarShopController {
 		  return null;
 	  }
 	  
-	public static List<BusinessHour> getBusinessHoursOfShopByDay(DayOfWeek day) {
+	private static List<BusinessHour> getBusinessHoursOfShopByDay(DayOfWeek day) {
 		CarShop carShop = CarShopApplication.getCarShop();
 		List<BusinessHour> dayHours = new ArrayList<BusinessHour>();
 		for(BusinessHour bh: carShop.getBusiness().getBusinessHours()) {
@@ -1063,7 +1072,7 @@ public class CarShopController {
 		return dayHours;
 	}
 	
-	  public static Time getOpeningTimeShopPerDay(DayOfWeek day) {
+	  private static Time getOpeningTimeShopPerDay(DayOfWeek day) {
 		  List<BusinessHour> bHours = getBusinessHoursOfShopByDay(day);
 		  Time startTime = null;
 		  for(BusinessHour bHour: bHours) {
@@ -1075,7 +1084,7 @@ public class CarShopController {
 		  return startTime;
 	  }
 	  
-	  public static Time getClosingTimeShopPerDay(DayOfWeek day) {
+	  private static Time getClosingTimeShopPerDay(DayOfWeek day) {
 		  List<BusinessHour> bHours = getBusinessHoursOfShopByDay(day);
 		  Time endTime = null;
 		  for(BusinessHour bHour: bHours) {
@@ -1098,7 +1107,7 @@ public class CarShopController {
 			return null;
 	 	}
 	  
-	  public static boolean overlappingBusinessHours(Time hour1Start, Time hour1End, Time hour2Start, Time hour2End) {
+	  private static boolean overlappingBusinessHours(Time hour1Start, Time hour1End, Time hour2Start, Time hour2End) {
 		  boolean overlap1 = hour1Start.after(hour2Start) && hour1Start.before(hour2End);
 		  boolean overlap2 = hour1End.after(hour2Start) && hour1End.before(hour2End);
 		  boolean overlap3 = hour2Start.after(hour1Start) && hour2Start.before(hour1End);
