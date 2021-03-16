@@ -64,6 +64,7 @@ public class CucumberStepDefinitions {
 	// Step Definitions for UpdateGarageOpeningHours. Written by Hadi Ghaddar
 	
 	@Given("a business exists with the following information:")
+	// adds a business
 	public void a_business_exists_with_the_following_information(io.cucumber.datatable.DataTable dataTable) {
 		List<Map<String, String>> listRepresentation = dataTable.asMaps(String.class, String.class);
 		for(Map<String, String> list: listRepresentation) {
@@ -78,6 +79,7 @@ public class CucumberStepDefinitions {
 	}
 
 	@Given("the business has the following opening hours:")
+	//adds opening hours to the business
 	public void the_business_has_the_following_opening_hours(io.cucumber.datatable.DataTable dataTable) {
 		List<Map<String, String>> listRepresentation = dataTable.asMaps(String.class, String.class);
 		for(Map<String, String> list: listRepresentation) {;
@@ -91,6 +93,7 @@ public class CucumberStepDefinitions {
 	}
 
 	@When("the user tries to add new business hours on {string} from {string} to {string} to garage belonging to the technician with type {string}")
+	//when user tries to add business hours for a certain garage, we make sure the user is the appropriate technician
 	public void the_user_tries_to_add_new_business_hours_on_from_to_to_garage_belonging_to_the_technician_with_type(String day, String startTime, String endTime, String type) {
         Time sTime = convertToTime(startTime);
         Time eTime = convertToTime(endTime);
@@ -107,6 +110,7 @@ public class CucumberStepDefinitions {
 	}
 	        
 	@Then("the garage belonging to the technician with type {string} should have opening hours on {string} from {string} to {string}")
+	//makes sure the garage has the added opening hours
 	public void the_garage_belonging_to_the_technician_with_type_should_have_opening_hours_on_from_to(String string, String string2, String string3, String string4) {
 	    Garage g = getGarageOfTechnician(getTechnicianTypeFromString(string));
 	    assertNotNull(g.getBusinessHours());
@@ -125,6 +129,7 @@ public class CucumberStepDefinitions {
 	}
 
 	@Given("there are opening hours on {string} from {string} to {string} for garage belonging to the technician with type {string}")
+	//adds opening hours to the garage belonging to the approprate technician
 	public void there_are_opening_hours_on_from_to_for_garage_belonging_to_the_technician_with_type(String string, String string2, String string3, String string4) {
 		Garage g = getGarageOfTechnician(getTechnicianTypeFromString(string4));
 		Time startTime = convertToTime(string2);
@@ -135,6 +140,7 @@ public class CucumberStepDefinitions {
 	}
 
 	@When("the user tries to remove opening hours on {string} from {string} to {string} to garage belonging to the technician with type {string}")
+	//when user tries to remove business hours for a certain garage, we make sure the user is the appropriate technician
 	public void the_user_tries_to_remove_opening_hours_on_from_to_to_garage_belonging_to_the_technician_with_type(String string, String string2, String string3, String string4) {
 	    DayOfWeek dayOfWeek = DayOfWeek.valueOf(string);
 	    Time startTime = convertToTime(string2);
@@ -152,6 +158,7 @@ public class CucumberStepDefinitions {
 	}
 
 	@Then("the garage belonging to the technician with type {string} should not have opening hours on {string} from {string} to {string}")
+	//makes sure the garage does not have the added opening hours
 	public void the_garage_belonging_to_the_technician_with_type_should_not_have_opening_hours_on_from_to(String string, String string2, String string3, String string4) {
 	    Garage g = getGarageOfTechnician(getTechnicianTypeFromString(string));
 	    assertNotNull(g.getBusinessHours());
@@ -171,6 +178,7 @@ public class CucumberStepDefinitions {
 	// Step Definitions for LogIn. Written by Hadi Ghaddar
 	
 	@When("the user tries to log in with username {string} and password {string}")
+	//checks if the user enters the correct username/password
 	public void the_user_tries_to_log_in_with_username_and_password(String string, String string2) {
 		username=string;
 		password=string2;
@@ -186,21 +194,25 @@ public class CucumberStepDefinitions {
 	}
 
 	@Then("the user should be successfully logged in")
+	//checks that the user is logged in
 	public void the_user_should_be_successfully_logged_in() {
 		assertNotNull(CarShopController.getLoggedInUser());
 		assertEquals(username,CarShopController.getLoggedInUser().getUsername());
 		assertEquals(password,CarShopController.getLoggedInUser().getPassword());
 	}
 	@Then("the user should not be logged in")
+	//checks that the user is not logged in
 	public void the_user_should_not_be_logged_in() {
 		assertNull(CarShopController.getLoggedInUser());
 	}
 	@Then("a new account shall be created")
 	public void a_new_account_shall_be_created() {
+	//checks that a new account is created
 		assertEquals(getCountOfUsers(),initialSize+1);
 	}
 
 	@Then("the user shall be successfully logged in")
+	//checks that the user is logged in
 	public void the_user_shall_be_successfully_logged_in() {
 		assertNotNull(CarShopController.getLoggedInUser());
 		assertEquals(username,CarShopController.getLoggedInUser().getUsername());
@@ -208,6 +220,7 @@ public class CucumberStepDefinitions {
 	}
 
 	@Then("the account shall have username {string}, password {string} and technician type {string}")
+	//technician user should have a username, password and technician type
 	public void the_account_shall_have_username_password_and_technician_type(String username, String password, String type) {
 	    if(getUserWithUsername(username)!=null) {
 			assertNotNull(CarShopController.getLoggedInUser());
@@ -224,6 +237,7 @@ public class CucumberStepDefinitions {
 	}
 
 	@Then("the corresponding garage for the technician shall be created")
+	//makes sure the corresponding garage for the technician is created
 	public void the_corresponding_garage_for_the_technician_shall_be_created() {
 		assertNotNull(CarShopController.getLoggedInUser());
 		User u = CarShopController.getLoggedInUser();
@@ -233,6 +247,7 @@ public class CucumberStepDefinitions {
 	}
 
 	@Then("the garage should have the same opening hours as the business")
+	//make sure the garage has the same opening hours as the business
 	public void the_garage_should_have_the_same_opening_hours_as_the_business() {
 		User u = CarShopController.getLoggedInUser();
 		assertTrue(u instanceof Technician);
