@@ -267,6 +267,7 @@ public class CucumberStepDefinitions {
 	
 	//This is the CucumberStepDefinitions code for signUpCustomer. Coded by Sami Ait Ouahmane
 	
+	//We create a new instance of carShop 
 	@Given("a Carshop system exists")
 	public void a_carshop_system_exists() {
 		carshop = CarShopApplication.getCarShop();
@@ -274,7 +275,10 @@ public class CucumberStepDefinitions {
 		errorCnt = 0;
 	}
 	
-
+	//We first log out of an account if we were logged in so that no error is thrown when we try to access
+	//methods that can't be used when signed up as an owner or technician (like signUpCustomerAccount)
+	//We delete the instance that has the username string
+	//
 	@Given("there is no existing username {string}")
 	public void there_is_no_existing_username(String string) {
 		CarShopController.logOut();
@@ -283,7 +287,8 @@ public class CucumberStepDefinitions {
 			i.delete();
 		}
 	}
-
+	//We sign up for customer account account and save the username, password, and
+	//size of customer list in two global variables for later on
 	@When("the user provides a new username {string} and a password {string}")
 	public void the_user_provides_a_new_username_and_a_password(String string, String string2) {
 	    username=string;
@@ -297,13 +302,16 @@ public class CucumberStepDefinitions {
 		 	 errorCnt++;
 	     }
 	}
-
+	
+	//If a new customer account is created, the size of the customer list should increase by 1
+	//We make sure that an account with this username exists
 	@Then("a new customer account shall be created")
 	public void a_new_customer_account_shall_be_created() {
 		assertEquals(initialSize+1, carshop.getCustomers().size());
 		assertNotNull(getUserWithUsername(username));	
 	}
 
+	//If the user with a certain username exists, make sure that his password matches the given password
 	@Then("the account shall have username {string} and password {string}")
 	public void the_account_shall_have_username_and_password(String string, String string2) {
 	    if(getUserWithUsername(string)!=null) {
@@ -315,17 +323,20 @@ public class CucumberStepDefinitions {
 	    
 	}
 
+	//If not account is created then initial size of customer list should remain the same
 	@Then("no new account shall be created")
 	public void no_new_account_shall_be_created() {
 		assertEquals(initialSize, carshop.getCustomers().size());
 	}
 
+	//raise an error message
 	@Then("an error message {string} shall be raised")
 	public void an_error_message_shall_be_raised(String string) {
 	    assertEquals(this.error,string);
 	    error="";
 	}
 
+	//We make sure that User with username string exists
 	@Given("there is an existing username {string}")
 	public void there_is_an_existing_username(String string) {
 		CarShopController.logOut();
@@ -348,6 +359,7 @@ public class CucumberStepDefinitions {
 	    }
 	}
 
+	//We make sure that a user is logged in with an account with username string
 	@Given("the user is logged in to an account with username {string}")
 	public void the_user_is_logged_in_to_an_account_with_username(String string) {
 		try {
@@ -365,6 +377,7 @@ public class CucumberStepDefinitions {
 	
 	//Start of Update account coded by Sami Ait Ouahmane
 	
+	//If an owner exists, we set his password to string2. Otherwise, we set an owner t our carshop system 
 	@Given("an owner account exists in the system with username {string} and password {string}")
 	public void an_owner_account_exists_in_the_system_with_username_and_password(String string, String string2) {
 	    if(getUserWithUsername(string)!=null) {
@@ -375,7 +388,7 @@ public class CucumberStepDefinitions {
 	    }
 	}
 	
-	
+	//We update the username with new username string and password string2
 	@When("the user tries to update account with a new username {string} and password {string}")
 	public void the_user_tries_to_update_account_with_a_new_username_and_password(String string, String string2) {
 		
@@ -396,7 +409,7 @@ public class CucumberStepDefinitions {
 	}
 	
 	
-	
+	//We make sure that the account hasn't been updated
 	@Then("the account shall not be updated")
 	public void the_account_shall_not_be_updated() {
 		assertEquals(CarShopController.getLoggedInUser().getUsername(),oldUsername);
