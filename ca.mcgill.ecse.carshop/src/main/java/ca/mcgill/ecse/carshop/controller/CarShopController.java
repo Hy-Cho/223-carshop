@@ -118,14 +118,16 @@ public class CarShopController {
 	public static void logIn(String username, String password) throws InvalidInputException {
 		CarShop carShop = CarShopApplication.getCarShop();
 		TechnicianType techType = getTechTypeFromUsername(username);
+		//case for owner log in
 		if(username.equals("owner")) {
 			Owner owner = carShop.getOwner();
-			
+			//creates a new owner if an owner account doesn't exist with username and password as "owner" and sets loggedInUser as owner
 			if(owner == null) {
 				owner = new Owner("owner", password, carShop);
 				loggedInUser = owner;
 			}
 			else {
+				//if entered password doesn't match owner's password
 				if(!password.equals(owner.getPassword())) {
 					loggedInUser = null;
 					throw new InvalidInputException("Username/password not found");
@@ -137,13 +139,15 @@ public class CarShopController {
 			
 			
 		}
-		//Make sure to implement the case where the case for technicians
+		// case for technician log in
 		else if(techType != null) {
 			Technician existingTechAccount = getTechnicianWithTechType(techType);
+			//creates a technician account with username, password and appropriate type
 			if(existingTechAccount == null) {
 				existingTechAccount = new Technician(username, password, techType, carShop);
-				
+				//corresponding garage for the technician is created
 				Garage garage = new Garage(carShop, existingTechAccount);
+				//the garage has the same opening hours as the business
 				if(carShop.getBusiness() != null) {
 					for(DayOfWeek day: DayOfWeek.values()) {
 						List<BusinessHour> dayBusinessHours = getBusinessHoursOfShopByDay(day);
@@ -158,26 +162,30 @@ public class CarShopController {
 				loggedInUser = existingTechAccount;
 			}
 			else {
+				//throws error if entered password doesn't match technician's password
 				if(!password.equals(existingTechAccount.getPassword())) {
 					loggedInUser = null;
 					throw new InvalidInputException("Username/password not found");
 				}
+				//sets loggedInUser as technician
 				else {
 					loggedInUser = existingTechAccount;
 				}
 			}
 		}
 		else {
+			//case for customer log in
 			Customer cust = getCustomerWithUsername(username);
 			if(cust != null) {
 				String custPassword = cust.getPassword();
 				if(custPassword.equals(password)) {
+					//sets loggedInUser as customer
 					loggedInUser = cust;
 					return;
 				}
 				
 			}
-			
+			//throws error if the username/password doesn't match any of the records
 			loggedInUser = null;
 			throw new InvalidInputException("Username/password not found");
 		}
@@ -186,37 +194,39 @@ public class CarShopController {
 	// UpdateGarageOpeningHours was coded by Hadi Ghaddar
 	public static void updateGarageOpeningHours(DayOfWeek day, Time startTime, Time endTime, TechnicianType techType) throws InvalidInputException {
 		CarShop carShop = CarShopApplication.getCarShop();
-	 
+	    //throws an error if the loggedInUser isn't a technician
 	    if (!(loggedInUser instanceof Technician)) {
 	      throw new InvalidInputException("You are not authorized to perform this operation");
 	    }
+	    //throws an error if the start time is after the end time
 	    if (startTime.after(endTime)) {
 	      throw new InvalidInputException("Start time must be before end time");
 	    }
-	    
 	    Technician tech = (Technician) loggedInUser;
+	    //throws an error if the technician's type doesn't match 
 	    if(tech.getType() != techType) {
 	    	throw new InvalidInputException("You are not authorized to perform this operation");
 	    }
-	    
 	    Time startTimeDayShop = getOpeningTimeShopPerDay(day);
 	    Time endTimeDayShop = getClosingTimeShopPerDay(day);
 	    
 	    
-	    
+	    //throws an error if the start and end time aren't defined, or if the start time is after end time/end time is before start time
 	    if (startTimeDayShop == null || endTimeDayShop == null|| startTime.before(startTimeDayShop) || endTime.after(endTimeDayShop)) {
 	    	throw new InvalidInputException("The opening hours are not within the opening hours of the business");        
 	    }
-	    
+	    //sets the garage type as the logged in technician's type
 	    Garage g = tech.getGarage();
 	    
 	    List<BusinessHour> bHourGarage = getBussinessHoursOfDayByGarage(g,day);
+	    //adds opening hours if there aren't any defined
 	    if (bHourGarage.size() == 0) {
 	    	BusinessHour bHour = new BusinessHour(day, startTime, endTime, carShop);
 	    	g.addBusinessHour(bHour);
 	    }
 	    else {
 	    	for(BusinessHour existingHours: bHourGarage) {
+	    		//throws an error if opening hours overlap with the business hours
 	    		if (overlappingBusinessHours(existingHours.getStartTime(), existingHours.getEndTime(), startTime, endTime)) {
 	    			throw new InvalidInputException("The opening hours cannot overlap");
 	    		}
