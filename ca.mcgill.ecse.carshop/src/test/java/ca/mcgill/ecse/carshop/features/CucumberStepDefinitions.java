@@ -806,6 +806,25 @@ public class CucumberStepDefinitions {
       }
     }
     
+    @Then("the business hour starting {string} at {string} shall {string} exist")
+    public void theBusinessHourStartingShallExist(String day, String startTime, String result) {
+      List<BusinessHour> bHours = carshop.getBusiness().getBusinessHours();
+      res = false;
+      DayOfWeek day1 = DayOfWeek.valueOf(day);
+      Time sTime = convertToTime(startTime);
+      for (BusinessHour b: bHours) {
+        if (b.getDayOfWeek().equals(day1) && b.getStartTime().equals(sTime)) {
+          res = true;
+          break;
+        }
+      }
+      if (!result.contains("not")) { // be
+        assertTrue(res);
+      } else {
+        assertFalse(res);
+      }
+    }
+    
     @Then("an error message {string} shall {string} be raised")
     public void anErrorMessageShallBeRaised(String errorMsg, String result) {
       if (!result.contains("not")) { // be
