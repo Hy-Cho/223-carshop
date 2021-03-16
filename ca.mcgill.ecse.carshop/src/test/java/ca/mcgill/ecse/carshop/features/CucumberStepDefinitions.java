@@ -568,7 +568,8 @@ public class CucumberStepDefinitions {
 		this.oldServiceName = null;
 	}
 	
-	// Author: Hyunbum Cho ----------------------------------------------------------
+	// Author: Hyunbum Cho (below this until specified is all Hyunbum's code)----------------------------------------------------------
+	// set up and update business info
     @Given("no business exists")
     public void noBuisnessExists() {
       if (carshop.hasBusiness()) {
@@ -940,6 +941,7 @@ public class CucumberStepDefinitions {
       }
     }
     
+    // convert from String to Time
     private static Time convertToTime(String t) {
       int hour;
       int minute;
@@ -950,6 +952,7 @@ public class CucumberStepDefinitions {
       return myTime;
     }
     
+    // convert from String to Date
     private static Date convertToDate(String d) {
       int year;
       int month;
@@ -962,7 +965,7 @@ public class CucumberStepDefinitions {
       return myDate;
     }
     
-    // end of Hyunbum's code ------------------------------------------------------
+    // end of Hyunbum's code -------------------------------------------------------------------------
 	
   //This is the start of Youssef's CucumberStepDefinitions code for defineServiceCombo
 	

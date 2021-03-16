@@ -599,7 +599,9 @@ public class CarShopController {
 	}
 	
 	
-	// Author: Hyunbum Cho -----------------------------------------------------
+	// Author: Hyunbum Cho (below this until specified is all Hyunbum's code) -----------------------------------------------------
+	// update, set up business info
+	// set up business info using provided inputs
 	public static void setBusinessInfo (String aName, String aAddress, String aPhoneNumber, String aEmail) throws InvalidInputException, InvalidUserException {
 	    if (CarShopController.getLoggedInUser() != CarShopApplication.getCarShop().getOwner()) {
 	      throw new InvalidUserException("No permission to set up business information");
@@ -612,6 +614,7 @@ public class CarShopController {
 	    CarShopApplication.getCarShop().setBusiness(business);
 	  }
 	  
+	// update the business info with provided inputs
 	  public static void updateBusinessInfo (String aName, String aAddress, String aPhoneNumber, String aEmail) throws InvalidInputException, InvalidUserException {
 	    if (CarShopController.getLoggedInUser() != CarShopApplication.getCarShop().getOwner()) {
 	      throw new InvalidUserException("No permission to update business information");
@@ -628,7 +631,7 @@ public class CarShopController {
 	    business.setEmail(aEmail);
 	    }
 	  
-	  
+	  // add business hour
 	  public static void addBusinessHour (DayOfWeek day, Time newStartTime, Time newEndTime) throws InvalidInputException, InvalidUserException {
 	    Business business = CarShopApplication.getCarShop().getBusiness();
 	    List<BusinessHour> bHour = business.getBusinessHours();
@@ -652,7 +655,7 @@ public class CarShopController {
 	    business.addBusinessHour(newBHour);
 	  }
 	  
-	  
+	  // update business hour
 	  public static void updateBusinessHour (DayOfWeek oldDay, Time oldStartTime, DayOfWeek day, Time newStartTime, Time newEndTime) throws InvalidInputException, InvalidUserException {
 	    Business business = CarShopApplication.getCarShop().getBusiness();
         List<BusinessHour> bHours = business.getBusinessHours();
@@ -683,7 +686,7 @@ public class CarShopController {
 	    }
 	  }
 	  
-	  
+	  // remove business hour
 	  public static void removeBusinessHour (DayOfWeek day, Time startTime) throws InvalidInputException, InvalidUserException {
 	    Business business = CarShopApplication.getCarShop().getBusiness();
         List<BusinessHour> bHours = business.getBusinessHours();
@@ -700,6 +703,7 @@ public class CarShopController {
 	    if (bHour != null) business.removeBusinessHour(bHour);
 	  }
 	  
+	  // view business info
 	  public static List<String> getBusinessInfo(){
 	    Business business = CarShopApplication.getCarShop().getBusiness();
 	    ArrayList<String> businessInfo = new ArrayList<String>(4);
@@ -710,6 +714,7 @@ public class CarShopController {
 	    return businessInfo;
 	  }
 	  
+	  // add new vacation or holiday
 	  public static void addNewTimeSlot(String type, Date startDate, Time startTime, Date endDate, Time endTime) throws InvalidInputException, InvalidUserException {
 	    Business business = CarShopApplication.getCarShop().getBusiness();
 	    List<TimeSlot> holidays;
@@ -785,7 +790,7 @@ public class CarShopController {
 	    }
 	  }
 	  
-	  
+	  // update vacation
 	  public static void updateVacation (Date oldDate, Time oldStartTime, Date startDate, Time startTime, Date endDate, Time endTime) throws InvalidInputException, InvalidUserException {
 	    Business business = CarShopApplication.getCarShop().getBusiness();
 	    List<TimeSlot> holidays;
@@ -843,7 +848,7 @@ public class CarShopController {
 	  }
 	  
 	  
-	  // needs change if TimeSlot is provided instead of oldDate, oldStartTime
+	  // update holiday
 	  public static void updateHoliday (Date oldDate, Time oldStartTime, Date startDate, Time startTime, Date endDate, Time endTime) throws InvalidInputException, InvalidUserException {
 	    Business business = CarShopApplication.getCarShop().getBusiness();
 	    List<TimeSlot> holidays;
@@ -900,7 +905,7 @@ public class CarShopController {
 	    holiday.setEndTime(endTime);
 	  }
 	  
-	  
+	  // remove a vacation or holiday
 	  public static void removeTimeSlot (String type, Date startDate, Time startTime, Date endDate, Time endTime) throws InvalidInputException, InvalidUserException {
 	    Business business = CarShopApplication.getCarShop().getBusiness();
 	    List<TimeSlot> holidays;
@@ -944,14 +949,17 @@ public class CarShopController {
 	    }
 	  }
 	  
+	  // set today
 	  public static void setToday (Date d) {
 	    today = d;
 	  }
 	  
+	  // set current time
 	  public static void setTime (Time t) {
 	    now = t;
 	  }
 	  
+	  // check for email validity
 	  private static boolean isValidEmailAddress(String email) {
 	    boolean valid = true;
 	    if(!email.contains("@")) {
