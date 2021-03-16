@@ -49,13 +49,13 @@ Feature: Update Service Combo
       | engine-check-basic | engine-check | engine-check,transmission-check | true,false |
 
     Examples: 
-      | name                     | mainService        | services                                          | mandatory        | error                                                    |
-      | engine-repair-basic      | engine-repair      | engine-check,engine-repair                        | true,true        | Service engine-repair does not exist                     |
-      | tire-change-combo        | tire-change        | engine-check,transmission-check                   | false,true       | Main service must be included in the services            |
-      | electronics-repair-basic | electronics-repair | electronics-repair                                | true             | A service Combo must contain at least 2 services         |
-      | electronics-repair-basic | electronics-repair | electronics-repair,engine-check,tire-change       | false,true,false | Main service must be mandatory                           |
-      | electronics-repair-basic | electronics-repair | electronics-repair,engine-check,electronics-check | true,false,true  | Service electronics-check does not exist                 |
-      | electronics-repair-combo | electronics-repair | electronics-repair,engine-check                   | true,true        | Service electronics-repair-combo Wash-Dry already exists |
+      | name                     | mainService        | services                                          | mandatory        | error                                            |
+      | engine-repair-basic      | engine-repair      | engine-check,engine-repair                        | true,true        | Service engine-repair does not exist             |
+      | tire-change-combo        | tire-change        | engine-check,transmission-check                   | false,true       | Main service must be included in the services    |
+      | electronics-repair-basic | electronics-repair | electronics-repair                                | true             | A service Combo must contain at least 2 services |
+      | electronics-repair-basic | electronics-repair | electronics-repair,engine-check,tire-change       | false,true,false | Main service must be mandatory                   |
+      | electronics-repair-basic | electronics-repair | electronics-repair,engine-check,electronics-check | true,false,true  | Service electronics-check does not exist         |
+      | electronics-repair-combo | electronics-repair | electronics-repair,engine-check                   | true,true        | Service electronics-repair-combo already exists  |
 
   Scenario Outline: Unauthorized attempt to update a service combo
     Given the following customers exist in the system:
