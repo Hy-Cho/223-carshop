@@ -13,6 +13,8 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -946,43 +948,84 @@ public class CucumberStepDefinitions {
   	@When("{string} initiates the definition of a service combo {string} with main service {string}, services {string} and mandatory setting {string}")
   	public void initiates_the_definition_of_a_service_combo_with_main_service_services_and_mandatory_setting(String username, String name, String mainServiceStr, String servicesStr, String mandatoryStr) {
   	    try {
-  	    	boolean mandatory = Boolean.valueOf(mandatoryStr);
-  	    	Service serviceMain = getServiceFromName(mainServiceStr);
-  	    	ServiceCombo serviceCombo = new ServiceCombo(name, carshop);
-  	    	ComboItem mainService = new ComboItem(mandatory, serviceMain, serviceCombo);
-  	    	CarShopController.defineCombo(name, mainService, null);
+  	    	String comboName = name;
+  	    	List<String> servicesString = Arrays.asList(servicesStr.split(","));
+  	    	List<Boolean> servicesBoolean = new ArrayList<>();
+  	    	String[] booleanStr = mandatoryStr.split(",");
+  	    	for(String s: booleanStr) {
+  	    		servicesBoolean.add(Boolean.valueOf(s));
+  	    	}
+  	    	
+  	    	CarShopController.defineCombo(comboName, mainServiceStr, servicesString, servicesBoolean);
   	    }
-  	    throw new io.cucumber.java.PendingException();
+  	    catch(InvalidInputException ex) {
+  	        error += ex.getMessage();
+  	        errorCnt++;
+  	    }
+  	    catch(RuntimeException ex) {
+  	    	error += ex.getMessage();
+  	        errorCnt++;
+  	    }
   	}
 
   	@Then("the service combo {string} shall exist in the system")
   	public void the_service_combo_shall_exist_in_the_system(String name) {
   		assertNotNull(getServiceComboFromName(name));
-  	    throw new io.cucumber.java.PendingException();
   	}
 
   	@Then("the service combo {string} shall contain the services {string} with mandatory setting {string}")
   	public void the_service_combo_shall_contain_the_services_with_mandatory_setting(String name, String servicesStr, String mandatoryStr) {
-  		assertEquals();
-  	    throw new io.cucumber.java.PendingException();
+  		ServiceCombo serviceCombo = getServiceComboFromName(name);
+  		List<String> servicesString = Arrays.asList(servicesStr.split(","));
+    	List<Boolean> servicesBoolean = new ArrayList<>();
+    	String[] booleanStr = mandatoryStr.split(",");
+    	for(String s: booleanStr) {
+    		servicesBoolean.add(Boolean.valueOf(s));
+    	}
+    	
+    	int checkedItems = 0;
+    	List<ComboItem> comboItems = serviceCombo.getServices();
+    	for(ComboItem co: comboItems) {
+    		int index = servicesString.indexOf(co.getService().getName());
+    		if(index == -1) {
+    			fail();
+    		}
+    		
+    		if(co.getMandatory() == Boolean.valueOf(servicesBoolean.get(index))) {
+    			checkedItems++;
+    		}
+    	}
+    	
+    	assertEquals(checkedItems, comboItems.size());
   	}
 
   	@Then("the main service of the service combo {string} shall be {string}")
   	public void the_main_service_of_the_service_combo_shall_be(String name, String mainService) {
-  	    assertEquals(Service.getWithName(mainService), getMainServiceFromComboName(name));
-  	    throw new io.cucumber.java.PendingException();
+  	    assertEquals(getServiceFromName(mainService), getMainServiceFromComboName(name).getService());
   	}
 
   	@Then("the service {string} in service combo {string} shall be mandatory")
-  	public void the_service_in_service_combo_shall_be_mandatory(String mainService, String name) {
-  	   assertEquals(true, getMainServiceMandatoryFromComboName(name));
-  	    throw new io.cucumber.java.PendingException();
+  	public void the_service_in_service_combo_shall_be_mandatory(String serviceName, String comboName) {
+  		Service service = getServiceFromName(serviceName);
+  		ServiceCombo combo = getServiceComboFromName(comboName);
+  		
+  		assertNotNull(service);
+  		assertNotNull(combo);
+  		
+  		for(ComboItem co: combo.getServices()) {
+  			if(co.getService().equals(service)) {
+  				assertTrue(co.getMandatory());
+  				return;
+  			}
+  		}
+  		
+  		fail();
+  		
   	}
 
   	@Then("the number of service combos in the system shall be {string}")
   	public void the_number_of_service_combos_in_the_system_shall_be(String number) {
-  	    assertEquals(Integer.valueOf(number),getNumberOfServiceCombosInSystem());
-  	    throw new io.cucumber.java.PendingException();
+  	    assertEquals(Integer.valueOf(number), getNumberOfServiceCombosInSystem());
   	}
 
   	@Given("the following service combos exist in the system:")
@@ -991,34 +1034,68 @@ public class CucumberStepDefinitions {
   		List<Map<String, String>> listReresentation = dataTable.asMaps(String.class, String.class);
   		for(Map<String, String> list: listReresentation) {
   			String name = list.get("name");
-  			String mainService = list.get("mainService");
+  			String mainServiceStr = list.get("mainService");
   			String services = list.get("services");
   			String mandatory = list.get("mandatory");
   			
   			ServiceCombo serviceCombo = new ServiceCombo(name, this.carshop);
-
-  	    throw new io.cucumber.java.PendingException();
+  			
+  	    	List<String> servicesString = Arrays.asList(services.split(","));
+  	    	List<Boolean> servicesBoolean = new ArrayList<>();
+  	    	String[] booleanStr = mandatory.split(",");
+  	    	for(String s: booleanStr) {
+  	    		servicesBoolean.add(Boolean.valueOf(s));
+  	    	}
+  	    	
+  	    	Service mainService = getServiceFromName(mainServiceStr);
+  	    	
+  	    	for(int i = 0; i < servicesString.size(); i++) {
+  	    		Service service = getServiceFromName(servicesString.get(i));
+  	    		ComboItem co = new ComboItem(servicesBoolean.get(i), service, serviceCombo);
+  	    		if(service.equals(mainService)) {
+  	    			serviceCombo.setMainService(co);
+  	    		}
+  	    	}
   		}
   	}
 
   	@Then("the service combo {string} shall not exist in the system")
   	public void the_service_combo_shall_not_exist_in_the_system(String name) {
   		assertNull(getServiceComboFromName(name));
-  	    throw new io.cucumber.java.PendingException();
   	}
 
   	@Then("the service combo {string} shall preserve the following properties:")
   	public void the_service_combo_shall_preserve_the_following_properties(String name, DataTable dataTable) {
-  		
   		List<Map<String, String>> maps = dataTable.asMaps();
   		for(Map<String, String> map: maps) {
-  			ServiceCombo serviceCombo = getServiceComboFromName(name);
-  			assertNotNull(serviceCombo);
-  			ComboItem mainService = getMainServiceFromComboName(map.get);
-  			assertEquals(serviceCombo.getMainService(), );
+  			ServiceCombo combo = getServiceComboFromName(name);
+  	  		assertNotNull(combo);
   			
-  			assertEquals(serviceCombo.getServices(), map.get("services"))e; // NOT COMPLETE
-  			throw new io.cucumber.java.PendingException();
+  			String mainServiceName = map.get("mainService");
+  			assertEquals(combo.getMainService().getService().getName(), mainServiceName);
+  			
+  			List<String> servicesString = Arrays.asList(map.get("services").split(","));
+  	    	List<Boolean> servicesBoolean = new ArrayList<>();
+  	    	String[] booleanStr = map.get("mandatory").split(",");
+  	    	for(String s: booleanStr) {
+  	    		servicesBoolean.add(Boolean.valueOf(s));
+  	    	}
+  	    	
+  	    	
+  	    	int checkedItems = 0;
+  	    	List<ComboItem> comboItems = combo.getServices();
+  	    	for(ComboItem co: comboItems) {
+  	    		int index = servicesString.indexOf(co.getService().getName());
+  	    		if(index == -1) {
+  	    			fail();
+  	    		}
+  	    		
+  	    		if(co.getMandatory() == Boolean.valueOf(servicesBoolean.get(index))) {
+  	    			checkedItems++;
+  	    		}
+  	    	}
+  	    	
+  	    	assertEquals(checkedItems, comboItems.size());
   		}
   	}
     // End of DefineServiceCombo
@@ -1026,38 +1103,37 @@ public class CucumberStepDefinitions {
   	//Start of UpdateServiceCombo
   	
   	@When("{string} initiates the update of service combo {string} to name {string}, main service {string} and services {string} and mandatory setting {string}")
-  	public void initiates_the_update_of_service_combo_to_name_main_service_and_services_and_mandatory_setting(String username, String serviceComboStr, String name, String mainServiceStr, String servicesStr, String mandatoryStr) {
-	try {
-		
-		CarShopController.updateCombo(serviceComboStr, name, getServiceFromName(mainServiceStr), servicesStr, mandatoryStr);
-		this.oldServiceComboName=serviceComboStr;
-	}
-
-catch(InvalidInputException ex) {
-	error = ex.getMessage();
-	errorCnt++;
-}
-catch(RuntimeException ex) {
-	error = ex.getMessage();
-	errorCnt++;
-}
-
-  	    throw new io.cucumber.java.PendingException();
+  	public void initiates_the_update_of_service_combo_to_name_main_service_and_services_and_mandatory_setting(String username, String oldName, String newName, String mainServiceStr, String servicesStr, String mandatoryStr) {
+		try {
+			List<String> servicesString = Arrays.asList(servicesStr.split(","));
+  	    	List<Boolean> servicesBoolean = new ArrayList<>();
+  	    	String[] booleanStr = mandatoryStr.split(",");
+  	    	for(String s: booleanStr) {
+  	    		servicesBoolean.add(Boolean.valueOf(s));
+  	    	}
+			
+			this.oldServiceComboName = oldName;
+			CarShopController.updateCombo(oldName, newName, mainServiceStr, servicesString, servicesBoolean);
+		}
+		catch(InvalidInputException ex) {
+			error = ex.getMessage();
+			errorCnt++;
+		}
+		catch(RuntimeException ex) {
+			error = ex.getMessage();
+			errorCnt++;
+		}
   	}
 
   	@Then("the service combo {string} shall be updated to name {string}")
-  	public void the_service_combo_shall_be_updated_to_name(String serviceComboStr, String name) {
-  			if(!serviceComboStr.equals(name)) {
-  				assertNotNull(this.oldServiceComboName);
-  				assertNull(getServiceComboFromName(this.oldServiceComboName));
-  			}
-  			
-  			assertEquals(serviceComboStr, this.oldServiceComboName);
-  			
-  			ServiceCombo newServiceCombo = getServiceComboFromName(name);
-  			assertNotNull(newServiceCombo);
-  			this.oldServiceComboName = null;
-  	    throw new io.cucumber.java.PendingException();
+  	public void the_service_combo_shall_be_updated_to_name(String oldName, String newName) {
+  		if(!oldName.equals(newName)) {
+  			assertNotNull(this.oldServiceComboName);
+  			assertNull(getServiceComboFromName(this.oldServiceComboName));
+  		}
+  		
+  		assertNotNull(getServiceComboFromName(newName));
+  		this.oldServiceComboName = null;
   	}
   	
   	//End of UpdateServiceCombo
