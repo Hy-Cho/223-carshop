@@ -15,6 +15,8 @@ Feature: Appointment management process
       | Wednesday | 8:00      | 18:00   |
       | Thursday  | 8:00      | 18:00   |
       | Friday    | 8:00      | 18:00   |
+      | Saturday  | 8:00      | 17:00   |
+      | Sunday    | 8:00      | 17:00   |
     Given the following technicians exist in the system:
       | username                | password | type         |
       | Tire-Technician         | pass1    | Tire         |
@@ -30,6 +32,8 @@ Feature: Appointment management process
       | Wednesday | 8:00      | 17:00   |
       | Thursday  | 8:00      | 17:00   |
       | Friday    | 8:00      | 17:00   |
+      | Saturday  | 8:00      | 17:00   |
+      | Sunday    | 8:00      | 17:00   |
     Given the business has the following holidays
       | startDate  | endDate    | startTime | endTime |
       | 2021-04-18 | 2021-12-18 | 10:00     | 23:59   |
@@ -317,7 +321,7 @@ Feature: Appointment management process
     Then the username associated with the appointment shall be "customer1"
     Then the user "customer1" shall have 0 no-show records
     Then the system shall have 2 appointments
-  
+
   Scenario: Update appointment time for service combo and new time overlaps with another combo item booking
     When "customer1" makes a "transmission-check-combo" appointment with service "electronics-repair" for the date "2021-04-08" and start time "11:20,12:40" at "2021-04-04+09:00"
     When "customer1" attempts to add the optional service "tire-change" to the service combo with start time "12:40" in the appointment at "2021-04-07+09:00"
