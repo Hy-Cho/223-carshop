@@ -1,10 +1,12 @@
 package ca.mcgill.ecse.carshop.controller;
 import java.sql.Date;
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import ca.mcgill.ecse.carshop.application.CarShopApplication;
+import ca.mcgill.ecse.carshop.model.Appointment;
 import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.Business;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
@@ -15,22 +17,16 @@ import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Owner;
 import ca.mcgill.ecse.carshop.model.Service;
+import ca.mcgill.ecse.carshop.model.ServiceBooking;
 import ca.mcgill.ecse.carshop.model.TimeSlot;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.User;
-import java.util.List;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import ca.mcgill.ecse.carshop.application.CarShopApplication;
-import ca.mcgill.ecse.carshop.model.CarShop;
+
 import ca.mcgill.ecse.carshop.model.ComboItem;
-import ca.mcgill.ecse.carshop.model.User;
-import ca.mcgill.ecse.carshop.model.Owner;
-import ca.mcgill.ecse.carshop.model.Service;
 import ca.mcgill.ecse.carshop.model.ServiceCombo;
-import ca.mcgill.ecse.carshop.model.BookableService;
 
 
 public class CarShopController {
@@ -40,6 +36,310 @@ public class CarShopController {
 	private static Date today = Date.valueOf(LocalDate.of(2021, 2, 1));
 	private static Time now = Time.valueOf(LocalTime.of(11, 0));
 		
+	//Part that handle the appointment taking procedure
+	public static void makeAppointmentService(String serviceName, Date date, Time startTime) throws InvalidInputException {
+	    // Makes sure that the person that is taking the appointment is a customer
+		if (!(loggedInUser instanceof Customer)) {
+		      throw new InvalidInputException("Only customers can make an appointment");
+		}
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("H:mm");
+		
+		
+		if(today.after(date) || (today.equals(date) && now.after(startTime))) {
+			throw new InvalidInputException("There are no available slots for "+serviceName+" on " + date.toString() + " at " + sdf.format(startTime));
+		}
+		
+		CarShop carShop = CarShopApplication.getCarShop();
+		Business business = carShop.getBusiness();
+		Customer cust = (Customer) loggedInUser;
+		 
+		Service service = getServiceFromName(serviceName);
+		if(service == null) {
+			throw new InvalidInputException("Service does not exist in the system.");
+		}
+		
+		Garage g = service.getGarage();
+		
+		//Computes the endTime based on the duration of the service and the startTime.
+		
+		int minutes = (startTime.getMinutes() == 60) ? service.getDuration() : (startTime.getMinutes() + service.getDuration());
+		int hours = (minutes / 60) + startTime.getHours();
+		while(minutes >= 60) {
+			minutes -= 60;
+		}
+		
+		Time endTime = new Time(hours, minutes, 0);
+		DayOfWeek dayOfWeek = getDayOfWeekFromDate(date);
+		
+		//Checks if the service booking is inside the business hours.
+		if(!isInBusinessHours(dayOfWeek, startTime, endTime)) {
+			throw new InvalidInputException("There are no available slots for "+serviceName+" on " + date.toString() + " at " + sdf.format(startTime));
+		}
+		
+		//Checks if the service booking is a holiday
+		if(isHoliday(date, startTime, endTime)) {
+			throw new InvalidInputException("There are no available slots for "+serviceName+" on " + date.toString() + " at " + sdf.format(startTime));
+		}
+		
+		//Checks if the service booking is a vacation
+		if(isVacation(date, startTime, endTime)) {
+			throw new InvalidInputException("There are no available slots for "+serviceName+" on " + date.toString() + " at " + sdf.format(startTime));
+		}
+		
+		//Checks if the service is in the business hours of the garage
+		if(!isInBusinessHoursGarage(dayOfWeek, startTime, endTime, g)) {
+			throw new InvalidInputException("There are no available slots for " + serviceName +" on " + date.toString() + " at " + sdf.format(startTime));
+		}
+		
+		//Checks if the spot is available to be used in the garage
+		if(!checkAvailableSlot(date, startTime, endTime, g)) {
+			throw new InvalidInputException("There are no available slots for " + serviceName +" on " + date.toString() + " at " + sdf.format(startTime));
+		}
+		
+		Appointment appointment = new Appointment(cust, service, carShop);
+		appointment.addServiceBooking(service, new TimeSlot(date, startTime, date, endTime, carShop));
+		
+	}
+	
+	public static void makeAppointmentCombo(String comboName, List<String> optionalName, Date date, List<Time> startTimes) throws InvalidInputException {
+		if (!(loggedInUser instanceof Customer)) {
+		      throw new InvalidInputException("Only customers can make an appointment");
+		}
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("H:mm");
+		
+		if(today.after(date)) {
+			throw new InvalidInputException("There are no available slots for "+comboName+" on " + date.toString() + " at " + sdf.format(startTimes.get(0)));
+		}
+		
+		CarShop carShop = CarShopApplication.getCarShop();
+		Business business = carShop.getBusiness();
+		Customer cust = (Customer) loggedInUser;
+		
+		ServiceCombo combo = getServiceComboFromName(comboName);
+		if(combo == null) {
+			throw new InvalidInputException("Service Comco does not exist in the system.");
+		}
+		
+		DayOfWeek dayOfWeek = getDayOfWeekFromDate(date);
+		
+		List<Time> endTimes = new ArrayList<>();
+		List<Service> services = new ArrayList<>();
+		
+		for(int i = 0; i < startTimes.size(); i++) {
+			//Handles the case for the first element of the list - Main Service
+			Service service = null;
+			Time startTime = startTimes.get(i);
+			Time endTime = null;
+			
+			
+			if(i == 0) {
+				service = combo.getMainService().getService();							
+			}
+			else {
+				service = getComboItemFromServiceName(combo, optionalName.get(i-1)).getService();
+			}
+			
+			if(service == null) {
+				throw new InvalidInputException("Service does not exist in the system");
+			}
+			
+			services.add(service);
+			
+			int minutes = (startTime.getMinutes() == 60) ? service.getDuration() : (startTime.getMinutes() + service.getDuration());
+			int hours = (minutes / 60) + startTime.getHours();
+			while(minutes >= 60) {
+				minutes -= 60;
+			}
+			
+			endTime = new Time(hours, minutes, 0);
+			endTimes.add(endTime);
+			
+			Garage g = service.getGarage();
+			
+			//Checks if the service booking is inside the business hours.
+			if(!isInBusinessHours(dayOfWeek, startTime, endTime)) {
+				throw new InvalidInputException("There are no available slots for "+comboName+" on " + date.toString() + " at " + sdf.format(startTimes.get(0)));
+			}
+			
+			//Checks if the service booking is a holiday
+			if(isHoliday(date, startTime, endTime)) {
+				throw new InvalidInputException("There are no available slots for "+comboName+" on " + date.toString() + " at " + sdf.format(startTimes.get(0)));
+			}
+			
+			//Checks if the service booking is a vacation
+			if(isVacation(date, startTime, endTime)) {
+				throw new InvalidInputException("There are no available slots for "+comboName+" on " + date.toString() + " at " + sdf.format(startTimes.get(0)));
+			}
+			
+			//Checks if the service is in the business hours of the garage
+			if(!isInBusinessHoursGarage(dayOfWeek, startTime, endTime, g)) {
+				throw new InvalidInputException("There are no available slots for " + comboName +" on " + date.toString() + " at " + sdf.format(startTimes.get(0)));
+			}
+			
+			//Checks if the spot is available to be used in the garage
+			if(!checkAvailableSlot(date, startTime, endTime, g)) {
+				throw new InvalidInputException("There are no available slots for " + comboName +" on " + date.toString() + " at " + sdf.format(startTimes.get(0)));
+			}
+		}
+		
+		//Used to check time conflicts between the time slots
+		for(int i = 0; i < startTimes.size(); i++) {
+			Time startTime = startTimes.get(i);
+			Time endTime = endTimes.get(i);
+			
+			for(int j = 0; j < startTimes.size(); j++) {
+				if (i == j) {
+					continue;
+				}
+				
+				Time startToCheck = startTimes.get(j);
+				Time endToCheck = endTimes.get(j);
+								
+				if(isOverlapping(startTime, endTime, startToCheck, endToCheck)) {
+					throw new InvalidInputException("Time slots for two services are overlapping");
+				}
+			}
+		}
+		
+		Appointment appointment = new Appointment(cust, combo, carShop);
+		
+		//Create the service bookings for each required time slot and adding it to the 
+		for(int i = 0; i < startTimes.size(); i++) {
+			ServiceBooking booking = new ServiceBooking(services.get(i), new TimeSlot(date, startTimes.get(i), date, endTimes.get(i), carShop), appointment);
+		}
+	}
+	
+	public static void cancelAppointment(String bookableName, Date date, Time startTime) throws InvalidInputException {
+		if (loggedInUser instanceof Owner) {
+		      throw new InvalidInputException("An owner cannot cancel an appointment");
+		}
+		if(loggedInUser instanceof Technician) {
+			throw new InvalidInputException("A technician cannot cancel an appointment");
+		}
+		
+		Customer loggedInCust = (Customer) loggedInUser; 
+		
+		if(today.equals(date)) {
+			throw new InvalidInputException("Cannot cancel an appointment on the appointment date");
+		}
+		
+		
+		CarShop carShop = CarShopApplication.getCarShop();
+		BookableService bookable = getBookableFromName(bookableName);
+		if(bookable == null) {
+			throw new InvalidInputException("BookableService does not exist in the system");
+		}
+		
+		for(Appointment appointment: carShop.getAppointments()) {
+			if(appointment.getBookableService().equals(bookable)) {
+				ServiceBooking booking = appointment.getServiceBooking(0);
+				if(booking.getTimeSlot().getStartDate().equals(date) && booking.getTimeSlot().getEndDate().equals(date)) {
+					if(booking.getTimeSlot().getStartTime().equals(startTime)) {
+						Customer cust = appointment.getCustomer();
+						if(!cust.equals(loggedInUser)) {
+							throw new InvalidInputException("A customer can only cancel their own appointments");
+						}
+						
+						appointment.delete();
+						return;
+					}
+				}
+			}
+		}
+	}
+	
+	public static boolean isOverlapping(Time start1, Time end1, Time start2, Time end2) {
+	    return (start1.before(end2) || start1.equals(end2)) && (start2.before(end1) || start2.equals(end1));
+	}
+	
+	
+	private static boolean checkAvailableSlot(Date d, Time startTime, Time endTime, Garage g) {
+		for(Service s: g.getServices()) {
+			for(ServiceBooking booking: s.getServiceBookings()) {
+				Date startDate = booking.getTimeSlot().getStartDate();
+				
+				if(startDate.equals(d)) {
+					Time slotStart = booking.getTimeSlot().getStartTime();
+					Time slotEnd = booking.getTimeSlot().getEndTime();
+										
+					if(isOverlapping(startTime, endTime, slotStart, slotEnd)) {
+						return false;
+					}
+				}
+			}
+		}
+		
+		return true;
+	}
+	
+	private static boolean isInBusinessHours(DayOfWeek dayOfWeek, Time startTime, Time endTime) {
+		Business business = CarShopApplication.getCarShop().getBusiness();
+		for(BusinessHour hour: business.getBusinessHours()) {
+			
+			if (hour.getDayOfWeek() == dayOfWeek) {
+				//System.out.println("Day Of Week Matching for " + dayOfWeek);
+				if(isOverlapping(startTime, endTime, hour.getStartTime(), hour.getEndTime())) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	private static boolean isInBusinessHoursGarage(DayOfWeek dayOfWeek, Time startTime, Time endTime, Garage g) {
+		for(BusinessHour hour: g.getBusinessHours()) {
+			if(hour.getDayOfWeek() == dayOfWeek) {
+				if((hour.getStartTime().before(startTime) || hour.getStartTime().equals(startTime)) && (hour.getEndTime().after(endTime) || hour.getEndTime().equals(endTime))) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	private static boolean isVacation(Date d, Time startTime, Time endTime) {
+		Business b = CarShopApplication.getCarShop().getBusiness();
+		for(TimeSlot slot: b.getVacations()) {
+			Date startDate = slot.getStartDate();
+			Date endDate = slot.getEndDate();
+			
+			// Date to check is in range.
+			if((d.equals(startDate) || startDate.before(d)) && (d.equals(endDate) || endDate.after(d))) {
+				Time slotStart = slot.getStartTime();
+				Time slotEnd = slot.getEndTime();
+				
+				if (startTime.after(slotStart) || endTime.before(slotEnd)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	private static boolean isHoliday(Date d, Time startTime, Time endTime) {
+		Business b = CarShopApplication.getCarShop().getBusiness();
+		for(TimeSlot slot: b.getHolidays()) {
+			Date startDate = slot.getStartDate();
+			Date endDate = slot.getEndDate();
+			
+			// Date to check is in range.
+			if((startDate.equals(d) || startDate.before(d)) && (endDate.equals(d) || endDate.after(d))) {
+				Time slotStart = slot.getStartTime();
+				Time slotEnd = slot.getEndTime();
+				
+				if (startTime.after(slotStart) || endTime.before(slotEnd)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
 	// signUpCustomerAccount was coded by Sami Ait Ouahmane
 	// It it doesn't find any exceptions, it signs up the user for a new customer account
 	public static void signUpCustomerAccount(String username, String password) throws InvalidInputException {
@@ -567,8 +867,6 @@ public class CarShopController {
 	      }
 	    }
 	    
-	    System.out.println("here");
-	    
 	    newBHour = new BusinessHour(day, newStartTime, newEndTime, business.getCarShop());
 	    business.addBusinessHour(newBHour);
 	  }
@@ -901,6 +1199,28 @@ public class CarShopController {
 	  
 	  // End of Hyunbum's code -------------------------------------------------------------------------
 	  
+	  private static BookableService getBookableFromName(String name) {
+		  CarShop carShop = CarShopApplication.getCarShop();
+		  for(BookableService bookable: carShop.getBookableServices()) {
+			  if(bookable.getName().equals(name)) {
+				  return bookable;
+			  }
+		  }
+		  
+		  return null;
+	  }
+	  
+	  private static ComboItem getComboItemFromServiceName(ServiceCombo combo, String name) {
+		  for(ComboItem item: combo.getServices()) {
+			  if(item.getService().getName().equals(name)) {
+				  return item;
+			  }
+		  }
+		  
+		  return null;
+	  }
+	  
+	  
 	  private static List<BusinessHour> getBussinessHoursOfDayByGarage(Garage g, DayOfWeek day) {
 			List<BusinessHour> businessHourPerGarage = g.getBusinessHours();
 			List<BusinessHour> dayBusinessHours = new ArrayList<BusinessHour>();
@@ -913,8 +1233,28 @@ public class CarShopController {
 			return dayBusinessHours;
 		}
 	  
-
-	  
+	  @SuppressWarnings("deprecation")
+	  private static DayOfWeek getDayOfWeekFromDate(Date d) {
+		  switch(d.getDay()) {
+		  	case 0:
+		  		return DayOfWeek.Sunday;
+		  	case 1:
+		  		return DayOfWeek.Monday;
+		  	case 2:
+		  		return DayOfWeek.Tuesday;
+		  	case 3:
+		  		return DayOfWeek.Wednesday;
+		  	case 4:
+		  		return DayOfWeek.Thursday;
+		  	case 5:
+		  		return DayOfWeek.Friday;
+		  	case 6:
+		  		return DayOfWeek.Saturday;
+		  	default:
+		  		return null;
+	
+		  }
+	  }
 	  
 	  private static Garage getGarageOfTechnician(TechnicianType techType) {
 			CarShop carshop = CarShopApplication.getCarShop();
@@ -992,6 +1332,20 @@ public class CarShopController {
 		  
 		  return startTime;
 	  }
+	  
+	 private static List<ServiceBooking> getAppointmentsForDayGarage(Garage g, Date d) {
+		 CarShop carShop = CarShopApplication.getCarShop();
+		 List<ServiceBooking> serviceBookings = new ArrayList<>();
+		 for(Service service: g.getServices()) {
+			 for(ServiceBooking serviceBooking: service.getServiceBookings()) {
+				 if(serviceBooking.getTimeSlot().getStartDate().equals(d) && serviceBooking.getTimeSlot().getEndDate().equals(d)) {
+					 serviceBookings.add(serviceBooking);
+				 }
+			 }
+		 }
+		 
+		 return serviceBookings;
+	 }
 	  
 	  private static Time getClosingTimeShopPerDay(DayOfWeek day) {
 		  List<BusinessHour> bHours = getBusinessHoursOfShopByDay(day);

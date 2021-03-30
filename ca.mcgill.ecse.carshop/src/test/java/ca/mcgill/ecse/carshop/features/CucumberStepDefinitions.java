@@ -22,6 +22,7 @@ import ca.mcgill.ecse.carshop.application.CarShopApplication;
 import ca.mcgill.ecse.carshop.controller.CarShopController;
 import ca.mcgill.ecse.carshop.controller.InvalidInputException;
 import ca.mcgill.ecse.carshop.controller.InvalidUserException;
+import ca.mcgill.ecse.carshop.model.Appointment;
 import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.Business;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
@@ -31,6 +32,7 @@ import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Owner;
 import ca.mcgill.ecse.carshop.model.Service;
+import ca.mcgill.ecse.carshop.model.ServiceBooking;
 import ca.mcgill.ecse.carshop.model.ServiceCombo;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
@@ -60,9 +62,271 @@ public class CucumberStepDefinitions {
     private String day;
 	private boolean res;
 	private String oldServiceComboName;
+	private int initialAppSize;
+	
+	//Step Definitions for Appointments Handling
+	@Given("{string} is logged in to their account")
+	public void logInUser(String username) {
+		try {
+			User u = getUserWithUsername(username);
+			CarShopController.logIn(u.getUsername(), u.getPassword());
+		}
+		catch(InvalidInputException e) {
+			error=e.getMessage();
+			errorCnt++;
+		}
+	}
+	
+	@Given("the system's time and date is {string}") 
+	public void setTimeAndDate(String str) {
+		String[] split1 = str.split("\\+");
+		String[] dateSplit = split1[0].split("-");
+		String[] timeSplit = split1[1].split(":");
+		
+	    Date d = Date.valueOf(LocalDate.of(Integer.valueOf(dateSplit[0]), Integer.valueOf(dateSplit[1]), Integer.valueOf(dateSplit[2])));
+	    Time t = Time.valueOf(LocalTime.of(Integer.valueOf(timeSplit[0]), Integer.valueOf(timeSplit[1])));
+	    CarShopController.setToday(d);
+	    CarShopController.setTime(t);
+	}
+	
+	@Given("the business has the following opening hours")
+	public void businessOpeningHours(DataTable dataTable) {
+		List<Map<String, String>> maps = dataTable.asMaps();
+		for(Map<String, String> map: maps) {
+			DayOfWeek day = DayOfWeek.valueOf(map.get("day"));
+			Time startTime = convertToTime(map.get("startTime"));
+			Time endTime = convertToTime(map.get("endTime"));
+			
+			BusinessHour hour = new BusinessHour(day, startTime, endTime, carshop);
+			carshop.getBusiness().addBusinessHour(hour);
+		}
+	}
+	@Given("all garages has the following opening hours")
+	public void garageOpeningHours(DataTable dataTable) {
+		List<Map<String, String>> maps = dataTable.asMaps();
+		for(Map<String, String> map: maps) {
+			DayOfWeek day = DayOfWeek.valueOf(map.get("day"));
+			Time startTime = convertToTime(map.get("startTime"));
+			Time endTime = convertToTime(map.get("endTime"));
+			
+			for(Garage g: carshop.getGarages()) {
+				BusinessHour hour = new BusinessHour(day, startTime, endTime, carshop);
+				g.addBusinessHour(hour);
+			}
+		}
+	}
+	
+	@Given("the business has the following holidays")
+	public void setHolidays(DataTable dataTable) {
+		List<Map<String, String>> maps = dataTable.asMaps();
+		for(Map<String, String> map: maps) {
+			Date startDate = convertToDate(map.get("startDate"));
+			Date endDate = convertToDate(map.get("endDate"));
+			
+			Time startTime = convertToTime(map.get("startTime"));
+			Time endTime = convertToTime(map.get("endTime"));
+			
+			carshop.getBusiness().addHoliday(new TimeSlot(startDate, startTime, endDate, endTime, carshop));
+			
+		}
+	}
+	@Given("the following appointments exist in the system:")
+	public void existingAppointments(DataTable dataTable) {
+		List<Map<String, String>> maps = dataTable.asMaps();
+		for(Map<String, String> map: maps) {
+			Customer cust = (Customer) getUserWithUsername(map.get("customer"));
+			ServiceCombo bookable = (ServiceCombo) getBookableFromName(map.get("serviceName"));
+		
+			List<Service> services = new ArrayList<>();
+			services.add(bookable.getMainService().getService());
+			services.add(getComboItemFromServiceName(bookable, map.get("optServices")).getService());
+		
+			String[] timeframes = map.get("timeSlots").split(",");
+			String[] time1 = timeframes[0].split("-");
+			String[] time2 = timeframes[1].split("-");
+			
+			Date date = convertToDate(map.get("date"));
+			
+			Appointment appointment = new Appointment(cust, bookable, carshop);
+			appointment.addServiceBooking(services.get(0), new TimeSlot(date, convertToTime(time1[0]), date, convertToTime(time1[1]), carshop));
+			appointment.addServiceBooking(services.get(1), new TimeSlot(date, convertToTime(time2[0]), date, convertToTime(time2[1]), carshop));
+		}
+	}
+	
+	@When("{string} schedules an appointment on {string} for {string} at {string}")
+	public void makeAppointmentService(String customer, String date, String servicename, String startTime) {	
+		try {
+			this.initialAppSize = carshop.getAppointments().size();
+			
+			CarShopController.makeAppointmentService(servicename, convertToDate(date), convertToTime(startTime));
+		}
+		catch(InvalidInputException ex) {
+			error += ex.getMessage();
+	        errorCnt++;	
+		}
+	}
+	@When("{string} schedules an appointment on {string} for {string} with {string} at {string}")
+	public void makeAppointmentCombo(String customer, String dateStr, String bookableName, String optionalServices, String startTimes) {
+		try {
+			this.initialAppSize = carshop.getAppointments().size();
+			
+			Date date = convertToDate(dateStr);
+			List<String> optServices = Arrays.asList(optionalServices.split(","));
+			List<Time> startT = new ArrayList<>();
+			for(String time: startTimes.split(",")) {
+				startT.add(convertToTime(time));
+			}
+			
+			CarShopController.makeAppointmentCombo(bookableName, optServices, date, startT);
+		}
+		catch(InvalidInputException ex) {
+			error += ex.getMessage();
+			errorCnt++;
+		}
+	}
+	@When("{string} attempts to cancel their {string} appointment on {string} at {string}")
+	public void cancelAppointment(String customerStr, String serviceName, String dateStr, String timeStr) {
+		try {
+			this.initialAppSize = carshop.getAppointments().size();
+			
+			CarShopController.cancelAppointment(serviceName, convertToDate(dateStr), convertToTime(timeStr));
+		}
+		catch(InvalidInputException ex) {
+			error += ex.getMessage();
+			errorCnt++;
+			System.out.println(ex.getMessage());
+		}
+	}
+	@When("{string} attempts to cancel {string}'s {string} appointment on {string} at {string}")
+	public void cancelAnotherAppointment(String loggedInUser, String apppointmentUser, String serviceName, String dateStr, String timeStr) {
+		try {
+			this.initialAppSize = carshop.getAppointments().size();
+			
+			CarShopController.cancelAppointment(serviceName, convertToDate(dateStr), convertToTime(timeStr));
+		}
+		catch(InvalidInputException ex) {
+			error += ex.getMessage();
+			errorCnt++;
+		}
+	}
+	
+	@Then("{string}'s {string} appointment on {string} at {string} shall be removed from the system")
+	public void appointmentRemoved(String customer, String serviceName, String dateStr, String timeStr) {
+		Customer cust = (Customer) getUserWithUsername(customer);
+		assertNotNull(cust);
+		
+		BookableService bookable = getBookableFromName(serviceName);
+		assertNotNull(bookable);
+		
+		assertNull(getAppointment(cust, bookable, convertToDate(dateStr), Arrays.asList(new Time[] {convertToTime(timeStr)})));
+	}
+	@Then("{string} shall have a {string} appointment on {string} at {string} with the following properties")
+	public void checkAppointmentProperties(String customer, String serviceName, String dateStr, String timeStr, DataTable dataTable) {
+		Customer cust = (Customer) getUserWithUsername(customer);
+		assertNotNull(cust);
+		
+		List<Map<String, String>> maps = dataTable.asMaps();
+		for(Map<String, String> map: maps) {
+			BookableService bookable = getBookableFromName(map.get("serviceName"));
+			assertNotNull(bookable);
+			
+			Date date = convertToDate(map.get("date"));
+			assertNotNull(date);
+			
+			String[] timeslots = map.get("timeSlots").split(",");
+			List<Time> startTimes = new ArrayList<>();
+			for(String timeslot: timeslots) {
+				startTimes.add(convertToTime(timeslot.split("-")[0]));
+			}
+			
+			assertNotNull(getAppointment(cust, bookable, date, startTimes));
+		}
+	}
+	
+	@Then("{string} shall have a {string} appointment on {string} from {string} to {string}")
+	public void checkServiceAppointment(String customer, String serviceName, String date, String startTime, String endTime) {		
+		Customer cust = (Customer) getUserWithUsername(customer);
+		assertNotNull(cust);
+		
+		BookableService bookable = getBookableFromName(serviceName);
+		assertNotNull(bookable);
+		
+		Date d = convertToDate(date);
+		
+		List<Time> startT = new ArrayList<>();
+		for(String time: startTime.split(",")) {
+			startT.add(convertToTime(time));
+		}
+		
+		List<Time> endT = new ArrayList<>();
+		for(String time: endTime.split(",")) {
+			endT.add(convertToTime(time));
+		}
+		
+		assertNotNull(getAppointment(cust, bookable, d, startT));
+	}
+	
+	@Then("there shall be {int} more appointment in the system")
+	public void checkAdditionalAppointments(int addition) {
+		assertEquals(this.initialAppSize+addition, carshop.getAppointments().size());
+	}
+	@Then("there shall be {int} less appointment in the system")
+	public void checkLessAppointments(int subtraction) {
+		assertEquals(this.initialAppSize - subtraction, carshop.getAppointments().size());
+	}
+	
+	@Then("the system shall report {string}")
+	public void checkError(String errorMessage) {
+		assertNotNull(this.error);
+		assertEquals(this.error, errorMessage);
+	}
+	
+	private BookableService getBookableFromName(String name) {
+		for(BookableService bookable: carshop.getBookableServices()) {
+			if(bookable.getName().equals(name)) {
+				return bookable;
+			}
+		}
+		
+		return null;
+	}
+	private ComboItem getComboItemFromServiceName(ServiceCombo combo, String name) {
+		for(ComboItem item: combo.getServices()) {
+			if(item.getService().getName().equals(name)) {
+				return item;
+			}
+		}
+		  
+		return null;
+	}
+	
+	private Appointment getAppointment(Customer cust, BookableService bookable, Date d, List<Time> startTimes) {
+		for(Appointment appointment: cust.getAppointments()) {
+			if(appointment.getBookableService().equals(bookable)) {
+				if(appointment.getServiceBookings().size() == startTimes.size()) {
+					int count = 0;
+					
+					for(int i = 0; i < startTimes.size(); i++) {
+						ServiceBooking booking = appointment.getServiceBooking(i);
+						if(booking.getTimeSlot().getStartDate().equals(d) && booking.getTimeSlot().getStartTime().equals(startTimes.get(i))) {
+							count += 1;
+						}
+					}
+					
+					if(count == appointment.getServiceBookings().size()) {
+						return appointment;
+					}
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	
+	//End of Step Definitions for appointments handling.
 	
 	// Step Definitions for UpdateGarageOpeningHours. Written by Hadi Ghaddar
-	
 	@Given("a business exists with the following information:")
 	// adds a business
 	public void a_business_exists_with_the_following_information(io.cucumber.datatable.DataTable dataTable) {
