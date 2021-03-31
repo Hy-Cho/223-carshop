@@ -885,7 +885,6 @@ public class CucumberStepDefinitions {
       }
     }
     
-    
     @When("the user tries to set up the business information with new {string} and {string} and {string} and {string}")
     public void userTriesToSetUpTheBusinessInfo(String name, String address, String phoneNumber, String email) {
       try {

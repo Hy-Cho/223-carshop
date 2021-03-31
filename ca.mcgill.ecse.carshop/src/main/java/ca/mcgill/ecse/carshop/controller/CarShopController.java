@@ -853,7 +853,7 @@ public class CarShopController {
 	    Business business = new Business(aName, aAddress, aPhoneNumber, aEmail, CarShopApplication.getCarShop());
 	    CarShopApplication.getCarShop().setBusiness(business);
 	    
-	    CarShopPersistence.save(carShop);
+	    CarShopPersistence.save(CarShopApplication.getCarShop());
 	  }
 	  
 	// update the business info with provided inputs
@@ -872,7 +872,7 @@ public class CarShopController {
 	    business.setPhoneNumber(aPhoneNumber);
 	    business.setEmail(aEmail);
 	    
-	    CarShopPersistence.save(carShop);
+	    CarShopPersistence.save(CarShopApplication.getCarShop());
 	    }
 	  
 	  // add business hour
@@ -929,7 +929,7 @@ public class CarShopController {
 	      bHour.setEndTime(newEndTime);
 	    }
 	    
-	    CarShopPersistence.save(carShop);
+	    CarShopPersistence.save(CarShopApplication.getCarShop());
 	  }
 	  
 	  // remove business hour
@@ -948,7 +948,7 @@ public class CarShopController {
 	    }
 	    if (bHour != null) business.removeBusinessHour(bHour);
 	    
-	    CarShopPersistence.save(carShop);
+	    CarShopPersistence.save(CarShopApplication.getCarShop());
 	  }
 	  
 	  // view business info
