@@ -2,10 +2,12 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.io.Serializable;
 import java.util.*;
 
-// line 45 "../../../../../carshop.ump"
-public class Business
+// line 33 "../../../../../carshopPersistence.ump"
+// line 67 "../../../../../carshop.ump"
+public class Business implements Serializable
 {
 
   //------------------------
@@ -423,5 +425,13 @@ public class Business
             "phoneNumber" + ":" + getPhoneNumber()+ "," +
             "email" + ":" + getEmail()+ "]" + System.getProperties().getProperty("line.separator") +
             "  " + "carShop = "+(getCarShop()!=null?Integer.toHexString(System.identityHashCode(getCarShop())):"null");
-  }
+  }  
+  //------------------------
+  // DEVELOPER CODE - PROVIDED AS-IS
+  //------------------------
+  
+  // line 36 "../../../../../carshopPersistence.ump"
+  private static final long serialVersionUID = 4643197646927298011L ;
+
+  
 }

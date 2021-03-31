@@ -2,10 +2,12 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.io.Serializable;
 import java.util.*;
 
-// line 21 "../../../../../carshop.ump"
-public class Owner extends User
+// line 15 "../../../../../carshopPersistence.ump"
+// line 43 "../../../../../carshop.ump"
+public class Owner extends User implements Serializable
 {
 
   //------------------------
@@ -22,7 +24,7 @@ public class Owner extends User
   public Owner(String aUsername, String aPassword, CarShop aCarShop)
   {
     super(aUsername, aPassword);
-    // line 26 "../../../../../carshop.ump"
+    // line 48 "../../../../../carshop.ump"
     if(!aUsername.equals("owner")) {
       		throw new RuntimeException("Owner account must have 'owner' username");
       	}
@@ -41,7 +43,7 @@ public class Owner extends User
   public boolean setUsername(String aUsername)
   {
     boolean wasSet = false;
-    // line 26 "../../../../../carshop.ump"
+    // line 48 "../../../../../carshop.ump"
     if(!aUsername.equals("owner")) {
       		throw new RuntimeException("Owner account must have 'owner' username");
       	}
@@ -93,5 +95,13 @@ public class Owner extends User
     }
     super.delete();
   }
+  
+  //------------------------
+  // DEVELOPER CODE - PROVIDED AS-IS
+  //------------------------
+  
+  // line 18 "../../../../../carshopPersistence.ump"
+  private static final long serialVersionUID = 5643193616927798071L ;
 
+  
 }

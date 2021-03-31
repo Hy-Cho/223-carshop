@@ -64,6 +64,12 @@ public class CucumberStepDefinitions {
 	private String oldServiceComboName;
 	private int initialAppSize;
 	
+	//Step Definitions for Appointment Management
+	@Then("the system shall have {int} (appointment|appointments)")
+	public void checkNumbAppointments(int number) {
+		assertEquals(carshop.getAppointments().size(), number);
+	}
+	
 	//Step Definitions for Appointments Handling
 	@Given("{string} is logged in to their account")
 	public void logInUser(String username) {
@@ -879,13 +885,6 @@ public class CucumberStepDefinitions {
       }
     }
     
-    @Given("the system's time and date is \"2021-02-01+11:00\"")
-    public void systemTimeAndDateIs() {
-      Date d = Date.valueOf(LocalDate.of(2021, 2, 1));
-      Time t = Time.valueOf(LocalTime.of(11, 0));
-      CarShopController.setToday(d);
-      CarShopController.setTime(t);
-    }
     
     @When("the user tries to set up the business information with new {string} and {string} and {string} and {string}")
     public void userTriesToSetUpTheBusinessInfo(String name, String address, String phoneNumber, String email) {

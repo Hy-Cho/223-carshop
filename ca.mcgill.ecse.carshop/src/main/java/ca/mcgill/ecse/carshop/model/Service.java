@@ -2,10 +2,12 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.io.Serializable;
 import java.util.*;
 
-// line 86 "../../../../../carshop.ump"
-public class Service extends BookableService
+// line 62 "../../../../../carshopPersistence.ump"
+// line 114 "../../../../../carshop.ump"
+public class Service extends BookableService implements Serializable
 {
 
   //------------------------
@@ -26,7 +28,7 @@ public class Service extends BookableService
   public Service(String aName, CarShop aCarShop, int aDuration, Garage aGarage)
   {
     super(aName, aCarShop);
-    // line 91 "../../../../../carshop.ump"
+    // line 119 "../../../../../carshop.ump"
     if(aDuration <= 0) {
       	  throw new RuntimeException("Duration must be positive");
       	}
@@ -47,7 +49,7 @@ public class Service extends BookableService
   public boolean setDuration(int aDuration)
   {
     boolean wasSet = false;
-    // line 91 "../../../../../carshop.ump"
+    // line 119 "../../../../../carshop.ump"
     if(aDuration <= 0) {
       	  throw new RuntimeException("Duration must be positive");
       	}
@@ -210,5 +212,13 @@ public class Service extends BookableService
     return super.toString() + "["+
             "duration" + ":" + getDuration()+ "]" + System.getProperties().getProperty("line.separator") +
             "  " + "garage = "+(getGarage()!=null?Integer.toHexString(System.identityHashCode(getGarage())):"null");
-  }
+  }  
+  //------------------------
+  // DEVELOPER CODE - PROVIDED AS-IS
+  //------------------------
+  
+  // line 65 "../../../../../carshopPersistence.ump"
+  private static final long serialVersionUID = 1843197616927718071L ;
+
+  
 }

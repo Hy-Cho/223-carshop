@@ -2,9 +2,11 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.io.Serializable;
 
-// line 105 "../../../../../carshop.ump"
-public class ComboItem
+// line 74 "../../../../../carshopPersistence.ump"
+// line 133 "../../../../../carshop.ump"
+public class ComboItem implements Serializable
 {
 
   //------------------------
@@ -122,5 +124,13 @@ public class ComboItem
             "mandatory" + ":" + getMandatory()+ "]" + System.getProperties().getProperty("line.separator") +
             "  " + "service = "+(getService()!=null?Integer.toHexString(System.identityHashCode(getService())):"null") + System.getProperties().getProperty("line.separator") +
             "  " + "serviceCombo = "+(getServiceCombo()!=null?Integer.toHexString(System.identityHashCode(getServiceCombo())):"null");
-  }
+  }  
+  //------------------------
+  // DEVELOPER CODE - PROVIDED AS-IS
+  //------------------------
+  
+  // line 77 "../../../../../carshopPersistence.ump"
+  private static final long serialVersionUID = -2943197646956718071L ;
+
+  
 }

@@ -2,10 +2,12 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.io.Serializable;
 import java.sql.Time;
 
-// line 62 "../../../../../carshop.ump"
-public class BusinessHour
+// line 39 "../../../../../carshopPersistence.ump"
+// line 84 "../../../../../carshop.ump"
+public class BusinessHour implements Serializable
 {
 
   //------------------------
@@ -127,5 +129,13 @@ public class BusinessHour
             "  " + "startTime" + "=" + (getStartTime() != null ? !getStartTime().equals(this)  ? getStartTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
             "  " + "endTime" + "=" + (getEndTime() != null ? !getEndTime().equals(this)  ? getEndTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
             "  " + "carShop = "+(getCarShop()!=null?Integer.toHexString(System.identityHashCode(getCarShop())):"null");
-  }
+  }  
+  //------------------------
+  // DEVELOPER CODE - PROVIDED AS-IS
+  //------------------------
+  
+  // line 42 "../../../../../carshopPersistence.ump"
+  private static final long serialVersionUID = 3643297516927798071L ;
+
+  
 }

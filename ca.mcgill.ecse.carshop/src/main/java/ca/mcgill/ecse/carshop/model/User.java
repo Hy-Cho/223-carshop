@@ -2,10 +2,12 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.io.Serializable;
 import java.util.*;
 
-// line 15 "../../../../../carshop.ump"
-public abstract class User
+// line 9 "../../../../../carshopPersistence.ump"
+// line 31 "../../../../../carshop.ump"
+public abstract class User implements Serializable
 {
 
   //------------------------
@@ -91,11 +93,26 @@ public abstract class User
     usersByUsername.remove(getUsername());
   }
 
+  // line 37 "../../../../../carshop.ump"
+   public static  void reinitializeUsernamesList(List<User> users){
+    for(User user: users) {
+		  usersByUsername.put(user.getUsername(), user);
+	  }
+  }
+
 
   public String toString()
   {
     return super.toString() + "["+
             "username" + ":" + getUsername()+ "," +
             "password" + ":" + getPassword()+ "]";
-  }
+  }  
+  //------------------------
+  // DEVELOPER CODE - PROVIDED AS-IS
+  //------------------------
+  
+  // line 12 "../../../../../carshopPersistence.ump"
+  private static final long serialVersionUID = 2643593686927798071L ;
+
+  
 }

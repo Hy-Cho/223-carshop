@@ -2,11 +2,13 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Time;
 
-// line 69 "../../../../../carshop.ump"
-public class TimeSlot
+// line 45 "../../../../../carshopPersistence.ump"
+// line 91 "../../../../../carshop.ump"
+public class TimeSlot implements Serializable
 {
 
   //------------------------
@@ -138,5 +140,13 @@ public class TimeSlot
             "  " + "endDate" + "=" + (getEndDate() != null ? !getEndDate().equals(this)  ? getEndDate().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
             "  " + "endTime" + "=" + (getEndTime() != null ? !getEndTime().equals(this)  ? getEndTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
             "  " + "carShop = "+(getCarShop()!=null?Integer.toHexString(System.identityHashCode(getCarShop())):"null");
-  }
+  }  
+  //------------------------
+  // DEVELOPER CODE - PROVIDED AS-IS
+  //------------------------
+  
+  // line 48 "../../../../../carshopPersistence.ump"
+  private static final long serialVersionUID = 3643488616935498071L ;
+
+  
 }

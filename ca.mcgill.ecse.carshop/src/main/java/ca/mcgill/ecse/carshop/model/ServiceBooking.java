@@ -1,10 +1,12 @@
- /*PLEASE DO NOT EDIT THIS CODE*/
+/*PLEASE DO NOT EDIT THIS CODE*/
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.io.Serializable;
 
-// line 117 "../../../../../carshop.ump"
-public class ServiceBooking
+// line 86 "../../../../../carshopPersistence.ump"
+// line 145 "../../../../../carshop.ump"
+public class ServiceBooking implements Serializable
 {
 
   //------------------------
@@ -122,5 +124,13 @@ public class ServiceBooking
       placeholderAppointment.removeServiceBooking(this);
     }
   }
+  
+  //------------------------
+  // DEVELOPER CODE - PROVIDED AS-IS
+  //------------------------
+  
+  // line 89 "../../../../../carshopPersistence.ump"
+  private static final long serialVersionUID = -7893197616927718071L ;
 
+  
 }

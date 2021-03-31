@@ -1,5 +1,7 @@
 namespace ca.mcgill.ecse.carshop.model;
 
+use carshopPersistence.ump;
+
 class CarShop  {
   1 <@>- 0..1 Business business;
   1 <@>- 0..1 Owner owner;
@@ -10,12 +12,32 @@ class CarShop  {
   1 <@>- * Appointment appointments;
   1 <@>- * TimeSlot timeSlots;
   1 <@>- * BookableService bookableServices;
+
+   public void reinitialize(){
+		List<BookableService> bookables = this.getBookableServices();
+		List<User> users = new ArrayList<>();
+		users.addAll(this.getCustomers());
+		users.addAll(this.getTechnicians());
+		if(this.getOwner() != null) {
+			users.add(this.getOwner());
+		}
+	   
+    
+	  User.reinitializeUsernamesList(users);
+	  BookableService.reinitializeNameList(bookables);
+  }
 }
 
 class User {
   abstract;
   unique username;
   password;
+  
+  public static void reinitializeUsernamesList(List<User> users) {
+	  for(User user: users) {
+		  usersByUsername.put(user.getUsername(), user);
+	  }
+  }
 }
 
 class Owner {
@@ -81,6 +103,12 @@ class Garage {
 class BookableService {
   abstract;
   unique name;
+  
+  public static void reinitializeNameList(List<BookableService> bookableServices) {
+	  for(BookableService bookable: bookableServices) {
+		  bookableservicesByName.put(bookable.getName(), bookable);
+	  }
+  }
 }
 
 class Service {

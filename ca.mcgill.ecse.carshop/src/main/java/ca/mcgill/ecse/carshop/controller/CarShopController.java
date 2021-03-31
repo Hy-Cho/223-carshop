@@ -21,6 +21,8 @@ import ca.mcgill.ecse.carshop.model.ServiceBooking;
 import ca.mcgill.ecse.carshop.model.TimeSlot;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.User;
+import ca.mcgill.ecse.carshop.persistence.CarShopPersistence;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -99,6 +101,8 @@ public class CarShopController {
 		
 		Appointment appointment = new Appointment(cust, service, carShop);
 		appointment.addServiceBooking(service, new TimeSlot(date, startTime, date, endTime, carShop));
+		
+		CarShopPersistence.save(carShop);
 		
 	}
 	
@@ -209,6 +213,8 @@ public class CarShopController {
 		for(int i = 0; i < startTimes.size(); i++) {
 			ServiceBooking booking = new ServiceBooking(services.get(i), new TimeSlot(date, startTimes.get(i), date, endTimes.get(i), carShop), appointment);
 		}
+		
+		CarShopPersistence.save(carShop);
 	}
 	
 	public static void cancelAppointment(String bookableName, Date date, Time startTime) throws InvalidInputException {
@@ -248,6 +254,8 @@ public class CarShopController {
 				}
 			}
 		}
+		
+		CarShopPersistence.save(carShop);
 	}
 	
 	public static boolean isOverlapping(Time start1, Time end1, Time start2, Time end2) {
@@ -373,6 +381,8 @@ public class CarShopController {
 			}
 			throw new InvalidInputException(e.getMessage());
 		}
+		
+		CarShopPersistence.save(carShop);
 	}
 	
 	//updateCustomerAccount was coded by Sami Ait Ouahmane
@@ -412,6 +422,8 @@ public class CarShopController {
 		catch(RuntimeException e) {
 			throw new InvalidInputException(e.getMessage());	
 		}
+		
+		CarShopPersistence.save(CarShopApplication.getCarShop());
 	}
 	
 	// logIn was coded by Hadi Ghaddar
@@ -532,6 +544,8 @@ public class CarShopController {
 	    		}
 	    	}
 	    }
+	    
+	    CarShopPersistence.save(carShop);
 	}
 	
 	public static void removeGarageBusinessHours(DayOfWeek day, Time startTime, Time endTime, TechnicianType techType) throws InvalidInputException {
@@ -559,6 +573,8 @@ public class CarShopController {
 	    else {
 	    	throw new InvalidInputException("Garage does not have opening hours on these days");
 	    }
+	    
+	    CarShopPersistence.save(carShop);
 	}
 	
 	//Code Written by Mario Bouzakhm
@@ -582,6 +598,7 @@ public class CarShopController {
 		try {
 			//Creates a new service with the garage mentioned (using referential integrity)
 	        Service service = new Service(name, carShop, duration, garage);
+	        CarShopPersistence.save(carShop);
 	    }
 		catch(RuntimeException ex) {
 			//Catches any invalid inputs and raises the corresponding error
@@ -617,6 +634,8 @@ public class CarShopController {
 				serviceToModify.setDuration(newDuration);
 				serviceToModify.setGarage(newGarage);
 			}
+			
+			CarShopPersistence.save(carShop);
 		}
 		catch(RuntimeException ex) {
 			//Catches any error and adds the appropriate message.
@@ -686,6 +705,7 @@ public class CarShopController {
 			}
 		}
 		
+		CarShopPersistence.save(carShop);
 	}
 	
 	//UpdateCombo was written by Youssef Farouk
@@ -771,6 +791,8 @@ public class CarShopController {
 				existingCombo.removeService(item);
 			}
 		}
+		
+		CarShopPersistence.save(carShop);
 	}
 	
 	//Returns combo item from entered combo if the latter contains the entered service
@@ -830,6 +852,8 @@ public class CarShopController {
 	    }
 	    Business business = new Business(aName, aAddress, aPhoneNumber, aEmail, CarShopApplication.getCarShop());
 	    CarShopApplication.getCarShop().setBusiness(business);
+	    
+	    CarShopPersistence.save(carShop);
 	  }
 	  
 	// update the business info with provided inputs
@@ -847,6 +871,8 @@ public class CarShopController {
 	    business.setAddress(aAddress);
 	    business.setPhoneNumber(aPhoneNumber);
 	    business.setEmail(aEmail);
+	    
+	    CarShopPersistence.save(carShop);
 	    }
 	  
 	  // add business hour
@@ -869,6 +895,8 @@ public class CarShopController {
 	    
 	    newBHour = new BusinessHour(day, newStartTime, newEndTime, business.getCarShop());
 	    business.addBusinessHour(newBHour);
+	    
+	    CarShopPersistence.save(CarShopApplication.getCarShop());
 	  }
 	  
 	  // update business hour
@@ -900,6 +928,8 @@ public class CarShopController {
 	      bHour.setStartTime(newStartTime);
 	      bHour.setEndTime(newEndTime);
 	    }
+	    
+	    CarShopPersistence.save(carShop);
 	  }
 	  
 	  // remove business hour
@@ -917,6 +947,8 @@ public class CarShopController {
 	      }
 	    }
 	    if (bHour != null) business.removeBusinessHour(bHour);
+	    
+	    CarShopPersistence.save(carShop);
 	  }
 	  
 	  // view business info
@@ -1004,6 +1036,8 @@ public class CarShopController {
 	    } else {
 	      business.addVacation(ts);
 	    }
+	    
+	    CarShopPersistence.save(CarShopApplication.getCarShop());
 	  }
 	  
 	  // update vacation
@@ -1061,6 +1095,8 @@ public class CarShopController {
 	    vacation.setStartTime(startTime);
 	    vacation.setEndDate(endDate);
 	    vacation.setEndTime(endTime);
+	    
+	    CarShopPersistence.save(CarShopApplication.getCarShop());
 	  }
 	  
 	  
@@ -1119,6 +1155,8 @@ public class CarShopController {
 	    holiday.setStartTime(startTime);
 	    holiday.setEndDate(endDate);
 	    holiday.setEndTime(endTime);
+	    
+	    CarShopPersistence.save(CarShopApplication.getCarShop());
 	  }
 	  
 	  // remove a vacation or holiday
@@ -1163,6 +1201,7 @@ public class CarShopController {
 	        business.removeVacation(vacation);
 	      }
 	    }
+	    CarShopPersistence.save(CarShopApplication.getCarShop());
 	  }
 	  
 	  // set today

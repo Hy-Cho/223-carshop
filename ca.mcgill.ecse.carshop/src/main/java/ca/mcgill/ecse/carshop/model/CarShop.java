@@ -2,12 +2,14 @@
 /*This code was generated using the UMPLE 1.30.1.5099.60569f335 modeling language!*/
 
 package ca.mcgill.ecse.carshop.model;
+import java.io.Serializable;
 import java.util.*;
 import java.sql.Time;
 import java.sql.Date;
 
-// line 3 "../../../../../carshop.ump"
-public class CarShop
+// line 3 "../../../../../carshopPersistence.ump"
+// line 5 "../../../../../carshop.ump"
+public class CarShop implements Serializable
 {
 
   //------------------------
@@ -932,4 +934,27 @@ public class CarShop
     
   }
 
+  // line 17 "../../../../../carshop.ump"
+   public void reinitialize(){
+    List<BookableService> bookables = this.getBookableServices();
+		List<User> users = new ArrayList<>();
+		users.addAll(this.getCustomers());
+		users.addAll(this.getTechnicians());
+		if(this.getOwner() != null) {
+			users.add(this.getOwner());
+		}
+	   
+    
+	  User.reinitializeUsernamesList(users);
+	  BookableService.reinitializeNameList(bookables);
+  }
+  
+  //------------------------
+  // DEVELOPER CODE - PROVIDED AS-IS
+  //------------------------
+  
+  // line 6 "../../../../../carshopPersistence.ump"
+  private static final long serialVersionUID = -2643593616927798071L ;
+
+  
 }
