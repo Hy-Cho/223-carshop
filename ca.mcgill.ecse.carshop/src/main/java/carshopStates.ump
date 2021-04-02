@@ -1,0 +1,14 @@
+class Appointment{
+  States{
+    Booking{
+      UpdateAppointment [moreThan1DayRemaining() && isInBusinessHour(newTime) && !isHoliday(newTime) && !isVacation(newTime) && checkAvailableSlot(newTime)] /{Appointment.delete(); (makeAppointmentService() || makeAppointmentCombo());} -> Booking;
+      No_Show [cur_time >= end_time && !isCustomerHere()] /{Appointment.delete(); customer.incrNoShow();} -> Final;
+      CancelAppointment [moreThan1DayRemaining()] /{Appointment.delete();} -> Final;
+      Start [Start_time <= cur_time && isCustomerHere()]-> AppointmentInProgress;
+    }
+    AppointmentInProgress{
+      End [cur_time == end_time] /{Appointment.delete();} -> Final;
+      UpdateServiceCombo [technicianIsAvailable() && isInBusinessHour(newTime) && isHoliday(newTime) && !isVacation(newTime) && checkAvailableSlot(newTime)] /{Appointment.delete(); updateCombo(newCombo); makeAppointmentCombo(newCombo);} -> AppointmentInProgress;
+    }
+  }
+}

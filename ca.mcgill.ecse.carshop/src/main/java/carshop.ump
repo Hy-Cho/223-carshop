@@ -1,6 +1,7 @@
 namespace ca.mcgill.ecse.carshop.model;
 
 use carshopPersistence.ump;
+use carshopStates.ump
 
 class CarShop  {
   1 <@>- 0..1 Business business;
