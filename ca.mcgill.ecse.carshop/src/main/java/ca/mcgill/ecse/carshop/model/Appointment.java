@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 // line 80 "../../../../../carshopPersistence.ump"
-// line 139 "../../../../../carshop.ump"
+// line 140 "../../../../../carshop.ump"
 public class Appointment implements Serializable
 {
 

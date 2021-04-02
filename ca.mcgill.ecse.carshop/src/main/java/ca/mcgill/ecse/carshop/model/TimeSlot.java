@@ -7,7 +7,7 @@ import java.sql.Date;
 import java.sql.Time;
 
 // line 45 "../../../../../carshopPersistence.ump"
-// line 91 "../../../../../carshop.ump"
+// line 92 "../../../../../carshop.ump"
 public class TimeSlot implements Serializable
 {
 

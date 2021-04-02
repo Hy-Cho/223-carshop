@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 // line 62 "../../../../../carshopPersistence.ump"
-// line 114 "../../../../../carshop.ump"
+// line 115 "../../../../../carshop.ump"
 public class Service extends BookableService implements Serializable
 {
 
@@ -28,7 +28,7 @@ public class Service extends BookableService implements Serializable
   public Service(String aName, CarShop aCarShop, int aDuration, Garage aGarage)
   {
     super(aName, aCarShop);
-    // line 119 "../../../../../carshop.ump"
+    // line 120 "../../../../../carshop.ump"
     if(aDuration <= 0) {
       	  throw new RuntimeException("Duration must be positive");
       	}
@@ -49,7 +49,7 @@ public class Service extends BookableService implements Serializable
   public boolean setDuration(int aDuration)
   {
     boolean wasSet = false;
-    // line 119 "../../../../../carshop.ump"
+    // line 120 "../../../../../carshop.ump"
     if(aDuration <= 0) {
       	  throw new RuntimeException("Duration must be positive");
       	}

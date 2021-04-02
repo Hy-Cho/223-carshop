@@ -65,9 +65,133 @@ public class CucumberStepDefinitions {
 	private int initialAppSize;
 	
 	//Step Definitions for Appointment Management
+	@Given("{string} has {int} no-show records")
+	public void setNoShow(String customer, int amount) {
+		Customer cust = (Customer) getUserWithUsername(customer);
+		cust.setNoShow(amount);
+	}
+	
+	@When("{string} makes a {string} appointment for the date {string} and time {string} at {string}")
+	public void makeAppointmentService(String customer, String serviceName, String dateStr, String timeStr, String currentStr) {
+		this.setTimeAndDate(currentStr);
+		
+		Time startTime = convertToTime(timeStr);
+		Date date = convertToDate(dateStr);
+		
+		this.logInUser(customer);
+		
+		try {
+			CarShopController.makeAppointmentService(serviceName, date, startTime);
+		} catch (InvalidInputException e) {
+			error=e.getMessage();
+			errorCnt++;
+		}
+	}
+	
+	@When("{string} makes a {string} appointment with service {string} for the date {string} and start time {string} at {string}")
+	public void makeAppointmentCombo(String customer, String serviceName, String servicesStr, String dateStr, String timeStr, String currentStr) {
+		this.setTimeAndDate(currentStr);
+		
+		Date date = convertToDate(dateStr);
+		String[] times = timeStr.split(",");
+		List<Time> startTimes = new ArrayList<>();
+		for(String time: times) {
+			startTimes.add(convertToTime(time));
+		}
+		
+		this.logInUser(customer);
+		
+		try {
+			CarShopController.makeAppointmentCombo(serviceName, Arrays.asList(servicesStr.split(",")), date, startTimes);
+		}
+		catch(InvalidInputException e) {
+			error = e.getMessage();
+			errorCnt++;
+		}
+	}
+	
+	@Then("the service combo shall have {string} selected services")
+	public void checkSelectedServices(String servicesStr) {
+		String[] services = servicesStr.split(",");
+		Appointment app = CarShopController.getLastAddedAppointment();
+		
+		assertNotNull(app);
+		assertTrue(app.getBookableService() instanceof ServiceCombo);
+	
+		List<ServiceBooking> bookings = app.getServiceBookings();
+		List<String> bookedServices = new ArrayList<>();
+		for(ServiceBooking booking: bookings) {
+			bookedServices.add(booking.getService().getName());
+		}
+		
+		int counter = 0;
+		for(String service: services) {
+			if(bookedServices.contains(service)) {
+				counter++;
+			}
+		}
+		
+		assertEquals(services.length, counter);
+	}
+	
 	@Then("the system shall have {int} (appointment|appointments)")
 	public void checkNumbAppointments(int number) {
 		assertEquals(carshop.getAppointments().size(), number);
+	}
+	
+	@Then("the (service|service combo) in the appointment shall be {string}")
+	public void checkServiceAppName(String name) {
+		Appointment app = CarShopController.getLastAddedAppointment();
+		assertNotNull(app);
+		
+		assertEquals(app.getBookableService().getName(), name);
+	}
+	
+	@Then("the appointment shall be for the date {string} with start time {string} and end time {string}")
+	public void checkCorrectTimes(String dateStr, String startStr, String endStr) {
+		Appointment app = CarShopController.getLastAddedAppointment();
+		assertNotNull(app);
+		
+		String[] startTimesStr = startStr.split(",");
+		String[] endTimesStr = endStr.split(",");
+		
+		List<Time> startTimes = new ArrayList<>();
+		List<Time> endTimes = new ArrayList<>();
+		
+		Date date = convertToDate(dateStr);
+		
+		for(int i = 0; i < startTimesStr.length; i++) {
+			startTimes.add(convertToTime(startTimesStr[i]));
+			endTimes.add(convertToTime(endTimesStr[i]));
+		}
+		
+		for(int j = 0; j < app.getServiceBookings().size(); j++) {
+			TimeSlot slot = app.getServiceBooking(j).getTimeSlot();
+			assertEquals(slot.getStartDate(), date);
+			assertEquals(slot.getEndDate(), date);
+			
+			assertEquals(slot.getStartTime(), startTimes.get(j));
+			assertEquals(slot.getEndDate(), endTimes.get(j));
+		}
+	}
+	
+	@Then("the username associated with the appointment shall be {string}")
+	public void checkCustomerName(String name) {
+		Appointment app = CarShopController.getLastAddedAppointment();
+		assertNotNull(app);
+		
+		assertEquals(app.getCustomer().getUsername(), name);
+	}
+
+	@Then("the user {string} shall have {int} no-show records")
+	public void checkNoShow(String customer, int amount) {
+		User u = getUserWithUsername(customer);
+		
+		assertTrue(u instanceof Customer);
+		assertNotNull(u);
+		
+		Customer c = (Customer) u;
+		assertEquals(c.getNoShow(), amount);
 	}
 	
 	//Step Definitions for Appointments Handling
@@ -782,7 +906,7 @@ public class CucumberStepDefinitions {
 			String username = list.get("username");
 			String password = list.get("password");
 			
-			Customer cust = new Customer(username, password, carshop);
+			Customer cust = new Customer(username, password, 0, carshop);
 		}
 	}
 	

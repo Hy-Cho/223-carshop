@@ -38,8 +38,8 @@ public class CarShopControllerTest {
     CarShop carShop = CarShopApplication.getCarShop();
     // owner, customers and technicians
     Owner owner = new Owner("owner", "ownerPass", carShop);
-    Customer customer1 = new Customer ("user1", "apple", carShop);
-    Customer customer2 = new Customer ("user2", "grape", carShop);
+    Customer customer1 = new Customer ("user1", "apple",0, carShop);
+    Customer customer2 = new Customer ("user2", "grape",0, carShop);
     Technician technician1 = new Technician("Tire-Technician", "pass1", TechnicianType.Tire, carShop);
     Technician technician2 = new Technician("Engine-Technician", "pass2", TechnicianType.Engine, carShop);
     Technician technician3 = new Technician("Transmission-Technician", "pass3", TechnicianType.Transmission, carShop);

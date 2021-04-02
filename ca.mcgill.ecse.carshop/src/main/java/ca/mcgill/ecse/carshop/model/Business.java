@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 // line 33 "../../../../../carshopPersistence.ump"
-// line 67 "../../../../../carshop.ump"
+// line 68 "../../../../../carshop.ump"
 public class Business implements Serializable
 {
 

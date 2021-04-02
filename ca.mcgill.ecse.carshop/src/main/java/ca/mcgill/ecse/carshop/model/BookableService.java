@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 // line 56 "../../../../../carshopPersistence.ump"
-// line 103 "../../../../../carshop.ump"
+// line 104 "../../../../../carshop.ump"
 public abstract class BookableService implements Serializable
 {
 
@@ -225,7 +225,7 @@ public abstract class BookableService implements Serializable
     }
   }
 
-  // line 108 "../../../../../carshop.ump"
+  // line 109 "../../../../../carshop.ump"
    public static  void reinitializeNameList(List<BookableService> bookableServices){
     for(BookableService bookable: bookableServices) {
 		  bookableservicesByName.put(bookable.getName(), bookable);

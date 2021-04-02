@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.sql.Time;
 
 // line 39 "../../../../../carshopPersistence.ump"
-// line 84 "../../../../../carshop.ump"
+// line 85 "../../../../../carshop.ump"
 public class BusinessHour implements Serializable
 {
 
