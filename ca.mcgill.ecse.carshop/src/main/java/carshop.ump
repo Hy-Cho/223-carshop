@@ -54,6 +54,7 @@ class Owner {
 
 class Customer {
   isA User;
+  Integer noShow;
 }
 
 class Technician {

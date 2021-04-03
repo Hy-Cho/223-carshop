@@ -24,7 +24,6 @@ import ca.mcgill.ecse.carshop.model.User;
 import ca.mcgill.ecse.carshop.persistence.CarShopPersistence;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 
 import ca.mcgill.ecse.carshop.model.ComboItem;
@@ -34,13 +33,17 @@ import ca.mcgill.ecse.carshop.model.ServiceCombo;
 public class CarShopController {
 	
 	private static User loggedInUser;
-
+	private static Appointment lastAddedAppointment;
+	
+	
 	private static Date today = Date.valueOf(LocalDate.of(2021, 2, 1));
 	private static Time now = Time.valueOf(LocalTime.of(11, 0));
 		
 	//Part that handle the appointment taking procedure
 	public static void makeAppointmentService(String serviceName, Date date, Time startTime) throws InvalidInputException {
-	    // Makes sure that the person that is taking the appointment is a customer
+	    CarShopController.lastAddedAppointment = null;
+		
+		// Makes sure that the person that is taking the appointment is a customer
 		if (!(loggedInUser instanceof Customer)) {
 		      throw new InvalidInputException("Only customers can make an appointment");
 		}
@@ -102,11 +105,15 @@ public class CarShopController {
 		Appointment appointment = new Appointment(cust, service, carShop);
 		appointment.addServiceBooking(service, new TimeSlot(date, startTime, date, endTime, carShop));
 		
+		CarShopController.lastAddedAppointment = appointment;
+		
 		CarShopPersistence.save(carShop);
 		
 	}
 	
 	public static void makeAppointmentCombo(String comboName, List<String> optionalName, Date date, List<Time> startTimes) throws InvalidInputException {
+		CarShopController.lastAddedAppointment = null;
+		
 		if (!(loggedInUser instanceof Customer)) {
 		      throw new InvalidInputException("Only customers can make an appointment");
 		}
@@ -213,6 +220,8 @@ public class CarShopController {
 		for(int i = 0; i < startTimes.size(); i++) {
 			ServiceBooking booking = new ServiceBooking(services.get(i), new TimeSlot(date, startTimes.get(i), date, endTimes.get(i), carShop), appointment);
 		}
+		
+		CarShopController.lastAddedAppointment = appointment;
 		
 		CarShopPersistence.save(carShop);
 	}
@@ -373,7 +382,7 @@ public class CarShopController {
 		
 		//Add the customer. Catch the error if any is thrown.
 		try {
-			carShop.addCustomer(username, password);
+			carShop.addCustomer(username, password, 0);
 		}
 		catch(RuntimeException e) {
 			if(e.getMessage().startsWith("Cannot create due to duplicate")) {
@@ -1431,6 +1440,10 @@ public class CarShopController {
 	 	}
 	  public static void logOut() {
 		  loggedInUser=null;
+	  }
+	  
+	  public static Appointment getLastAddedAppointment() {
+		  return CarShopController.lastAddedAppointment;
 	  }
 		
 

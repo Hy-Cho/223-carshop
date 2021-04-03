@@ -337,9 +337,9 @@ public class CarShop implements Serializable
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public Customer addCustomer(String aUsername, String aPassword)
+  public Customer addCustomer(String aUsername, String aPassword, int aNoShow)
   {
-    return new Customer(aUsername, aPassword, this);
+    return new Customer(aUsername, aPassword, aNoShow, this);
   }
 
   public boolean addCustomer(Customer aCustomer)

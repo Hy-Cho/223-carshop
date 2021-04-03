@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 // line 51 "../../../../../carshopPersistence.ump"
-// line 98 "../../../../../carshop.ump"
+// line 99 "../../../../../carshop.ump"
 public class Garage implements Serializable
 {
 

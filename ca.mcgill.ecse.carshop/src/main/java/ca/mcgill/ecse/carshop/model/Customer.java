@@ -14,6 +14,9 @@ public class Customer extends User implements Serializable
   // MEMBER VARIABLES
   //------------------------
 
+  //Customer Attributes
+  private int noShow;
+
   //Customer Associations
   private CarShop carShop;
   private List<Appointment> appointments;
@@ -22,9 +25,10 @@ public class Customer extends User implements Serializable
   // CONSTRUCTOR
   //------------------------
 
-  public Customer(String aUsername, String aPassword, CarShop aCarShop)
+  public Customer(String aUsername, String aPassword, int aNoShow, CarShop aCarShop)
   {
     super(aUsername, aPassword);
+    noShow = aNoShow;
     boolean didAddCarShop = setCarShop(aCarShop);
     if (!didAddCarShop)
     {
@@ -36,6 +40,19 @@ public class Customer extends User implements Serializable
   //------------------------
   // INTERFACE
   //------------------------
+
+  public boolean setNoShow(int aNoShow)
+  {
+    boolean wasSet = false;
+    noShow = aNoShow;
+    wasSet = true;
+    return wasSet;
+  }
+
+  public int getNoShow()
+  {
+    return noShow;
+  }
   /* Code from template association_GetOne */
   public CarShop getCarShop()
   {
@@ -178,7 +195,14 @@ public class Customer extends User implements Serializable
     }
     super.delete();
   }
-  
+
+
+  public String toString()
+  {
+    return super.toString() + "["+
+            "noShow" + ":" + getNoShow()+ "]" + System.getProperties().getProperty("line.separator") +
+            "  " + "carShop = "+(getCarShop()!=null?Integer.toHexString(System.identityHashCode(getCarShop())):"null");
+  }  
   //------------------------
   // DEVELOPER CODE - PROVIDED AS-IS
   //------------------------
