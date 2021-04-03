@@ -13,7 +13,7 @@ class Appointment{
       }
        } -> Booking;
       
-      No_Show [cur_time >= end_time] /{Appointment.delete(); customer.incrNoShow();} -> Final;
+      No_Show [cur_time >= end_time] /{ delete(); customer.incrNoShow();} -> Final;
       
       CancelAppointment [moreThan1DayRemaining()] /{Appointment.delete();} -> Final;
       
@@ -23,9 +23,17 @@ class Appointment{
       End [cur_time == end_time] /{Appointment.delete();} -> Final;
       
       UpdateServiceCombo [technicianIsAvailable() && isInBusinessHour(newTimes) && isHoliday(newTimes) && !isVacation(newTimes) && checkAvailableSlot(newTimes)] 
-      /{Appointment.delete(); updateCombo(newCombo); makeAppointmentCombo(newCombo);} -> AppointmentInProgress;
+      /{ delete(); updateCombo(newCombo); makeAppointmentCombo(realName,date,startTimes);} -> AppointmentInProgress;
     }
   }
-
   
+  private updateAppointment(realName,optionalName,date,startTimes){
+  	delete();
+  	if(bookableService instanceof ServiceCombo){
+      	makeAppointmentCombo(realName,optionalName,date,startTimes);
+     }
+    else{
+	   	makeAppointmentService(realName,date,startTimes);
+    }
+  }
 }
