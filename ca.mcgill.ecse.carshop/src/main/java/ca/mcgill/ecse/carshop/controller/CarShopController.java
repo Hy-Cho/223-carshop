@@ -123,7 +123,7 @@ public class CarShopController {
 		
 		ServiceCombo combo = getServiceComboFromName(comboName);
 		if(combo == null) {
-			throw new InvalidInputException("Service Comco does not exist in the system.");
+			throw new InvalidInputException("Service Combo does not exist in the system.");
 		}
 		
 		DayOfWeek dayOfWeek = getDayOfWeekFromDate(date);

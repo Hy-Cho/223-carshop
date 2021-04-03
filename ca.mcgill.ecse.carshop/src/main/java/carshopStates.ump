@@ -2,8 +2,16 @@ class Appointment{
   States{
     Booking{
     
-      UpdateAppointment [moreThan1DayRemaining() && isInBusinessHour(newTimess) && !isHoliday(newTimess) && !isVacation(newTimes) && checkAvailableSlot(newTimes)] 
-      /{Appointment.delete(); (makeAppointmentService() || makeAppointmentCombo());} -> Booking;
+      UpdateAppointment [moreThan1DayRemaining() && isInBusinessHour(newTimes) && !isHoliday(newTimes) && !isVacation(newTimes) && checkAvailableSlot(newTimes)] 
+      /{Appointment.delete(); 
+     //Appointment.cancelAppointment(bookableName,date,startTimes);
+      if(Appointment.isCombo()){
+      	makeAppointmentCombo(comboName,optionalName,date,startTimes);
+      }
+      else if(Appointment.isService()){
+      	makeAppointmentService(serviceName,date,startTimes);
+      }
+       } -> Booking;
       
       No_Show [cur_time >= end_time && !isCustomerHere()] /{Appointment.delete(); customer.incrNoShow();} -> Final;
       
@@ -18,4 +26,9 @@ class Appointment{
       /{Appointment.delete(); updateCombo(newCombo); makeAppointmentCombo(newCombo);} -> AppointmentInProgress;
     }
   }
+  
+  private Appointment getAppointment (){
+  	CarShop.getAppointments
+  }
+  
 }
