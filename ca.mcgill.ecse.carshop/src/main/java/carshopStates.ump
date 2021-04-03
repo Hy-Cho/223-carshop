@@ -13,7 +13,7 @@ class Appointment{
       }
        } -> Booking;
       
-      No_Show [cur_time >= end_time && !isCustomerHere()] /{Appointment.delete(); customer.incrNoShow();} -> Final;
+      No_Show [cur_time >= end_time] /{Appointment.delete(); customer.incrNoShow();} -> Final;
       
       CancelAppointment [moreThan1DayRemaining()] /{Appointment.delete();} -> Final;
       
@@ -26,9 +26,6 @@ class Appointment{
       /{Appointment.delete(); updateCombo(newCombo); makeAppointmentCombo(newCombo);} -> AppointmentInProgress;
     }
   }
-  
-  private Appointment getAppointment (){
-  	CarShop.getAppointments
-  }
+
   
 }
