@@ -5,7 +5,7 @@ package ca.mcgill.ecse.carshop.model;
 import java.io.Serializable;
 
 // line 74 "../../../../../carshopPersistence.ump"
-// line 134 "../../../../../carshop.ump"
+// line 139 "../../../../../carshop.ump"
 public class ComboItem implements Serializable
 {
 

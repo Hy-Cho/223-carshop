@@ -3,65 +3,48 @@ class Appointment{
     Booking{
     
       UpdateAppointment [moreThan1DayRemaining() && isInBusinessHour(newTimes) && !isHoliday(newTimes) && !isVacation(newTimes) && checkAvailableSlot(newTimes)] 
-      /{ updateAppointment(realName,optionalName,date,startTimes) } -> Booking;
+      /{ updateAppointment(realName,optionalName,date,startTimes); } -> Booking;
       
-      No_Show [cur_time >= end_time] /{ delete(); customer.incrNoShow();} -> Final;
+      No_Show [(getCurTimes().after(getEndTimes()) || getCurTimes().equals(getEndTimes()))] /{ delete(); customer.incrNoShow();} -> Final;
       
       CancelAppointment [moreThan1DayRemaining()] /{delete();} -> Final;
       
-      Start [getStartTimes() <= cur_time && isCustomerHere()]-> AppointmentInProgress;
+      Start [(getStartTimes().before(getCurTimes()) || getStartTimes().equals(getCurTimes()))]-> AppointmentInProgress;
     }
     AppointmentInProgress{
-      End [cur_time == getEndTimes()] /{ delete();} -> Final;
+      End [getCurTimes().equals(getEndTimes())] /{ delete();} -> Final;
       
       UpdateServiceCombo [technicianIsAvailable() && isInBusinessHour(newTimes) && isHoliday(newTimes) && !isVacation(newTimes) && checkAvailableSlot(newTimes)] 
-      /{ delete(); updateCombo(newCombo); makeAppointmentCombo(realName,date,startTimes);} -> AppointmentInProgress;
+      /{ delete(); updateCombo(newCombo); CarShopController.makeAppointmentCombo(realName,date,startTimes);} -> AppointmentInProgress;
     }
   }
   
   private void updateAppointment(realName,optionalName,date,startTimes){
   	delete();
   	if(bookableService instanceof ServiceCombo){
-      	makeAppointmentCombo(realName,optionalName,date,startTimes);
+      	CarShopController.makeAppointmentCombo(realName,optionalName,date,startTimes);
      }
     else{
-	   	makeAppointmentService(realName,date,startTimes);
+	   	CarShopController.makeAppointmentService(realName,date,startTimes);
     }
   }
   
   private Time getStartTimes(){
-  	ServiceBooking kept=null;
-  	for(ServiceBooking a: getServiceBookings()){
-  		if(a.getAppointment() == this){
-  			kept=a;
-  			break;
-  		}
-  	}
-  	if(a!=null){
-  		return a.getTimeSlot().getStartTime();
-  	}
-	else{
-		return null;
-	}
+  
+  	ServiceBooking firstBooking = this.getServiceBookings().get(0);
+	return firstBooking.getTimeSlot().getStartTime();
+  
   }
   
   private Time getEndTimes(){
-  	ServiceBooking kept=null;
-  	for(ServiceBooking a: getServiceBookings()){
-  		if(a.getAppointment() == this){
-  			kept=a;
-  			break;
-  		}
-  	}
-  	if(a!=null){
-  		return a.getTimeSlot().getEndTime();
-  	}
-	else{
-		return null;
-	}
+  
+  	int length = this.getServiceBookings().size();
+	ServiceBooking lastBooking = this.getServiceBookings().get(length-1);
+	return lastBooking.getTimeSlot().getEndTime();
+  
   }
   
   private Time getCurTimes(){
-  	return null;
+  	return CarShopController.getCurrentTimes();
   }
 }

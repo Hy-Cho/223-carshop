@@ -38,6 +38,8 @@ public class CarShopController {
 	
 	private static Date today = Date.valueOf(LocalDate.of(2021, 2, 1));
 	private static Time now = Time.valueOf(LocalTime.of(11, 0));
+	
+	
 		
 	//Part that handle the appointment taking procedure
 	public static void makeAppointmentService(String serviceName, Date date, Time startTime) throws InvalidInputException {
@@ -1446,5 +1448,8 @@ public class CarShopController {
 		  return CarShopController.lastAddedAppointment;
 	  }
 		
-
+	  public static Time getCurrentTimes() {
+			
+			return now;
+		}
 }

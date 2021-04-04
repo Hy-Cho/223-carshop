@@ -53,8 +53,12 @@ class Owner {
 }
 
 class Customer {
+  
   isA User;
   Integer noShow;
+  public void incrNoShow(){
+  	this.noShow+=1;
+  }
 }
 
 class Technician {
@@ -139,6 +143,8 @@ class ComboItem {
 
 
 class Appointment {
+  depend java.sql.Time;
+  depend ca.mcgill.ecse.carshop.controller.CarShopController;
   * -- 1 Customer customer;
   * -- 1 BookableService bookableService;
   1 <@>- * ServiceBooking serviceBookings;

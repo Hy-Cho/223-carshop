@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 // line 21 "../../../../../carshopPersistence.ump"
-// line 54 "../../../../../carshop.ump"
+// line 55 "../../../../../carshop.ump"
 public class Customer extends User implements Serializable
 {
 
@@ -194,6 +194,11 @@ public class Customer extends User implements Serializable
       aAppointment.delete();
     }
     super.delete();
+  }
+
+  // line 60 "../../../../../carshop.ump"
+   public void incrNoShow(){
+    this.noShow+=1;
   }
 
 

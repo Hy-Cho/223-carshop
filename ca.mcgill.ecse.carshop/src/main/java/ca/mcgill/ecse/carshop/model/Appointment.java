@@ -3,16 +3,23 @@
 
 package ca.mcgill.ecse.carshop.model;
 import java.io.Serializable;
+import java.sql.Time;
+import ca.mcgill.ecse.carshop.controller.CarShopController;
 import java.util.*;
 
 // line 80 "../../../../../carshopPersistence.ump"
-// line 140 "../../../../../carshop.ump"
+// line 1 "../../../../../carshopStates.ump"
+// line 145 "../../../../../carshop.ump"
 public class Appointment implements Serializable
 {
 
   //------------------------
   // MEMBER VARIABLES
   //------------------------
+
+  //Appointment State Machines
+  public enum States { Booking, Final, AppointmentInProgress }
+  private States states;
 
   //Appointment Associations
   private Customer customer;
@@ -42,11 +49,178 @@ public class Appointment implements Serializable
     {
       throw new RuntimeException("Unable to create appointment due to carShop. See http://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
+    setStates(States.Booking);
   }
 
   //------------------------
   // INTERFACE
   //------------------------
+
+  public String getStatesFullName()
+  {
+    String answer = states.toString();
+    return answer;
+  }
+
+  public States getStates()
+  {
+    return states;
+  }
+
+  public boolean UpdateAppointment()
+  {
+    boolean wasEventProcessed = false;
+    
+    States aStates = states;
+    switch (aStates)
+    {
+      case Booking:
+        if (moreThan1DayRemaining()&&isInBusinessHour(newTimes)&&!(isHoliday(newTimes))&&!(isVacation(newTimes))&&checkAvailableSlot(newTimes))
+        {
+        // line 6 "../../../../../carshopStates.ump"
+          updateAppointment(realName,optionalName,date,startTimes);
+          setStates(States.Booking);
+          wasEventProcessed = true;
+          break;
+        }
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  public boolean No_Show()
+  {
+    boolean wasEventProcessed = false;
+    
+    States aStates = states;
+    switch (aStates)
+    {
+      case Booking:
+        if ((getCurTimes().after(getEndTimes())||getCurTimes().equals(getEndTimes())))
+        {
+        // line 8 "../../../../../carshopStates.ump"
+          delete(); customer.incrNoShow();
+          setStates(States.Final);
+          wasEventProcessed = true;
+          break;
+        }
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  public boolean CancelAppointment()
+  {
+    boolean wasEventProcessed = false;
+    
+    States aStates = states;
+    switch (aStates)
+    {
+      case Booking:
+        if (moreThan1DayRemaining())
+        {
+        // line 10 "../../../../../carshopStates.ump"
+          delete();
+          setStates(States.Final);
+          wasEventProcessed = true;
+          break;
+        }
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  public boolean Start()
+  {
+    boolean wasEventProcessed = false;
+    
+    States aStates = states;
+    switch (aStates)
+    {
+      case Booking:
+        if ((getStartTimes().before(getCurTimes())||getStartTimes().equals(getCurTimes())))
+        {
+          setStates(States.AppointmentInProgress);
+          wasEventProcessed = true;
+          break;
+        }
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  public boolean End()
+  {
+    boolean wasEventProcessed = false;
+    
+    States aStates = states;
+    switch (aStates)
+    {
+      case AppointmentInProgress:
+        if (getCurTimes().equals(getEndTimes()))
+        {
+        // line 15 "../../../../../carshopStates.ump"
+          delete();
+          setStates(States.Final);
+          wasEventProcessed = true;
+          break;
+        }
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  public boolean UpdateServiceCombo()
+  {
+    boolean wasEventProcessed = false;
+    
+    States aStates = states;
+    switch (aStates)
+    {
+      case AppointmentInProgress:
+        if (technicianIsAvailable()&&isInBusinessHour(newTimes)&&isHoliday(newTimes)&&!(isVacation(newTimes))&&checkAvailableSlot(newTimes))
+        {
+        // line 18 "../../../../../carshopStates.ump"
+          delete(); updateCombo(newCombo); CarShopController.makeAppointmentCombo(realName,date,startTimes);
+          setStates(States.AppointmentInProgress);
+          wasEventProcessed = true;
+          break;
+        }
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  private void setStates(States aStates)
+  {
+    states = aStates;
+
+    // entry actions and do activities
+    switch(states)
+    {
+      case Final:
+        delete();
+        break;
+    }
+  }
   /* Code from template association_GetOne */
   public Customer getCustomer()
   {
@@ -249,6 +423,35 @@ public class Appointment implements Serializable
     {
       placeholderCarShop.removeAppointment(this);
     }
+  }
+
+  // line 23 "../../../../../carshopStates.ump"
+   private void updateAppointment(String realName, String optionalName, String date, String startTimes){
+    delete();
+  	if(bookableService instanceof ServiceCombo){
+      	CarShopController.makeAppointmentCombo(realName,optionalName,date,startTimes);
+     }
+    else{
+	   	CarShopController.makeAppointmentService(realName,date,startTimes);
+    }
+  }
+
+  // line 34 "../../../../../carshopStates.ump"
+   private Time getStartTimes(){
+    ServiceBooking firstBooking = this.getServiceBookings().get(0);
+	return firstBooking.getTimeSlot().getStartTime();
+  }
+
+  // line 41 "../../../../../carshopStates.ump"
+   private Time getEndTimes(){
+    int length = this.getServiceBookings().size();
+	ServiceBooking lastBooking = this.getServiceBookings().get(length-1);
+	return lastBooking.getTimeSlot().getEndTime();
+  }
+
+  // line 48 "../../../../../carshopStates.ump"
+   private Time getCurTimes(){
+    return CarShopController.getCurrentTimes();
   }
   
   //------------------------
