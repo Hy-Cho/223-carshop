@@ -257,6 +257,4 @@ public class Appointment implements Serializable
   
   // line 83 "../../../../../carshopPersistence.ump"
   private static final long serialVersionUID = 1943199919927718071L ;
-
-  
 }

@@ -3,12 +3,12 @@ class Appointment{
     Booking{
     
       UpdateAppointment [moreThan1DayRemaining() && isInBusinessHour(newTimes) && !isHoliday(newTimes) && !isVacation(newTimes) && checkAvailableSlot(newTimes)] 
-      /{Appointment.delete(); 
+      /{bookableService instanceof ServiceCombo} Appointment.delete(); 
      //Appointment.cancelAppointment(bookableName,date,startTimes);
-      if(Appointment.isCombo()){
+      if(bookableService instanceof ServiceCombo){
       	makeAppointmentCombo(comboName,optionalName,date,startTimes);
       }
-      else if(Appointment.isService()){
+      else (Appointment.isService()){
       	makeAppointmentService(serviceName,date,startTimes);
       }
        } -> Booking;

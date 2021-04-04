@@ -55,6 +55,10 @@ class Owner {
 class Customer {
   isA User;
   Integer noShow;
+
+  private void incrementNoShow() {
+    this.noShow += 1;
+  }
 }
 
 class Technician {

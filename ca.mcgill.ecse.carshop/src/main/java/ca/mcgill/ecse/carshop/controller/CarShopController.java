@@ -74,32 +74,10 @@ public class CarShopController {
 			minutes -= 60;
 		}
 		
-		Time endTime = new Time(hours, minutes, 0);
-		DayOfWeek dayOfWeek = getDayOfWeekFromDate(date);
+		Time endTime = new Time(hours, minutes, 0);;
 		
-		//Checks if the service booking is inside the business hours.
-		if(!isInBusinessHours(dayOfWeek, startTime, endTime)) {
+		if(!checkValidTime(date, startTime, endTime, service)) {
 			throw new InvalidInputException("There are no available slots for "+serviceName+" on " + date.toString() + " at " + sdf.format(startTime));
-		}
-		
-		//Checks if the service booking is a holiday
-		if(isHoliday(date, startTime, endTime)) {
-			throw new InvalidInputException("There are no available slots for "+serviceName+" on " + date.toString() + " at " + sdf.format(startTime));
-		}
-		
-		//Checks if the service booking is a vacation
-		if(isVacation(date, startTime, endTime)) {
-			throw new InvalidInputException("There are no available slots for "+serviceName+" on " + date.toString() + " at " + sdf.format(startTime));
-		}
-		
-		//Checks if the service is in the business hours of the garage
-		if(!isInBusinessHoursGarage(dayOfWeek, startTime, endTime, g)) {
-			throw new InvalidInputException("There are no available slots for " + serviceName +" on " + date.toString() + " at " + sdf.format(startTime));
-		}
-		
-		//Checks if the spot is available to be used in the garage
-		if(!checkAvailableSlot(date, startTime, endTime, g)) {
-			throw new InvalidInputException("There are no available slots for " + serviceName +" on " + date.toString() + " at " + sdf.format(startTime));
 		}
 		
 		Appointment appointment = new Appointment(cust, service, carShop);
@@ -111,6 +89,57 @@ public class CarShopController {
 		
 	}
 	
+	public static boolean checkValidTime(Date date, Time startTime, Time endTime, Service service) {
+		DayOfWeek dayOfWeek = getDayOfWeekFromDate(date);
+		
+		if(!isInBusinessHours(dayOfWeek, startTime, endTime)) {
+			return false;
+		}
+		
+		//Checks if the service booking is a holiday
+		if(isHoliday(date, startTime, endTime)) {
+			return false;
+		}
+		
+		//Checks if the service booking is a vacation
+		if(isVacation(date, startTime, endTime)) {
+			return false;
+		}
+		
+		//Checks if the service is in the business hours of the garage
+		if(!isInBusinessHoursGarage(dayOfWeek, startTime, endTime, service.getGarage())) {
+			return false;
+		}
+		
+		//Checks if the spot is available to be used in the garage
+		if(!checkAvailableSlot(date, startTime, endTime, service.getGarage())) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public static boolean checkOverlappingTimes(List<Time> startTimes, List<Time> endTimes) {
+		for(int i = 0; i < startTimes.size(); i++) {
+			Time startTime = startTimes.get(i);
+			Time endTime = endTimes.get(i);
+			
+			for(int j = 0; j < startTimes.size(); j++) {
+				if (i == j) {
+					continue;
+				}
+				
+				Time startToCheck = startTimes.get(j);
+				Time endToCheck = endTimes.get(j);
+								
+				if(isOverlapping(startTime, endTime, startToCheck, endToCheck)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	 
 	public static void makeAppointmentCombo(String comboName, List<String> optionalName, Date date, List<Time> startTimes) throws InvalidInputException {
 		CarShopController.lastAddedAppointment = null;
 		
@@ -130,7 +159,7 @@ public class CarShopController {
 		
 		ServiceCombo combo = getServiceComboFromName(comboName);
 		if(combo == null) {
-			throw new InvalidInputException("Service Combo does not exist in the system.");
+			throw new InvalidInputException("Service Comco does not exist in the system.");
 		}
 		
 		DayOfWeek dayOfWeek = getDayOfWeekFromDate(date);
@@ -167,52 +196,16 @@ public class CarShopController {
 			endTime = new Time(hours, minutes, 0);
 			endTimes.add(endTime);
 			
-			Garage g = service.getGarage();
-			
-			//Checks if the service booking is inside the business hours.
-			if(!isInBusinessHours(dayOfWeek, startTime, endTime)) {
+			if(!checkValidTime(date, startTime, endTime, service)) {
 				throw new InvalidInputException("There are no available slots for "+comboName+" on " + date.toString() + " at " + sdf.format(startTimes.get(0)));
-			}
-			
-			//Checks if the service booking is a holiday
-			if(isHoliday(date, startTime, endTime)) {
-				throw new InvalidInputException("There are no available slots for "+comboName+" on " + date.toString() + " at " + sdf.format(startTimes.get(0)));
-			}
-			
-			//Checks if the service booking is a vacation
-			if(isVacation(date, startTime, endTime)) {
-				throw new InvalidInputException("There are no available slots for "+comboName+" on " + date.toString() + " at " + sdf.format(startTimes.get(0)));
-			}
-			
-			//Checks if the service is in the business hours of the garage
-			if(!isInBusinessHoursGarage(dayOfWeek, startTime, endTime, g)) {
-				throw new InvalidInputException("There are no available slots for " + comboName +" on " + date.toString() + " at " + sdf.format(startTimes.get(0)));
-			}
-			
-			//Checks if the spot is available to be used in the garage
-			if(!checkAvailableSlot(date, startTime, endTime, g)) {
-				throw new InvalidInputException("There are no available slots for " + comboName +" on " + date.toString() + " at " + sdf.format(startTimes.get(0)));
 			}
 		}
 		
 		//Used to check time conflicts between the time slots
-		for(int i = 0; i < startTimes.size(); i++) {
-			Time startTime = startTimes.get(i);
-			Time endTime = endTimes.get(i);
-			
-			for(int j = 0; j < startTimes.size(); j++) {
-				if (i == j) {
-					continue;
-				}
-				
-				Time startToCheck = startTimes.get(j);
-				Time endToCheck = endTimes.get(j);
-								
-				if(isOverlapping(startTime, endTime, startToCheck, endToCheck)) {
-					throw new InvalidInputException("Time slots for two services are overlapping");
-				}
-			}
+		if(!checkOverlappingTimes(startTimes, endTimes)) {
+			throw new InvalidInputException("Time slots for two services are overlapping");
 		}
+		
 		
 		Appointment appointment = new Appointment(cust, combo, carShop);
 		
