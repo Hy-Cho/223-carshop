@@ -3,15 +3,7 @@ class Appointment{
     Booking{
     
       UpdateAppointment [moreThan1DayRemaining() && isInBusinessHour(newTimes) && !isHoliday(newTimes) && !isVacation(newTimes) && checkAvailableSlot(newTimes)] 
-      /{Appointment.delete(); 
-     //Appointment.cancelAppointment(bookableName,date,startTimes);
-      if(Appointment.isCombo()){
-      	makeAppointmentCombo(comboName,optionalName,date,startTimes);
-      }
-      else if(Appointment.isService()){
-      	makeAppointmentService(serviceName,date,startTimes);
-      }
-       } -> Booking;
+      /{ updateAppointment(realName,optionalName,date,startTimes) } -> Booking;
       
       No_Show [cur_time >= end_time] /{ delete(); customer.incrNoShow();} -> Final;
       
