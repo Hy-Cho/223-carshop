@@ -7,19 +7,19 @@ class Appointment{
       
       No_Show [cur_time >= end_time] /{ delete(); customer.incrNoShow();} -> Final;
       
-      CancelAppointment [moreThan1DayRemaining()] /{Appointment.delete();} -> Final;
+      CancelAppointment [moreThan1DayRemaining()] /{delete();} -> Final;
       
-      Start [Start_time <= cur_time && isCustomerHere()]-> AppointmentInProgress;
+      Start [getStartTimes() <= cur_time && isCustomerHere()]-> AppointmentInProgress;
     }
     AppointmentInProgress{
-      End [cur_time == end_time] /{Appointment.delete();} -> Final;
+      End [cur_time == getEndTimes()] /{ delete();} -> Final;
       
       UpdateServiceCombo [technicianIsAvailable() && isInBusinessHour(newTimes) && isHoliday(newTimes) && !isVacation(newTimes) && checkAvailableSlot(newTimes)] 
       /{ delete(); updateCombo(newCombo); makeAppointmentCombo(realName,date,startTimes);} -> AppointmentInProgress;
     }
   }
   
-  private updateAppointment(realName,optionalName,date,startTimes){
+  private void updateAppointment(realName,optionalName,date,startTimes){
   	delete();
   	if(bookableService instanceof ServiceCombo){
       	makeAppointmentCombo(realName,optionalName,date,startTimes);
@@ -27,5 +27,41 @@ class Appointment{
     else{
 	   	makeAppointmentService(realName,date,startTimes);
     }
+  }
+  
+  private Time getStartTimes(){
+  	ServiceBooking kept=null;
+  	for(ServiceBooking a: getServiceBookings()){
+  		if(a.getAppointment() == this){
+  			kept=a;
+  			break;
+  		}
+  	}
+  	if(a!=null){
+  		return a.getTimeSlot().getStartTime();
+  	}
+	else{
+		return null;
+	}
+  }
+  
+  private Time getEndTimes(){
+  	ServiceBooking kept=null;
+  	for(ServiceBooking a: getServiceBookings()){
+  		if(a.getAppointment() == this){
+  			kept=a;
+  			break;
+  		}
+  	}
+  	if(a!=null){
+  		return a.getTimeSlot().getEndTime();
+  	}
+	else{
+		return null;
+	}
+  }
+  
+  private Time getCurTimes(){
+  	return null;
   }
 }
