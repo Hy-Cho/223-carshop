@@ -8,7 +8,7 @@ import java.sql.Time;
 import java.sql.Date;
 
 // line 3 "../../../../../carshopPersistence.ump"
-// line 5 "../../../../../carshop.ump"
+// line 6 "../../../../../carshop.ump"
 public class CarShop implements Serializable
 {
 
@@ -934,7 +934,7 @@ public class CarShop implements Serializable
     
   }
 
-  // line 17 "../../../../../carshop.ump"
+  // line 18 "../../../../../carshop.ump"
    public void reinitialize(){
     List<BookableService> bookables = this.getBookableServices();
 		List<User> users = new ArrayList<>();

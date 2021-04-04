@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 // line 9 "../../../../../carshopPersistence.ump"
-// line 31 "../../../../../carshop.ump"
+// line 32 "../../../../../carshop.ump"
 public abstract class User implements Serializable
 {
 
@@ -93,7 +93,7 @@ public abstract class User implements Serializable
     usersByUsername.remove(getUsername());
   }
 
-  // line 37 "../../../../../carshop.ump"
+  // line 38 "../../../../../carshop.ump"
    public static  void reinitializeUsernamesList(List<User> users){
     for(User user: users) {
 		  usersByUsername.put(user.getUsername(), user);

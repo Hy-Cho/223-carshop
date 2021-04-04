@@ -1,34 +1,50 @@
 class Appointment{
   States{
     Booking{
-    
-      UpdateAppointment [moreThan1DayRemaining() && isInBusinessHour(newTimes) && !isHoliday(newTimes) && !isVacation(newTimes) && checkAvailableSlot(newTimes)] 
-      /{bookableService instanceof ServiceCombo} Appointment.delete(); 
-     //Appointment.cancelAppointment(bookableName,date,startTimes);
-      if(bookableService instanceof ServiceCombo){
-      	makeAppointmentCombo(comboName,optionalName,date,startTimes);
-      }
-      else (Appointment.isService()){
-      	makeAppointmentService(serviceName,date,startTimes);
-      }
-       } -> Booking;
-      
-      No_Show [cur_time >= end_time && !isCustomerHere()] /{Appointment.delete(); customer.incrNoShow();} -> Final;
-      
-      CancelAppointment [moreThan1DayRemaining()] /{Appointment.delete();} -> Final;
-      
-      Start [Start_time <= cur_time && isCustomerHere()]-> AppointmentInProgress;
+
+      UpdateAppointment [moreThan1DayRemaining() && isInBusinessHour(newTimes) && !isHoliday(newTimes) && !isVacation(newTimes) && checkAvailableSlot(newTimes)]
+      /{ updateAppointment(realName,optionalName,date,startTimes); } -> Booking;
+
+      No_Show [(getCurTimes().after(getEndTimes()) || getCurTimes().equals(getEndTimes()))] /{ delete(); customer.incrNoShow();} -> Final;
+
+      CancelAppointment [moreThan1DayRemaining()] /{delete();} -> Final;
+
+      Start [(getStartTimes().before(getCurTimes()) || getStartTimes().equals(getCurTimes()))]-> AppointmentInProgress;
     }
     AppointmentInProgress{
-      End [cur_time == end_time] /{Appointment.delete();} -> Final;
-      
-      UpdateServiceCombo [technicianIsAvailable() && isInBusinessHour(newTimes) && isHoliday(newTimes) && !isVacation(newTimes) && checkAvailableSlot(newTimes)] 
-      /{Appointment.delete(); updateCombo(newCombo); makeAppointmentCombo(newCombo);} -> AppointmentInProgress;
+      End [getCurTimes().equals(getEndTimes())] /{ delete();} -> Final;
+
+      UpdateServiceCombo [technicianIsAvailable() && isInBusinessHour(newTimes) && isHoliday(newTimes) && !isVacation(newTimes) && checkAvailableSlot(newTimes)]
+      /{ delete(); updateCombo(newCombo); CarShopController.makeAppointmentCombo(realName,date,startTimes);} -> AppointmentInProgress;
     }
   }
-  
-  private Appointment getAppointment (){
-  	CarShop.getAppointments
+
+  private void updateAppointment(realName,optionalName,date,startTimes){
+  	delete();
+  	if(bookableService instanceof ServiceCombo){
+      	CarShopController.makeAppointmentCombo(realName,optionalName,date,startTimes);
+     }
+    else{
+	   	CarShopController.makeAppointmentService(realName,date,startTimes);
+    }
   }
-  
+
+  private Time getStartTimes(){
+
+  	ServiceBooking firstBooking = this.getServiceBookings().get(0);
+	return firstBooking.getTimeSlot().getStartTime();
+
+  }
+
+  private Time getEndTimes(){
+
+  	int length = this.getServiceBookings().size();
+	ServiceBooking lastBooking = this.getServiceBookings().get(length-1);
+	return lastBooking.getTimeSlot().getEndTime();
+
+  }
+
+  private Time getCurTimes(){
+  	return CarShopController.getCurrentTimes();
+  }
 }

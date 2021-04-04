@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 // line 15 "../../../../../carshopPersistence.ump"
-// line 43 "../../../../../carshop.ump"
+// line 44 "../../../../../carshop.ump"
 public class Owner extends User implements Serializable
 {
 
@@ -24,7 +24,7 @@ public class Owner extends User implements Serializable
   public Owner(String aUsername, String aPassword, CarShop aCarShop)
   {
     super(aUsername, aPassword);
-    // line 48 "../../../../../carshop.ump"
+    // line 49 "../../../../../carshop.ump"
     if(!aUsername.equals("owner")) {
       		throw new RuntimeException("Owner account must have 'owner' username");
       	}
@@ -43,7 +43,7 @@ public class Owner extends User implements Serializable
   public boolean setUsername(String aUsername)
   {
     boolean wasSet = false;
-    // line 48 "../../../../../carshop.ump"
+    // line 49 "../../../../../carshop.ump"
     if(!aUsername.equals("owner")) {
       		throw new RuntimeException("Owner account must have 'owner' username");
       	}
