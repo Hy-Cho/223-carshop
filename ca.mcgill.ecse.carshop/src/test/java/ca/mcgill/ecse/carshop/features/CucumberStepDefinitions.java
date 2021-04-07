@@ -23,6 +23,7 @@ import ca.mcgill.ecse.carshop.controller.CarShopController;
 import ca.mcgill.ecse.carshop.controller.InvalidInputException;
 import ca.mcgill.ecse.carshop.controller.InvalidUserException;
 import ca.mcgill.ecse.carshop.model.Appointment;
+import ca.mcgill.ecse.carshop.model.Appointment.States;
 import ca.mcgill.ecse.carshop.model.BookableService;
 import ca.mcgill.ecse.carshop.model.Business;
 import ca.mcgill.ecse.carshop.model.BusinessHour;
@@ -88,6 +89,33 @@ public class CucumberStepDefinitions {
 		}
 	}
 	
+	@When("{string} attempts to update the date to {string} and time to {string} at {string}")
+	public void updateServiceDateTime(String customer, String dateStr, String startStr, String currentStr) {
+		this.updateDateTimes(customer, dateStr, startStr, currentStr);
+	}
+	
+	@When("{string} attempts to update the date to {string} and start time to {string} at {string}")
+	public void updateDateTimes(String customer, String dateStr, String startsStr, String currentStr) {
+		this.setTimeAndDate(currentStr);
+		
+		Date d = convertToDate(dateStr);
+		String[] starts = startsStr.split(",");
+		List<Time> startTimes = new ArrayList<>();
+		
+		for(String start: starts) {
+			startTimes.add(convertToTime(start));
+		}
+		
+		Appointment app = CarShopController.getLastAddedAppointment();
+		
+		try {
+			CarShopController.updateDateTimes(app, d, startTimes);
+		} catch (InvalidInputException e) {
+			error = e.getMessage();
+			errorCnt++;
+		}
+	}
+	
 	@When("{string} makes a {string} appointment with service {string} for the date {string} and start time {string} at {string}")
 	public void makeAppointmentCombo(String customer, String serviceName, String servicesStr, String dateStr, String timeStr, String currentStr) {
 		this.setTimeAndDate(currentStr);
@@ -110,6 +138,95 @@ public class CucumberStepDefinitions {
 		}
 	}
 	
+	@When("{string} attempts to change the service in the appointment to {string} at {string}")
+	public void changeMainService(String customer, String serviceName, String currentStr) throws InvalidInputException {
+		this.setTimeAndDate(currentStr);
+		
+		Appointment app = CarShopController.getLastAddedAppointment();
+		if(app == null) {
+			throw new InvalidInputException("No Appointment to modify");
+		}
+		
+		CarShopController.setMainService(app, serviceName);
+	}
+	
+	@When("the owner starts the appointment at {string}")
+	public void startAppointment(String currentStr) {
+		this.setTimeAndDate(currentStr);
+		
+		Appointment app = CarShopController.getLastAddedAppointment();
+		if(app == null) {
+			System.out.println("It is null");
+		}
+		
+		CarShopController.startAppointment(app);
+	}
+	
+	@When("the owner ends the appointment at {string}") 
+	public void endAppointment(String currentStr) {
+		this.setTimeAndDate(currentStr);
+		
+		Appointment app = CarShopController.getLastAddedAppointment();
+		CarShopController.endAppointment(app);
+	}
+	@When("the owner attempts to end the appointment at {string}")
+	public void attemptEndApp(String currentStr) {
+		this.endAppointment(currentStr);
+	}
+	
+	@When("the owner attempts to register a no-show for the appointment at {string}")
+	public void registerNoShow(String currentStr) {
+		this.setTimeAndDate(currentStr);
+		Appointment app = CarShopController.getLastAddedAppointment();
+		CarShopController.registerNoShow(app);
+	}
+	
+	@When("{string} attempts to add the optional service {string} to the service combo with start time {string} in the appointment at {string}")
+	public void addOptionalService(String customer, String addedService, String timeStr, String currentStr) {
+		this.setTimeAndDate(currentStr);
+		
+		Appointment app = CarShopController.getLastAddedAppointment();
+		Time startTime = convertToTime(timeStr);
+		try {
+			CarShopController.addOptionalService(app, addedService, startTime);
+		} catch (InvalidInputException e) {
+			error = e.getMessage();
+			errorCnt++;
+		}
+	}
+	@When("{string} attempts to cancel the appointment at {string}")
+	public void customerCancelApp(String customer, String currentStr) {
+		this.setTimeAndDate(currentStr);
+		
+		Appointment app = CarShopController.getLastAddedAppointment();
+		if(app != null) {
+			try {
+				CarShopController.customerCancelApp(app);
+			} catch (InvalidInputException e) {
+				error = e.getMessage();
+				errorCnt++;
+			}
+		}
+	}
+	
+	@Then("the appointment shall be booked") 
+	public void appointmentBooked() {
+		Appointment app = CarShopController.getLastAddedAppointment();
+		assertNotNull(app);
+	
+		States state = app.getStates();
+		assertEquals(state, States.Booking);
+	}
+	
+	@Then("the appointment shall be in progress")
+	public void appointmentInProgress() {
+		Appointment app = CarShopController.getLastAddedAppointment();
+		assertNotNull(app);
+		
+		States state = app.getStates();
+		assertEquals(state, States.AppointmentInProgress);
+	}
+	
 	@Then("the service combo shall have {string} selected services")
 	public void checkSelectedServices(String servicesStr) {
 		String[] services = servicesStr.split(",");
@@ -121,6 +238,7 @@ public class CucumberStepDefinitions {
 		List<ServiceBooking> bookings = app.getServiceBookings();
 		List<String> bookedServices = new ArrayList<>();
 		for(ServiceBooking booking: bookings) {
+			System.out.println(booking.getService().getName());
 			bookedServices.add(booking.getService().getName());
 		}
 		
@@ -171,7 +289,7 @@ public class CucumberStepDefinitions {
 			assertEquals(slot.getEndDate(), date);
 			
 			assertEquals(slot.getStartTime(), startTimes.get(j));
-			assertEquals(slot.getEndDate(), endTimes.get(j));
+			assertEquals(slot.getEndTime(), endTimes.get(j));
 		}
 	}
 	
@@ -269,17 +387,24 @@ public class CucumberStepDefinitions {
 		
 			List<Service> services = new ArrayList<>();
 			services.add(bookable.getMainService().getService());
-			services.add(getComboItemFromServiceName(bookable, map.get("optServices")).getService());
-		
+			
+			List<String> optionalServices = Arrays.asList(map.get("optServices").split(","));
+			for(String s: optionalServices) {
+				services.add(this.getComboItemFromServiceName(bookable, s).getService());
+			}
+			
 			String[] timeframes = map.get("timeSlots").split(",");
-			String[] time1 = timeframes[0].split("-");
-			String[] time2 = timeframes[1].split("-");
 			
 			Date date = convertToDate(map.get("date"));
 			
 			Appointment appointment = new Appointment(cust, bookable, carshop);
-			appointment.addServiceBooking(services.get(0), new TimeSlot(date, convertToTime(time1[0]), date, convertToTime(time1[1]), carshop));
-			appointment.addServiceBooking(services.get(1), new TimeSlot(date, convertToTime(time2[0]), date, convertToTime(time2[1]), carshop));
+			for(int i = 0; i < timeframes.length; i++) {
+				String[] times = timeframes[i].split("-");
+				Time startTime = convertToTime(times[0]);
+				Time endTime = convertToTime(times[1]);
+				
+				appointment.addServiceBooking(services.get(i), new TimeSlot(date, startTime, date, endTime, carshop));
+			}
 		}
 	}
 	
@@ -680,6 +805,7 @@ public class CucumberStepDefinitions {
 	@Given("a Carshop system exists")
 	public void a_carshop_system_exists() {
 		carshop = CarShopApplication.getCarShop();
+		
 		error = "";
 		errorCnt = 0;
 	}
@@ -831,7 +957,9 @@ public class CucumberStepDefinitions {
 	
 	@Given("an owner account exists in the system")
 	public void thereIsAnOwner()  {
-		Owner owner = new Owner("owner", "password", this.carshop);
+		if(getUserWithUsername("owner") == null) {
+			Owner owner = new Owner("owner", "password", this.carshop);
+		}
 	}
 	
 	@Given("a business exists in the system")

@@ -21,6 +21,7 @@ import ca.mcgill.ecse.carshop.model.ServiceBooking;
 import ca.mcgill.ecse.carshop.model.TimeSlot;
 import ca.mcgill.ecse.carshop.model.Technician;
 import ca.mcgill.ecse.carshop.model.User;
+import ca.mcgill.ecse.carshop.model.Appointment.States;
 import ca.mcgill.ecse.carshop.persistence.CarShopPersistence;
 
 import java.util.ArrayList;
@@ -35,12 +36,222 @@ public class CarShopController {
 	private static User loggedInUser;
 	private static Appointment lastAddedAppointment;
 	
-	
 	private static Date today = Date.valueOf(LocalDate.of(2021, 2, 1));
 	private static Time now = Time.valueOf(LocalTime.of(11, 0));
 	
-	
+	//Appointment Management
+	public static void customerCancelApp(Appointment app) throws InvalidInputException {
+		if(!loggedInUser.equals(app.getCustomer())) {
+			throw new InvalidInputException("You cannot cancel another customer's appointment");
+		}
 		
+		States state = app.getStates();
+		if(state == States.Booking) {
+			if(!app.getServiceBooking(0).getTimeSlot().getStartDate().equals(today)) {
+				app.Cancel();
+			}
+		}
+		
+		CarShopPersistence.save(CarShopApplication.getCarShop());
+	}
+	
+	public static void setMainService(Appointment app, String serviceName) throws InvalidInputException {
+		if(!loggedInUser.equals(app.getCustomer())) {
+			throw new InvalidInputException("Only the customer can change their appointment");
+		}
+		
+		CarShop carShop = CarShopApplication.getCarShop();
+		
+		Service service = getServiceFromName(serviceName);
+		Time startTime = app.getServiceBooking(0).getTimeSlot().getStartTime();
+		Date d = app.getServiceBooking(0).getTimeSlot().getStartDate();
+		
+		int minutes = (startTime.getMinutes() == 60) ? service.getDuration() : (startTime.getMinutes() + service.getDuration());
+		int hours = (minutes / 60) + startTime.getHours();
+		while(minutes >= 60) {
+			minutes -= 60;
+		}
+		
+		Time endTime = new Time(hours, minutes, 0);
+		
+		if(CarShopController.checkValidTime(d, startTime, endTime, service) && !CarShopController.getToday().equals(d)) {
+			app.SetMain(service, new TimeSlot(d, startTime, d, endTime, carShop));
+		}
+		
+		CarShopPersistence.save(carShop);
+	}
+	public static void updateDateTimes(Appointment app, Date d, List<Time> startTimes) throws InvalidInputException {
+		if(!loggedInUser.equals(app.getCustomer())) {
+			throw new InvalidInputException("Only the customer can change their appointment");
+		}
+		
+		if(app.getServiceBooking(0).getTimeSlot().getStartDate().equals(today)) {
+			return;
+		}
+		
+		CarShop carShop = CarShopApplication.getCarShop();
+		States state = app.getStates();
+		if(state == States.Booking) {
+			if(today.equals(d)) {
+				return;
+			}
+			
+			List<Service> services = new ArrayList<>();
+			for(ServiceBooking booking: app.getServiceBookings()) {
+				services.add(booking.getService());
+			}
+			
+			List<Time> existingStarts = getStartTimes(app);
+			List<Time> endTimes = new ArrayList<>();
+			
+			Date existingDate = app.getServiceBooking(0).getTimeSlot().getStartDate();
+			
+			for(int i = 0; i < services.size(); i++) {
+				Time startTime = startTimes.get(i);
+				Time existingStart = existingStarts.get(i);
+				
+				Time endTime;
+				
+				if(startTime.equals(existingStart) && (existingDate.equals(d))) {
+					continue;
+				}
+				
+				Service service = services.get(i);
+				
+				int minutes = (startTime.getMinutes() == 60) ? service.getDuration() : (startTime.getMinutes() + service.getDuration());
+				int hours = (minutes / 60) + startTime.getHours();
+				while(minutes >= 60) {
+					minutes -= 60;
+				}
+				
+				endTime = new Time(hours, minutes, 0);
+				endTimes.add(endTime);
+				
+				//Checks that the slots we are trying to use are available.
+				if(!checkValidTime(d, startTime, endTime, service)) {
+					return;
+				}
+			}
+			
+			//Checks that none of the times are overlapping
+			if(!checkOverlappingTimes(startTimes, endTimes)) {
+				return;
+			}
+			
+			for(int i = 0; i < app.getServiceBookings().size(); i++) {
+				ServiceBooking booking = app.getServiceBooking(i);
+				booking.setTimeSlot(new TimeSlot(d, startTimes.get(i), d, endTimes.get(i), carShop));
+			}
+		}
+		
+		CarShopPersistence.save(carShop);
+		
+	}
+	
+	private static List<Time> getStartTimes(Appointment app) {
+		List<Time> startTimes = new ArrayList<>();
+		for(ServiceBooking booking: app.getServiceBookings()) {
+			startTimes.add(booking.getTimeSlot().getStartTime());
+		}
+		
+		return startTimes;
+	}
+	
+	public static void addOptionalService(Appointment app, String addedService, Time startTime) throws InvalidInputException {
+		if(!loggedInUser.equals(app.getCustomer())) {
+			throw new InvalidInputException("Only the customer can change their appointment");
+		}
+		
+		CarShop carShop = CarShopApplication.getCarShop();
+		if(app.getBookableService() instanceof ServiceCombo) {
+			States state = app.getStates();
+			if(state == States.Booking) {
+				if(today.equals(app.getServiceBooking(0).getTimeSlot().getStartDate())) {
+					return;
+				}
+			}
+			
+			
+			Service service = getServiceFromName(addedService);
+			Date d = app.getServiceBooking(0).getTimeSlot().getStartDate();
+			
+			int minutes = (startTime.getMinutes() == 60) ? service.getDuration() : (startTime.getMinutes() + service.getDuration());
+			int hours = (minutes / 60) + startTime.getHours();
+			while(minutes >= 60) {
+				minutes -= 60;
+			}
+			
+			
+			
+			Time endTime = new Time(hours, minutes, 0);
+			
+			if(!checkValidTime(d, startTime, endTime, service)) {
+				return;
+			}
+			
+			
+			List<Time> startTimes = new ArrayList<>();
+			List<Time> endTimes = new ArrayList<>();
+			
+			for(ServiceBooking booking: app.getServiceBookings()) {
+				startTimes.add(booking.getTimeSlot().getStartTime());
+				endTimes.add(booking.getTimeSlot().getEndTime());
+			}
+			
+			
+			startTimes.add(startTime);
+			endTimes.add(endTime);
+			
+			if(!checkOverlappingTimes(startTimes, endTimes)) {
+				return;
+			}
+			
+			app.AddBooking(service, new TimeSlot(d, startTime, d, endTime, carShop));
+		
+			CarShopPersistence.save(carShop);
+		}
+	}
+	
+	public static void startAppointment(Appointment app) {
+		States state = app.getStates();
+		if(States.Booking == state) {
+			Time startTime = app.getServiceBooking(0).getTimeSlot().getStartTime();
+			Date d = app.getServiceBooking(0).getTimeSlot().getStartDate();
+			
+			if(today.equals(d) && (now.after(startTime) || startTime.equals(now))) {
+				app.Start();
+			}
+		}
+		
+		CarShopPersistence.save(CarShopApplication.getCarShop());
+	}
+	
+	public static void endAppointment(Appointment app) {
+		States state = app.getStates();
+		
+		if(States.AppointmentInProgress == state) {
+			int length = app.getServiceBookings().size();
+			Time endTime = app.getServiceBooking(length - 1).getTimeSlot().getEndTime();
+			Date endDate = app.getServiceBooking(length - 1).getTimeSlot().getEndDate();
+			
+			if(today.equals(endDate) && (now.after(endTime) || now.equals(endTime))) {
+				app.End();
+			}
+		}
+		
+		CarShopPersistence.save(CarShopApplication.getCarShop());
+	}
+	
+	public static void registerNoShow(Appointment app) {
+		States state = app.getStates();
+		if(States.Booking == state) {
+			app.NoShow();
+		}
+		
+		CarShopPersistence.save(CarShopApplication.getCarShop());
+	}
+	// End Of Appointment Management
+	
 	//Part that handle the appointment taking procedure
 	public static void makeAppointmentService(String serviceName, Date date, Time startTime) throws InvalidInputException {
 	    CarShopController.lastAddedAppointment = null;
@@ -76,19 +287,17 @@ public class CarShopController {
 			minutes -= 60;
 		}
 		
-		Time endTime = new Time(hours, minutes, 0);;
+		Time endTime = new Time(hours, minutes, 0);
 		
 		if(!checkValidTime(date, startTime, endTime, service)) {
 			throw new InvalidInputException("There are no available slots for "+serviceName+" on " + date.toString() + " at " + sdf.format(startTime));
 		}
 		
 		Appointment appointment = new Appointment(cust, service, carShop);
-		appointment.addServiceBooking(service, new TimeSlot(date, startTime, date, endTime, carShop));
-		
+		appointment.SetMain(service, new TimeSlot(date, startTime, date, endTime, carShop));
+				
 		CarShopController.lastAddedAppointment = appointment;
-		
 		CarShopPersistence.save(carShop);
-		
 	}
 	
 	public static boolean checkValidTime(Date date, Time startTime, Time endTime, Service service) {
@@ -121,26 +330,7 @@ public class CarShopController {
 		return true;
 	}
 	
-	public static boolean checkOverlappingTimes(List<Time> startTimes, List<Time> endTimes) {
-		for(int i = 0; i < startTimes.size(); i++) {
-			Time startTime = startTimes.get(i);
-			Time endTime = endTimes.get(i);
-			
-			for(int j = 0; j < startTimes.size(); j++) {
-				if (i == j) {
-					continue;
-				}
-				
-				Time startToCheck = startTimes.get(j);
-				Time endToCheck = endTimes.get(j);
-								
-				if(isOverlapping(startTime, endTime, startToCheck, endToCheck)) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
+
 	 
 	public static void makeAppointmentCombo(String comboName, List<String> optionalName, Date date, List<Time> startTimes) throws InvalidInputException {
 		CarShopController.lastAddedAppointment = null;
@@ -267,6 +457,27 @@ public class CarShopController {
 	}
 	
 	
+	public static boolean checkOverlappingTimes(List<Time> startTimes, List<Time> endTimes) {
+		for(int i = 0; i < startTimes.size(); i++) {
+			Time startTime = startTimes.get(i);
+			Time endTime = endTimes.get(i);
+			
+			for(int j = 0; j < startTimes.size(); j++) {
+				if (i == j) {
+					continue;
+				}
+				
+				Time startToCheck = startTimes.get(j);
+				Time endToCheck = endTimes.get(j);
+								
+				if(isOverlapping(startTime, endTime, startToCheck, endToCheck)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
 	private static boolean checkAvailableSlot(Date d, Time startTime, Time endTime, Garage g) {
 		for(Service s: g.getServices()) {
 			for(ServiceBooking booking: s.getServiceBookings()) {
@@ -324,7 +535,8 @@ public class CarShopController {
 				Time slotStart = slot.getStartTime();
 				Time slotEnd = slot.getEndTime();
 				
-				if (startTime.after(slotStart) || endTime.before(slotEnd)) {
+				
+				if (isOverlapping(slotStart, slotEnd, startTime, endTime)) {
 					return true;
 				}
 			}
@@ -343,7 +555,8 @@ public class CarShopController {
 				Time slotStart = slot.getStartTime();
 				Time slotEnd = slot.getEndTime();
 				
-				if (startTime.after(slotStart) || endTime.before(slotEnd)) {
+				
+				if (isOverlapping(slotStart, slotEnd, startTime, endTime)) {
 					return true;
 				}
 			}
@@ -1444,5 +1657,8 @@ public class CarShopController {
 	  public static Time getCurrentTimes() {
 			
 			return now;
-		}
+	  }
+	  public static Date getToday() {
+		  return today;
+	  }
 }

@@ -943,8 +943,8 @@ public class CarShop implements Serializable
 		if(this.getOwner() != null) {
 			users.add(this.getOwner());
 		}
-	   
-    
+
+
 	  User.reinitializeUsernamesList(users);
 	  BookableService.reinitializeNameList(bookables);
   }

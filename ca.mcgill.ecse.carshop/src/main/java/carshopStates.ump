@@ -1,50 +1,48 @@
 class Appointment{
   States{
-    Booking{
-
-      UpdateAppointment [moreThan1DayRemaining() && isInBusinessHour(newTimes) && !isHoliday(newTimes) && !isVacation(newTimes) && checkAvailableSlot(newTimes)]
-      /{ updateAppointment(realName,optionalName,date,startTimes); } -> Booking;
-
-      No_Show [(getCurTimes().after(getEndTimes()) || getCurTimes().equals(getEndTimes()))] /{ delete(); customer.incrNoShow();} -> Final;
-
-      CancelAppointment [moreThan1DayRemaining()] /{delete();} -> Final;
-
-      Start [(getStartTimes().before(getCurTimes()) || getStartTimes().equals(getCurTimes()))]-> AppointmentInProgress;
-    }
-    AppointmentInProgress{
-      End [getCurTimes().equals(getEndTimes())] /{ delete();} -> Final;
-
-      UpdateServiceCombo [technicianIsAvailable() && isInBusinessHour(newTimes) && isHoliday(newTimes) && !isVacation(newTimes) && checkAvailableSlot(newTimes)]
-      /{ delete(); updateCombo(newCombo); CarShopController.makeAppointmentCombo(realName,date,startTimes);} -> AppointmentInProgress;
-    }
+   Booking {
+  	SetMain(Service s, TimeSlot t) / { setMainService(s, t); } -> Booking;
+  	AddBooking(Service s, TimeSlot t) / { this.addServiceBooking(s, t); } -> Booking;
+    UpdateDateTimes(Date d, List<Time> startTimes, List<Time> endTimes) / {updateDateTimes(d, startTimes, endTimes); } -> Booking;
+    Cancel / {delete();} -> FinalState;
+    
+    Start -> AppointmentInProgress;
+    
+    NoShow / {customer.incrNoShow(); delete(); } -> FinalState;
+   }
+   
+   AppointmentInProgress {
+   	Start -> AppointmentInProgress;
+   	AddBooking(Service s, TimeSlot t) / {this.addServiceBooking(s, t); } -> AppointmentInProgress;
+   	End / {delete(); } -> FinalState;
+   }
+   
+   final FinalState {
+   
+   } 
   }
-
-  private void updateAppointment(realName,optionalName,date,startTimes){
-  	delete();
-  	if(bookableService instanceof ServiceCombo){
-      	CarShopController.makeAppointmentCombo(realName,optionalName,date,startTimes);
-     }
-    else{
-	   	CarShopController.makeAppointmentService(realName,date,startTimes);
-    }
+  
+  private void setMainService(Service s, TimeSlot t) {
+  	if(bookableService instanceof Service) {
+	    this.setBookableService(s);
+	    if(this.getServiceBookings().size() == 0) {
+	        this.addServiceBooking(s, t);
+	    }
+	    else {
+	        ServiceBooking booking = this.getServiceBooking(0);
+	        booking.setService(s);
+	        booking.setTimeSlot(t);
+	    }
+	}
   }
-
-  private Time getStartTimes(){
-
-  	ServiceBooking firstBooking = this.getServiceBookings().get(0);
-	return firstBooking.getTimeSlot().getStartTime();
-
-  }
-
-  private Time getEndTimes(){
-
-  	int length = this.getServiceBookings().size();
-	ServiceBooking lastBooking = this.getServiceBookings().get(length-1);
-	return lastBooking.getTimeSlot().getEndTime();
-
-  }
-
-  private Time getCurTimes(){
-  	return CarShopController.getCurrentTimes();
+  
+  private void updateDateTimes(Date d, List<Time> startTimes, List<Time> endTimes) {
+  	for(int i = 0; i < startTimes.size(); i++) {
+  	  Time startTime = startTimes.get(i);
+  	  Time endTime = endTimes.get(i);
+  	  
+  	  ServiceBooking booking = this.getServiceBooking(i);
+  	  booking.setTimeSlot(new TimeSlot(d, startTime, d, endTime, carShop));
+  	}
   }
 }

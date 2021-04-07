@@ -8,6 +8,7 @@ import ca.mcgill.ecse.carshop.persistence.CarShopPersistence;
 public class CarShopApplication {
 	
 	private static CarShop carShop;
+	private static final boolean TESTING = true;
 	
     public String getGreeting() {
         return "Hello World!";
@@ -19,10 +20,21 @@ public class CarShopApplication {
     
     public static CarShop getCarShop() {
     	if(carShop == null) {
-    		carShop = CarShopPersistence.load();
+    		if(TESTING) {
+    			carShop = new CarShop();
+    		}
+    		else {
+    			carShop = CarShopPersistence.load();
+    		}
+    		
+    		
     	}
     	
     	return carShop;
+    }
+    
+    public static boolean getTesting() {
+    	return TESTING;
     }
 }
     

@@ -71,12 +71,10 @@ public class CarShopControllerTest {
     Time now = Time.valueOf(LocalTime.of(11, 0));
     
     // Scenario Outline: Set up basic business information
-    // TODO
   }
   
   @Test
   public void testUpdateBusinessInfo () {
-    // TODO
   }
 }
 

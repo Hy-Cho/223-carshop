@@ -144,7 +144,7 @@ class ComboItem {
 
 class Appointment {
   depend java.sql.Time;
-  depend ca.mcgill.ecse.carshop.controller.CarShopController;
+  depend java.sql.Date;
   * -- 1 Customer customer;
   * -- 1 BookableService bookableService;
   1 <@>- * ServiceBooking serviceBookings;
