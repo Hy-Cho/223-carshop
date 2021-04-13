@@ -23,8 +23,8 @@ public class CarShopApplication {
     public static void main(String[] args) {
     	java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-//                new CarshopPage().setVisible(true);
-                new CarShopPageHyunbum().setVisible(true);
+                new CarshopPage().setVisible(true);
+//                new CarShopPageHyunbum().setVisible(true);
             }
         });
     }

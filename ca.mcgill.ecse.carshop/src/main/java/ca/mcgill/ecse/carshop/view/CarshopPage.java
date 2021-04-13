@@ -217,30 +217,30 @@ public class CarshopPage extends JFrame {
 		
 				
 		pack();
-//		// elements for add service
-//	      serviceNameLabel = new JLabel();
-//	      serviceNameLabel.setText("Name: ");
-//	      serviceNameTextField = new JTextField();
-//	      serviceDurationLabel = new JLabel();
-//	      serviceDurationLabel.setText("Duration: ");
-//	      serviceDurationTextField = new JTextField();
-//	      garageList = new JComboBox<String>(new String[0]);
-//	      addServiceButton = new JButton();
-//	      addServiceButton.setText("Add Service");
-//	      serviceTable = new JTable();
-//	      serviceTableScrollPane = new JScrollPane(serviceTable);
-//	      this.add(serviceTableScrollPane);
-//	      Dimension d = serviceTable.getPreferredSize();
-//	      serviceTableScrollPane.setPreferredSize(new Dimension(d.width, HEIGHT_SERVICE_TABLE));
-//	      serviceTableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-//	      
-//	      
-//	      // action listeners for service
-//	      addServiceButton.addActionListener(new java.awt.event.ActionListener() {
-//	        public void actionPerformed(java.awt.event.ActionEvent evt) {
-//	          addServiceButtonActionPerformed(evt);
-//	        }
-//	      });
+		// elements for add service
+	      serviceNameLabel = new JLabel();
+	      serviceNameLabel.setText("Name: ");
+	      serviceNameTextField = new JTextField();
+	      serviceDurationLabel = new JLabel();
+	      serviceDurationLabel.setText("Duration: ");
+	      serviceDurationTextField = new JTextField();
+	      garageList = new JComboBox<String>(new String[0]);
+	      addServiceButton = new JButton();
+	      addServiceButton.setText("Add Service");
+	      serviceTable = new JTable();
+	      serviceTableScrollPane = new JScrollPane(serviceTable);
+	      this.add(serviceTableScrollPane);
+	      Dimension d = serviceTable.getPreferredSize();
+	      serviceTableScrollPane.setPreferredSize(new Dimension(d.width, HEIGHT_SERVICE_TABLE));
+	      serviceTableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+	      
+	      
+	      // action listeners for service
+	      addServiceButton.addActionListener(new java.awt.event.ActionListener() {
+	        public void actionPerformed(java.awt.event.ActionEvent evt) {
+	          addServiceButtonActionPerformed(evt);
+	        }
+	      });
 //	      
 //	      // layout
 ////	      GroupLayout layout = new GroupLayout(getContentPane());
