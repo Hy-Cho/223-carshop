@@ -39,6 +39,51 @@ public class CarShopController {
 	private static Date today = Date.valueOf(LocalDate.of(2021, 2, 1));
 	private static Time now = Time.valueOf(LocalTime.of(11, 0));
 	
+	/*
+	public static List<TOService> getServices(){
+	  ArrayList<TOService> bookableServices = new ArrayList<TOService>();
+	  for (BookableService bookableService: CarShopApplication.getCarShop().getBookableServices()) {
+	    TOService toService = new TOService(bookableService.getName(), bookableService.get);
+	    
+	  }
+	  return bookableServices;
+	}
+	*/
+	
+	public static void testView() {
+	  Owner owner = new Owner("owner", "owner pass", CarShopApplication.getCarShop());
+	  try {
+	    logIn("owner", "owner pass");
+	  } catch (InvalidInputException e) {
+	    System.out.println("incorrect password");
+	  }
+	  Technician tech = CarShopApplication.getCarShop().addTechnician("technician 1", "password", TechnicianType.Electronics);
+	  CarShopApplication.getCarShop().addGarage(tech);
+	}
+	public static List<TOGarage> getGarages(){
+	  ArrayList<TOGarage> garages = new ArrayList<TOGarage>();
+	  for (Garage garage: CarShopApplication.getCarShop().getGarages()) {
+	    TOGarage toGarage = new TOGarage(garage.getTechnician().getUsername());
+	    garages.add(toGarage);
+      }
+      return garages;
+    }
+	
+	public static Garage getGarageFromTechnicianType(String username) throws InvalidInputException {
+	  List<Garage> garages = CarShopApplication.getCarShop().getGarages();
+	  Garage g = null;
+	  for (Garage garage: garages) {
+	    if (garage.getTechnician().getUsername() == username) {
+	      g = garage;
+	      break;
+	    }
+	  }
+	  if (g == null) {
+	    throw new InvalidInputException("Couldn't find any garage with technican type" + username);
+	  }
+	  return g;
+	}
+	
 	//Appointment Management
 	public static void customerCancelApp(Appointment app) throws InvalidInputException {
 		if(!loggedInUser.equals(app.getCustomer())) {
