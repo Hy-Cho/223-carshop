@@ -75,7 +75,6 @@ public class CarshopPage extends JFrame {
 	
 	private String error=null;
 	public CarshopPage() {
-	  CarShopController.testView();
 	  initComponents();
 	  refreshData();
 	}
@@ -218,71 +217,71 @@ public class CarshopPage extends JFrame {
 		
 				
 		pack();
-		// elements for add service
-	      serviceNameLabel = new JLabel();
-	      serviceNameLabel.setText("Name: ");
-	      serviceNameTextField = new JTextField();
-	      serviceDurationLabel = new JLabel();
-	      serviceDurationLabel.setText("Duration: ");
-	      serviceDurationTextField = new JTextField();
-	      garageList = new JComboBox<String>(new String[0]);
-	      addServiceButton = new JButton();
-	      addServiceButton.setText("Add Service");
-	      serviceTable = new JTable();
-	      serviceTableScrollPane = new JScrollPane(serviceTable);
-	      this.add(serviceTableScrollPane);
-	      Dimension d = serviceTable.getPreferredSize();
-	      serviceTableScrollPane.setPreferredSize(new Dimension(d.width, HEIGHT_SERVICE_TABLE));
-	      serviceTableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-	      
-	      
-	      // action listeners for service
-	      addServiceButton.addActionListener(new java.awt.event.ActionListener() {
-	        public void actionPerformed(java.awt.event.ActionEvent evt) {
-	          addServiceButtonActionPerformed(evt);
-	        }
-	      });
-	      
-	      // layout
-//	      GroupLayout layout = new GroupLayout(getContentPane());
-	      getContentPane().setLayout(layout);
-	      layout.setAutoCreateGaps(true);
-	      layout.setAutoCreateContainerGaps(true);
-	      layout.setHorizontalGroup(
-	          layout.createParallelGroup()
-	          .addGroup(layout.createSequentialGroup()
-	              .addGroup(layout.createParallelGroup()
-	                  .addComponent(serviceNameLabel)
-	                  .addComponent(serviceDurationLabel)
-	                  )
-	              .addGroup(layout.createParallelGroup()
-	                  .addComponent(serviceNameTextField)
-	                  .addComponent(serviceDurationTextField)
-	                  .addComponent(garageList)
-	                  .addComponent(addServiceButton)
-	                  )
-	              )
-	          .addComponent(errorMessage)
-	          );
-
-	      layout.setVerticalGroup(
-	          layout.createSequentialGroup()
-	          .addGroup(layout.createParallelGroup()
-	              .addComponent(serviceNameLabel)
-	              .addComponent(serviceNameTextField)
-	              )
-	          .addGroup(layout.createParallelGroup()
-	              .addComponent(serviceDurationLabel)
-	              .addComponent(serviceDurationTextField)
-	              )
-	          .addComponent(garageList)
-	          .addComponent(addServiceButton)
-	          .addComponent(errorMessage)
-	          );
-	      
-	      layout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {serviceNameTextField, serviceDurationTextField});
-	      layout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {addServiceButton, garageList});
-	      layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {serviceNameTextField, serviceDurationTextField, addServiceButton, garageList});
+//		// elements for add service
+//	      serviceNameLabel = new JLabel();
+//	      serviceNameLabel.setText("Name: ");
+//	      serviceNameTextField = new JTextField();
+//	      serviceDurationLabel = new JLabel();
+//	      serviceDurationLabel.setText("Duration: ");
+//	      serviceDurationTextField = new JTextField();
+//	      garageList = new JComboBox<String>(new String[0]);
+//	      addServiceButton = new JButton();
+//	      addServiceButton.setText("Add Service");
+//	      serviceTable = new JTable();
+//	      serviceTableScrollPane = new JScrollPane(serviceTable);
+//	      this.add(serviceTableScrollPane);
+//	      Dimension d = serviceTable.getPreferredSize();
+//	      serviceTableScrollPane.setPreferredSize(new Dimension(d.width, HEIGHT_SERVICE_TABLE));
+//	      serviceTableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+//	      
+//	      
+//	      // action listeners for service
+//	      addServiceButton.addActionListener(new java.awt.event.ActionListener() {
+//	        public void actionPerformed(java.awt.event.ActionEvent evt) {
+//	          addServiceButtonActionPerformed(evt);
+//	        }
+//	      });
+//	      
+//	      // layout
+////	      GroupLayout layout = new GroupLayout(getContentPane());
+//	      getContentPane().setLayout(layout);
+//	      layout.setAutoCreateGaps(true);
+//	      layout.setAutoCreateContainerGaps(true);
+//	      layout.setHorizontalGroup(
+//	          layout.createParallelGroup()
+//	          .addGroup(layout.createSequentialGroup()
+//	              .addGroup(layout.createParallelGroup()
+//	                  .addComponent(serviceNameLabel)
+//	                  .addComponent(serviceDurationLabel)
+//	                  )
+//	              .addGroup(layout.createParallelGroup()
+//	                  .addComponent(serviceNameTextField)
+//	                  .addComponent(serviceDurationTextField)
+//	                  .addComponent(garageList)
+//	                  .addComponent(addServiceButton)
+//	                  )
+//	              )
+//	          .addComponent(errorMessage)
+//	          );
+//
+//	      layout.setVerticalGroup(
+//	          layout.createSequentialGroup()
+//	          .addGroup(layout.createParallelGroup()
+//	              .addComponent(serviceNameLabel)
+//	              .addComponent(serviceNameTextField)
+//	              )
+//	          .addGroup(layout.createParallelGroup()
+//	              .addComponent(serviceDurationLabel)
+//	              .addComponent(serviceDurationTextField)
+//	              )
+//	          .addComponent(garageList)
+//	          .addComponent(addServiceButton)
+//	          .addComponent(errorMessage)
+//	          );
+//	      
+//	      layout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {serviceNameTextField, serviceDurationTextField});
+//	      layout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {addServiceButton, garageList});
+//	      layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {serviceNameTextField, serviceDurationTextField, addServiceButton, garageList});
 	}
 	
 	private void signUpForCustomerAccountActionPerformed(java.awt.event.ActionEvent evt) {

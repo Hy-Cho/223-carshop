@@ -133,8 +133,6 @@ public class CarShopPageHyunbum extends JFrame {
         // duration
         serviceDurationTextField.setText("");
 
-        
-        // toggle sick status
         garages = new HashMap<Integer, TOGarage>();
         garageList.removeAllItems();
         Integer index = 0;
