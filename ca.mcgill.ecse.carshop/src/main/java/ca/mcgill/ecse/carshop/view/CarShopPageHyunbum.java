@@ -24,7 +24,7 @@ import ca.mcgill.ecse.carshop.controller.TOGarage;
 import ca.mcgill.ecse.carshop.model.Garage;
 
 
-public class CarShopPage extends JFrame {
+public class CarShopPageHyunbum extends JFrame {
 	private static final long serialVersionUID = -5633915762703837868L;
 	
 	private String error = null;
@@ -45,7 +45,7 @@ public class CarShopPage extends JFrame {
 	// garages to add service
 	private HashMap<Integer, TOGarage> garages;
 	
-	public CarShopPage() {
+	public CarShopPageHyunbum() {
 	  CarShopController.testView();
 	  initComponents();
       refreshData();

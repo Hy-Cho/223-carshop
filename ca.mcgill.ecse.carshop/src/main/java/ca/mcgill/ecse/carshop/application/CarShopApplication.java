@@ -4,7 +4,7 @@
 package ca.mcgill.ecse.carshop.application;
 import ca.mcgill.ecse.carshop.model.CarShop;
 import ca.mcgill.ecse.carshop.persistence.CarShopPersistence;
-import ca.mcgill.ecse.carshop.view.CarShopPage;
+import ca.mcgill.ecse.carshop.view.CarShopPageHyunbum;
 
 public class CarShopApplication {
 	
@@ -18,7 +18,7 @@ public class CarShopApplication {
     public static void main(String[] args) {
       java.awt.EventQueue.invokeLater(new Runnable() {
         public void run() {
-            new CarShopPage().setVisible(true);
+            new CarShopPageHyunbum().setVisible(true);
         }
     });
     }
