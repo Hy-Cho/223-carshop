@@ -27,7 +27,6 @@ import javax.swing.JFrame;
 import ca.mcgill.ecse.carshop.controller.CarShopController;
 import ca.mcgill.ecse.carshop.controller.InvalidInputException;
 import ca.mcgill.ecse.carshop.controller.InvalidUserException;
-import ca.mcgill.ecse.carshop.controller.TOGarage;
 
 public class CarshopPage extends JFrame {
 	private static final long serialVersionUID = -5633915762703837868L;
@@ -52,31 +51,31 @@ public class CarshopPage extends JFrame {
 	private JTextField BAddressTextField;
 	private JTextField BPhoneNumberTextField;
 	private JTextField BEmailTextField;
-	private JButton SetBizInfo;
+	private JButton SetBizInfoButton;
 	private JLabel BNameLabel;
 	private JLabel BAddressLabel;
 	private JLabel BPhoneNumberLabel;
 	private JLabel BEmailLabel;
 	
-	// add service
-    private JLabel serviceNameLabel;
-    private JTextField serviceNameTextField;
-    private JLabel serviceDurationLabel;
-    private JTextField serviceDurationTextField;
-    private JComboBox<String> garageList;
-    private JButton addServiceButton;
-    private JTable serviceTable;
-    private JScrollPane serviceTableScrollPane;
-    private DefaultTableModel serviceDtm;
-    private String serviceColumnNames[] = {"Name", "Duration"};
-    private static final int HEIGHT_SERVICE_TABLE = 250;
-    // garages to add service
-    private HashMap<Integer, TOGarage> garages;
+	//Business Info displayer element
+	private JLabel BInfoPresenter;
+	private JLabel BNameDisplayerLabel;
+	private JLabel BAddressDisplayerLabel;
+	private JLabel BPhoneNumberDisplayerLabel;
+	private JLabel BEmailDisplayerLabel;
+	private JLabel BNameDisplayerField;
+	private JLabel BAddressDisplayerField;
+	private JLabel BPhoneNumberDisplayerField;
+	private JLabel BEmailDisplayerField;
+	
+	//LoggedInAs element
+	private JLabel LoggedInAsLabel;
+	private JLabel LoggedInAsField;
 	
 	private String error=null;
 	public CarshopPage() {
-	  initComponents();
-	  refreshData();
+		initComponents();
+		refreshData();
 	}
 	
 	private void refreshData() {
@@ -90,20 +89,6 @@ public class CarshopPage extends JFrame {
 			BAddressTextField.setText("");;
 			BPhoneNumberTextField.setText("");;
 			BEmailTextField.setText("");
-			// service name
-	        serviceNameTextField.setText("");
-	        // duration
-	        serviceDurationTextField.setText("");
-
-	        garages = new HashMap<Integer, TOGarage>();
-	        garageList.removeAllItems();
-	        Integer index = 0;
-	        for (TOGarage garage : CarShopController.getGarages()) {
-	          garages.put(index, garage);
-	          garageList.addItem(garage.getTechnicianUsername() + "'s garage");
-	            index++;
-	        };
-	        garageList.setSelectedIndex(-1);
 		}
 		pack();
 	}
@@ -145,8 +130,34 @@ public class CarshopPage extends JFrame {
 		BPhoneNumberLabel.setText("Phone Number: ");
 		BEmailLabel = new JLabel();
 		BEmailLabel.setText("Email: ");
-		SetBizInfo = new JButton();
-		SetBizInfo.setText("Set Business Information");
+		SetBizInfoButton = new JButton();
+		SetBizInfoButton.setText("Set Business Information");
+		
+		//elements for BusinessInfoDisplayer
+		BInfoPresenter=new JLabel();
+		BInfoPresenter.setText("Business Information: ");
+		BNameDisplayerLabel=new JLabel();
+		BNameDisplayerLabel.setText("Name: ");
+		BAddressDisplayerLabel=new JLabel();
+		BAddressDisplayerLabel.setText("Address: ");
+		BPhoneNumberDisplayerLabel=new JLabel();
+		BPhoneNumberDisplayerLabel.setText("Phone Number: ");
+		BEmailDisplayerLabel= new JLabel();
+		BEmailDisplayerLabel.setText("Email: ");
+		BNameDisplayerField= new JLabel();
+		BNameDisplayerField.setText( "" );
+		BAddressDisplayerField= new JLabel();
+		BAddressDisplayerField.setText("");
+		BPhoneNumberDisplayerField= new JLabel();
+		BPhoneNumberDisplayerField.setText("");
+		BEmailDisplayerField= new JLabel();
+		BEmailDisplayerField.setText("");
+		
+		//elements for LoggedInAs element
+		LoggedInAsLabel=new JLabel();
+		LoggedInAsLabel.setText("Logged In As: ");
+		LoggedInAsField=new JLabel();
+		LoggedInAsField.setText("");
 		
 		//add listeners to sign up as a customer
 		signUpForCustomerAccountButton.addActionListener(new java.awt.event.ActionListener() {
@@ -163,7 +174,7 @@ public class CarshopPage extends JFrame {
 		});
 		
 		//add listener to setup business info
-		SetBizInfo.addActionListener(new java.awt.event.ActionListener() {
+		SetBizInfoButton.addActionListener(new java.awt.event.ActionListener() {
 		    public void actionPerformed(java.awt.event.ActionEvent evt) {
 		        SetUpBusinessInfoAccountButtonActionPerformed(evt);
 		    }
@@ -179,21 +190,42 @@ public class CarshopPage extends JFrame {
 								  	.addGroup(layout.createSequentialGroup()
 										      		.addGroup(layout.createParallelGroup()
 										      				.addComponent(signUpUsernameLabel)
-										      				.addComponent(signUpPasswordLabel))
-										      		.addGroup(layout.createParallelGroup())
+										      				.addComponent(signUpPasswordLabel)
+										      				.addComponent(BNameLabel)
+										      				.addComponent(BAddressLabel)
+										      				.addComponent(BEmailLabel)
+										      				.addComponent(BPhoneNumberLabel)
+										      				.addComponent(LoggedInAsLabel))
+										      		.addGroup(layout.createParallelGroup()
 										      				.addComponent(signUpUsernameTextField,200,200,400)
 										      				.addComponent(signUpPasswordTextField,200,200,400)
 										      				.addComponent(signUpForCustomerAccountButton)
+										      				.addComponent(BNameTextField)
+										      				.addComponent(BAddressTextField)
+										      				.addComponent(BEmailTextField)
+										      				.addComponent(BPhoneNumberTextField)
+										      				.addComponent(SetBizInfoButton)
+										      				.addComponent(LoggedInAsField))
 										      		.addGroup(layout.createParallelGroup()
 												      				.addComponent(logInUsernameLabel)
-												      				.addComponent(logInPasswordLabel))
-												     .addGroup(layout.createParallelGroup())
+												      				.addComponent(logInPasswordLabel)
+												      				.addComponent(BInfoPresenter)
+												      				.addComponent(BNameDisplayerLabel)
+												      				.addComponent(BAddressDisplayerLabel)
+												      				.addComponent(BEmailDisplayerLabel)
+												      				.addComponent(BPhoneNumberDisplayerLabel))
+												     .addGroup(layout.createParallelGroup()
 												      				.addComponent(logInUsernameTextField,200,200,400)
 												      				.addComponent(logInPasswordTextField,200,200,400)
-												      				.addComponent(logInAccountButton)));
+												      				.addComponent(logInAccountButton)
+												      				.addComponent(BNameDisplayerField)
+												      				.addComponent(BAddressDisplayerField)
+												      				.addComponent(BEmailDisplayerField)
+												      				.addComponent(BPhoneNumberDisplayerField))));
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {signUpForCustomerAccountButton, signUpPasswordTextField, signUpUsernameTextField});
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {logInAccountButton, logInPasswordTextField, logInUsernameTextField});
-		
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {SetBizInfoButton, BPhoneNumberTextField, BEmailTextField,BAddressTextField,BNameTextField});
+
 		layout.setVerticalGroup(
 					layout.createSequentialGroup()
 					.addComponent(errorMessage)
@@ -210,78 +242,38 @@ public class CarshopPage extends JFrame {
 					.addGroup(layout.createParallelGroup()
 									.addComponent(signUpForCustomerAccountButton)
 									.addComponent(logInAccountButton))
+					.addGroup(layout.createParallelGroup()
+							.addComponent(BNameLabel)
+							.addComponent(BNameTextField)
+							.addComponent(BInfoPresenter)
+							)
+					.addGroup(layout.createParallelGroup()
+							.addComponent(BAddressLabel)
+							.addComponent(BAddressTextField)
+							.addComponent(BNameDisplayerLabel)
+							.addComponent(BNameDisplayerField))
+					.addGroup(layout.createParallelGroup()
+							.addComponent(BEmailLabel)
+							.addComponent(BEmailTextField)
+							.addComponent(BAddressDisplayerLabel)
+							.addComponent(BAddressDisplayerField))
+					.addGroup(layout.createParallelGroup()
+							.addComponent(BPhoneNumberLabel)
+							.addComponent(BPhoneNumberTextField)
+							.addComponent(BEmailDisplayerLabel)
+							.addComponent(BEmailDisplayerField))
+					.addGroup(layout.createParallelGroup()
+							.addComponent(SetBizInfoButton)
+							.addComponent(BPhoneNumberDisplayerLabel)
+							.addComponent(BPhoneNumberDisplayerField))
+					.addGroup(layout.createParallelGroup()
+							.addComponent(LoggedInAsLabel)
+							.addComponent(LoggedInAsField))
+					
 				);
 		
-		//layout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {signUpForCustomerAccountButton, signUpPasswordTextField, signUpUsernameTextField});
-		//layout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {logInAccountButton, logInPasswordTextField, logInUsernameTextField});
-		
-				
 		pack();
-		// elements for add service
-	      serviceNameLabel = new JLabel();
-	      serviceNameLabel.setText("Name: ");
-	      serviceNameTextField = new JTextField();
-	      serviceDurationLabel = new JLabel();
-	      serviceDurationLabel.setText("Duration: ");
-	      serviceDurationTextField = new JTextField();
-	      garageList = new JComboBox<String>(new String[0]);
-	      addServiceButton = new JButton();
-	      addServiceButton.setText("Add Service");
-	      serviceTable = new JTable();
-	      serviceTableScrollPane = new JScrollPane(serviceTable);
-	      this.add(serviceTableScrollPane);
-	      Dimension d = serviceTable.getPreferredSize();
-	      serviceTableScrollPane.setPreferredSize(new Dimension(d.width, HEIGHT_SERVICE_TABLE));
-	      serviceTableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-	      
-	      
-	      // action listeners for service
-	      addServiceButton.addActionListener(new java.awt.event.ActionListener() {
-	        public void actionPerformed(java.awt.event.ActionEvent evt) {
-	          addServiceButtonActionPerformed(evt);
-	        }
-	      });
-//	      
-//	      // layout
-////	      GroupLayout layout = new GroupLayout(getContentPane());
-//	      getContentPane().setLayout(layout);
-//	      layout.setAutoCreateGaps(true);
-//	      layout.setAutoCreateContainerGaps(true);
-//	      layout.setHorizontalGroup(
-//	          layout.createParallelGroup()
-//	          .addGroup(layout.createSequentialGroup()
-//	              .addGroup(layout.createParallelGroup()
-//	                  .addComponent(serviceNameLabel)
-//	                  .addComponent(serviceDurationLabel)
-//	                  )
-//	              .addGroup(layout.createParallelGroup()
-//	                  .addComponent(serviceNameTextField)
-//	                  .addComponent(serviceDurationTextField)
-//	                  .addComponent(garageList)
-//	                  .addComponent(addServiceButton)
-//	                  )
-//	              )
-//	          .addComponent(errorMessage)
-//	          );
-//
-//	      layout.setVerticalGroup(
-//	          layout.createSequentialGroup()
-//	          .addGroup(layout.createParallelGroup()
-//	              .addComponent(serviceNameLabel)
-//	              .addComponent(serviceNameTextField)
-//	              )
-//	          .addGroup(layout.createParallelGroup()
-//	              .addComponent(serviceDurationLabel)
-//	              .addComponent(serviceDurationTextField)
-//	              )
-//	          .addComponent(garageList)
-//	          .addComponent(addServiceButton)
-//	          .addComponent(errorMessage)
-//	          );
-//	      
-//	      layout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {serviceNameTextField, serviceDurationTextField});
-//	      layout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {addServiceButton, garageList});
-//	      layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {serviceNameTextField, serviceDurationTextField, addServiceButton, garageList});
+		
 	}
 	
 	private void signUpForCustomerAccountActionPerformed(java.awt.event.ActionEvent evt) {
@@ -300,6 +292,7 @@ public class CarshopPage extends JFrame {
 		error="";
 		try {
 			CarShopController.logIn(logInUsernameTextField.getText(), logInPasswordTextField.getText());
+			LoggedInAsField.setText(logInUsernameTextField.getText());
 			
 		}
 		catch(InvalidInputException e) {
@@ -310,41 +303,25 @@ public class CarshopPage extends JFrame {
 	
 	private void SetUpBusinessInfoAccountButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		error="";
-		try {
-			CarShopController.setBusinessInfo(BNameTextField.getText(), BAddressTextField.getText(), BPhoneNumberTextField.getText(), BEmailTextField.getText());
+		if(!BPhoneNumberDisplayerField.getText().equals("")) {
+			error="You have already set your business information. You must update it now.";
 		}
-		catch(InvalidInputException e) {
-			error=e.getMessage();
-		}
-		catch(InvalidUserException e) {
-			error=e.getMessage();
+		else {
+			try {
+				CarShopController.setBusinessInfo(BNameTextField.getText(), BAddressTextField.getText(), BPhoneNumberTextField.getText(), BEmailTextField.getText());
+				BNameDisplayerField.setText( BNameTextField.getText() );
+				BAddressDisplayerField.setText(BAddressTextField.getText());
+				BPhoneNumberDisplayerField.setText(BPhoneNumberTextField.getText());
+				BEmailDisplayerField.setText(BEmailTextField.getText());
+			}
+			catch(InvalidInputException e) {
+				error=e.getMessage();
+			}
+			catch(InvalidUserException e) {
+				error=e.getMessage();
+			}
 		}
 		refreshData();
 	}
-	
-	
-	
-	private void addServiceButtonActionPerformed(java.awt.event.ActionEvent evt) {
-      // clear error message
-      error = "";
-      
-      int selectedGarage = garageList.getSelectedIndex();
-      if (selectedGarage < 0) {
-        error = "Garage has to be selected to add a service!";
-      }
-      if (error.length() == 0) {
-        try {
-          TOGarage garage = garages.get(selectedGarage);
-          String technicianUsername = garage.getTechnicianUsername();
-          CarShopController.createService(serviceNameTextField.getText(), Integer.parseInt(serviceDurationTextField.getText()), CarShopController.getGarageFromTechnicianType(technicianUsername));
-        } catch (InvalidInputException e) {
-            error = e.getMessage();
-        } catch (RuntimeException e) {
-          error = e.getMessage();
-        } 
-      }        
-      // update visuals
-      refreshData();
-  }
 	
 }
