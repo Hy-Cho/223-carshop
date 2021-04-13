@@ -63,7 +63,7 @@ public class CarShopController {
 	public static List<TOGarage> getGarages(){
 	  ArrayList<TOGarage> garages = new ArrayList<TOGarage>();
 	  for (Garage garage: CarShopApplication.getCarShop().getGarages()) {
-	    TOGarage toGarage = new TOGarage(garage.getTechnician().getUsername());
+	    TOGarage toGarage = new TOGarage(garage.getTechnician().getUsername(), garage.getTechnician().getType().toString());
 	    garages.add(toGarage);
       }
       return garages;

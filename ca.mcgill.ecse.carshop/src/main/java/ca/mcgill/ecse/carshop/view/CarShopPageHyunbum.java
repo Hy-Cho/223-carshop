@@ -138,7 +138,7 @@ public class CarShopPageHyunbum extends JFrame {
         Integer index = 0;
         for (TOGarage garage : CarShopController.getGarages()) {
           garages.put(index, garage);
-          garageList.addItem(garage.getTechnicianUsername() + "'s garage");
+          garageList.addItem(garage.getTechnicianUsername() + "'s garage" + "(" + garage.getTechnicianType() + " technician)");
             index++;
         };
         garageList.setSelectedIndex(-1);

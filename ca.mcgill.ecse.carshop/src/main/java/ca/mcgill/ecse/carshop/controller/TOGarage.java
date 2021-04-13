@@ -13,14 +13,16 @@ public class TOGarage
 
   //TOGarage Attributes
   private String technicianUsername;
+  private String technicianType;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public TOGarage(String aTechnicianUsername)
+  public TOGarage(String aTechnicianUsername, String aTechnicianType)
   {
     technicianUsername = aTechnicianUsername;
+    technicianType = aTechnicianType;
   }
 
   //------------------------
@@ -35,9 +37,22 @@ public class TOGarage
     return wasSet;
   }
 
+  public boolean setTechnicianType(String aTechnicianType)
+  {
+    boolean wasSet = false;
+    technicianType = aTechnicianType;
+    wasSet = true;
+    return wasSet;
+  }
+
   public String getTechnicianUsername()
   {
     return technicianUsername;
+  }
+
+  public String getTechnicianType()
+  {
+    return technicianType;
   }
 
   public void delete()
@@ -47,6 +62,7 @@ public class TOGarage
   public String toString()
   {
     return super.toString() + "["+
-            "technicianUsername" + ":" + getTechnicianUsername()+ "]";
+            "technicianUsername" + ":" + getTechnicianUsername()+ "," +
+            "technicianType" + ":" + getTechnicianType()+ "]";
   }
 }

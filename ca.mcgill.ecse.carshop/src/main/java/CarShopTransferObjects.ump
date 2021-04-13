@@ -9,4 +9,5 @@ class TOService {
 
 class TOGarage {
   String technicianUsername;
+  String technicianType;
 }
