@@ -5,6 +5,7 @@ namespace ca.mcgill.ecse.carshop.controller;
 class TOService {
   String name;
   Integer duration;
+  TOGarage garage;
 }
 
 class TOGarage {

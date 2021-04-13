@@ -18,9 +18,11 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
 import ca.mcgill.ecse.carshop.controller.CarShopController;
 import ca.mcgill.ecse.carshop.controller.InvalidInputException;
 import ca.mcgill.ecse.carshop.controller.TOGarage;
+import ca.mcgill.ecse.carshop.controller.TOService;
 import ca.mcgill.ecse.carshop.model.Garage;
 
 
@@ -40,7 +42,7 @@ public class CarShopPageHyunbum extends JFrame {
 	private JTable serviceTable;
 	private JScrollPane serviceTableScrollPane;
 	private DefaultTableModel serviceDtm;
-	private String serviceColumnNames[] = {"Name", "Duration"};
+	private String serviceColumnNames[] = {"Name", "Duration", "garage"};
 	private static final int HEIGHT_SERVICE_TABLE = 250;
 	// garages to add service
 	private HashMap<Integer, TOGarage> garages;
@@ -101,6 +103,7 @@ public class CarShopPageHyunbum extends JFrame {
                   )
               )
           .addComponent(errorMessage)
+          .addComponent(serviceTable)
           );
 
       layout.setVerticalGroup(
@@ -116,6 +119,7 @@ public class CarShopPageHyunbum extends JFrame {
           .addComponent(garageList)
           .addComponent(addServiceButton)
           .addComponent(errorMessage)
+          .addComponent(serviceTable)
           );
       
       layout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {serviceNameTextField, serviceDurationTextField});
@@ -138,26 +142,37 @@ public class CarShopPageHyunbum extends JFrame {
         Integer index = 0;
         for (TOGarage garage : CarShopController.getGarages()) {
           garages.put(index, garage);
-          garageList.addItem(garage.getTechnicianUsername() + "'s garage" + "(" + garage.getTechnicianType() + " technician)");
+          garageList.addItem(garage.getTechnicianUsername() + "'s garage (" + garage.getTechnicianType() + " technician)");
             index++;
         };
         garageList.setSelectedIndex(-1);
       }
-//	  refreshAvailableServices();
+	  refreshAvailableServices();
 	  pack();
 	}
 	
-	// cannot get existing services with current way of car shop implementation
-	/*
+
 	private void refreshAvailableServices() {
       serviceDtm = new DefaultTableModel(0, 0);
       serviceDtm.setColumnIdentifiers(serviceColumnNames);
       serviceTable.setModel(serviceDtm);
-      
+      for (TOService service : CarShopController.getServices()) {
+        String serviceName = service.getName();
+        int duration = service.getDuration();
+        TOGarage garage = service.getGarage();
+        String garageName = "<html>" +  garage.getTechnicianUsername() + "'s garage<br>(" + garage.getTechnicianType() + " technician)</html>";
+        Object[] obj = {serviceName, duration, garageName};
+        serviceDtm.addRow(obj);
+    }
+      // set column width
+      serviceTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+      final TableColumnModel columnModel = serviceTable.getColumnModel();
+      serviceTable.setRowHeight(35);
+      columnModel.getColumn(1).setPreferredWidth(4);
       Dimension d = serviceTable.getPreferredSize();
       serviceTableScrollPane.setPreferredSize(new Dimension(d.width, HEIGHT_SERVICE_TABLE));
   }
-  */
+  
 	
 	private void addServiceButtonActionPerformed(java.awt.event.ActionEvent evt) {
       // clear error message
