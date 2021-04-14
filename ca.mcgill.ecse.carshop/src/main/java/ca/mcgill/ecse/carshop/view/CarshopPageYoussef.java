@@ -18,6 +18,7 @@ import javax.swing.WindowConstants;
 
 import ca.mcgill.ecse.carshop.controller.CarShopController;
 import ca.mcgill.ecse.carshop.controller.InvalidInputException;
+import ca.mcgill.ecse.carshop.controller.TOService;
 
 public class CarshopPageYoussef extends JFrame {
 	private static final long serialVersionUID = -5633915762703837868L;
@@ -146,15 +147,15 @@ public class CarshopPageYoussef extends JFrame {
 	    	// mandatory
 	    	mandatoryTextField.setText("");
 	    	
-//	    	// define combo - main service
-//	    	existingServices = new HashMap<Integer, String>();
-//	    	mainServiceList.removeAllItems();
-//	    	Integer index = 0;
-//	    	for (String service : CarShopController.getServices()) {
-//	    		existingServices.put(index,service);
-//	    		mainServiceList.addItem(service);
-//	    		index++;		
-//	    	}
+	    	// define combo - main service
+	    	existingServices = new HashMap<Integer, String>();
+	    	mainServiceList.removeAllItems();
+	    	Integer index = 0;
+	    	for (TOService service : CarShopController.getServices()) {
+	    		existingServices.put(index,service.getName());
+	    		mainServiceList.addItem(service.getName());
+	    		index++;		
+	    	}
 	    	mainServiceList.setSelectedIndex(-1);
 	}
 	}
