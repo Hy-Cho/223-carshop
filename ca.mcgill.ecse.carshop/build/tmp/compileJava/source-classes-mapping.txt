@@ -1,0 +1,30 @@
+ca/mcgill/ecse/carshop/model/Owner.java
+ ca.mcgill.ecse.carshop.model.Owner
+ca/mcgill/ecse/carshop/model/Appointment.java
+ ca.mcgill.ecse.carshop.model.Appointment
+ca/mcgill/ecse/carshop/application/CarShopApplication.java
+ ca.mcgill.ecse.carshop.application.CarShopApplication
+ca/mcgill/ecse/carshop/model/CarShop.java
+ ca.mcgill.ecse.carshop.model.CarShop
+ca/mcgill/ecse/carshop/model/TimeSlot.java
+ ca.mcgill.ecse.carshop.model.TimeSlot
+ca/mcgill/ecse/carshop/model/Customer.java
+ ca.mcgill.ecse.carshop.model.Customer
+ca/mcgill/ecse/carshop/model/ServiceBooking.java
+ ca.mcgill.ecse.carshop.model.ServiceBooking
+ca/mcgill/ecse/carshop/model/Garage.java
+ ca.mcgill.ecse.carshop.model.Garage
+ca/mcgill/ecse/carshop/model/Technician.java
+ ca.mcgill.ecse.carshop.model.Technician
+ ca.mcgill.ecse.carshop.model.Technician$TechnicianType
+ca/mcgill/ecse/carshop/model/BookableService.java
+ ca.mcgill.ecse.carshop.model.BookableService
+ca/mcgill/ecse/carshop/model/Business.java
+ ca.mcgill.ecse.carshop.model.Business
+ca/mcgill/ecse/carshop/model/User.java
+ ca.mcgill.ecse.carshop.model.User
+ca/mcgill/ecse/carshop/model/Service.java
+ ca.mcgill.ecse.carshop.model.Service
+ca/mcgill/ecse/carshop/model/BusinessHour.java
+ ca.mcgill.ecse.carshop.model.BusinessHour
+ ca.mcgill.ecse.carshop.model.BusinessHour$DayOfWeek

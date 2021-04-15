@@ -148,7 +148,6 @@ public class CarShopApplication {
             }
         });
 	}
-
     
     public static CarShop getCarShop() {
     	if(carShop == null) {
