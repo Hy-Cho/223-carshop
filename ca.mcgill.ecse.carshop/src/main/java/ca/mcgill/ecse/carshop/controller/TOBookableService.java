@@ -3,29 +3,26 @@
 
 package ca.mcgill.ecse.carshop.controller;
 
-// line 36 "../../../../../carshopTO.ump"
-
-public class TOService
+// line 17 "../../../../../carshopTO.ump"
+public class TOBookableService
 {
 
   //------------------------
   // MEMBER VARIABLES
   //------------------------
 
-  //TOService Attributes
+  //TOBookableService Attributes
   private String name;
-  private int duration;
-  private TOGarage garage;
+  private boolean isCombo;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public TOService(String aName, int aDuration, TOGarage aGarage)
+  public TOBookableService(String aName, boolean aIsCombo)
   {
     name = aName;
-    duration = aDuration;
-    garage = aGarage;
+    isCombo = aIsCombo;
   }
 
   //------------------------
@@ -40,18 +37,10 @@ public class TOService
     return wasSet;
   }
 
-  public boolean setDuration(int aDuration)
+  public boolean setIsCombo(boolean aIsCombo)
   {
     boolean wasSet = false;
-    duration = aDuration;
-    wasSet = true;
-    return wasSet;
-  }
-
-  public boolean setGarage(TOGarage aGarage)
-  {
-    boolean wasSet = false;
-    garage = aGarage;
+    isCombo = aIsCombo;
     wasSet = true;
     return wasSet;
   }
@@ -61,14 +50,14 @@ public class TOService
     return name;
   }
 
-  public int getDuration()
+  public boolean getIsCombo()
   {
-    return duration;
+    return isCombo;
   }
-
-  public TOGarage getGarage()
+  /* Code from template attribute_IsBoolean */
+  public boolean isIsCombo()
   {
-    return garage;
+    return isCombo;
   }
 
   public void delete()
@@ -79,7 +68,6 @@ public class TOService
   {
     return super.toString() + "["+
             "name" + ":" + getName()+ "," +
-            "duration" + ":" + getDuration()+ "]" + System.getProperties().getProperty("line.separator") +
-            "  " + "garage" + "=" + (getGarage() != null ? !getGarage().equals(this)  ? getGarage().toString().replaceAll("  ","    ") : "this" : "null");
+            "isCombo" + ":" + getIsCombo()+ "]";
   }
 }

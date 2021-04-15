@@ -90,6 +90,7 @@ public class CarShopController {
 	
 	//Appointment Management
 	public static void customerCancelApp(Appointment app) throws InvalidInputException {
+		
 		if(!loggedInUser.equals(app.getCustomer())) {
 			throw new InvalidInputException("You cannot cancel another customer's appointment");
 		}
@@ -102,6 +103,11 @@ public class CarShopController {
 		}
 		
 		CarShopPersistence.save(CarShopApplication.getCarShop());
+	}
+	
+	public static void customerCancelAppTO(TOAppointment app) throws InvalidInputException {
+		Appointment appt = getAppointmentFromTO(app);
+		CarShopController.customerCancelApp(appt);
 	}
 	
 	public static void setMainService(Appointment app, String serviceName) throws InvalidInputException {
@@ -129,6 +135,11 @@ public class CarShopController {
 		
 		CarShopPersistence.save(carShop);
 	}
+	
+	public static void setMainServiceTO(TOAppointment to, String serviceName) throws InvalidInputException {
+		CarShopController.setMainService(getAppointmentFromTO(to), serviceName);
+	}
+	
 	public static void updateDateTimes(Appointment app, Date d, List<Time> startTimes) throws InvalidInputException {
 		if(!loggedInUser.equals(app.getCustomer())) {
 			throw new InvalidInputException("Only the customer can change their appointment");
@@ -197,6 +208,10 @@ public class CarShopController {
 		
 	}
 	
+	public static void updateDateTimesTO(TOAppointment to, Date d, List<Time> startTimes) throws InvalidInputException {
+		CarShopController.updateDateTimes(getAppointmentFromTO(to), d, startTimes);
+	}
+	
 	private static List<Time> getStartTimes(Appointment app) {
 		List<Time> startTimes = new ArrayList<>();
 		for(ServiceBooking booking: app.getServiceBookings()) {
@@ -260,6 +275,9 @@ public class CarShopController {
 			CarShopPersistence.save(carShop);
 		}
 	}
+	public static void addOptionalServiceTO(TOAppointment to, String addedService, Time startTime) throws InvalidInputException {
+		CarShopController.addOptionalService(getAppointmentFromTO(to), addedService, startTime);
+	}
 	
 	public static void startAppointment(Appointment app) {
 		States state = app.getStates();
@@ -273,6 +291,11 @@ public class CarShopController {
 		}
 		
 		CarShopPersistence.save(CarShopApplication.getCarShop());
+	}
+	
+	public static void startAppointmentTO(TOAppointment toAppointment) {
+		CarShopController.startAppointment(getAppointmentFromTO(toAppointment));
+		
 	}
 	
 	public static void endAppointment(Appointment app) {
@@ -291,6 +314,10 @@ public class CarShopController {
 		CarShopPersistence.save(CarShopApplication.getCarShop());
 	}
 	
+	public static void endApponitmentTO(TOAppointment toAppointment) {
+		CarShopController.endAppointment(getAppointmentFromTO(toAppointment));
+	}
+	
 	public static void registerNoShow(Appointment app) {
 		States state = app.getStates();
 		if(States.Booking == state) {
@@ -298,6 +325,11 @@ public class CarShopController {
 		}
 		
 		CarShopPersistence.save(CarShopApplication.getCarShop());
+	}
+	
+	public static void registerNoShowTO(TOAppointment toAppointment) {
+		CarShopController.registerNoShow(getAppointmentFromTO(toAppointment));
+		
 	}
 	// End Of Appointment Management
 	
@@ -725,7 +757,10 @@ public class CarShopController {
 				existingTechAccount = new Technician(username, password, techType, carShop);
 				//corresponding garage for the technician is created
 				Garage garage = new Garage(carShop, existingTechAccount);
+				
 				//the garage has the same opening hours as the business
+				loggedInUser = existingTechAccount;
+				
 				if(carShop.getBusiness() != null) {
 					for(DayOfWeek day: DayOfWeek.values()) {
 						List<BusinessHour> dayBusinessHours = getBusinessHoursOfShopByDay(day);
@@ -736,8 +771,6 @@ public class CarShopController {
 						}
 					}
 				}
-				
-				loggedInUser = existingTechAccount;
 			}
 			else {
 				//throws error if entered password doesn't match technician's password
@@ -1695,6 +1728,145 @@ public class CarShopController {
 			
 			return null;
 	 	}
+	  
+	  public static List<TOAppointment> getAppointments() {
+		  List<TOAppointment> appointments = new ArrayList<>();
+		  
+		  for(Appointment app: CarShopApplication.getCarShop().getAppointments()) {
+			  String username = app.getCustomer().getUsername();
+			  
+			  Date d = app.getServiceBookings().get(0).getTimeSlot().getStartDate();
+			  
+			  List<String> services = new ArrayList<>();
+			  List<Time> startTimes = new ArrayList<>();
+			  List<Time> endTimes = new ArrayList<>();
+			  
+			  for(ServiceBooking bookings: app.getServiceBookings()) {
+				  services.add(bookings.getService().getName());
+				  startTimes.add(bookings.getTimeSlot().getStartTime());
+				  endTimes.add(bookings.getTimeSlot().getEndTime());
+			  }
+			  
+			  TOAppointment toApp = new TOAppointment(username, app.getBookableService().getName(), d, services, startTimes, endTimes, app.getBookableService() instanceof ServiceCombo);
+			  appointments.add(toApp);
+		  }
+		  
+		  return appointments;
+	  }
+	  
+	  public static Garage getGarageFromTechnicianType(String username) throws InvalidInputException {
+		  List<Garage> garages = CarShopApplication.getCarShop().getGarages();
+		  Garage g = null;
+		  for (Garage garage: garages) {
+		    if (garage.getTechnician().getUsername() == username) {
+		      g = garage;
+		      break;
+		    }
+		  }
+		  if (g == null) {
+		    throw new InvalidInputException("Couldn't find any garage with technican type" + username);
+		  }
+		  return g;
+		}
+	  
+	  public static List<TOGarage> getGarages(){
+		  ArrayList<TOGarage> garages = new ArrayList<TOGarage>();
+		  for (Garage garage: CarShopApplication.getCarShop().getGarages()) {
+		    TOGarage toGarage = new TOGarage(garage.getTechnician().getUsername(), garage.getTechnician().getType().toString());
+		    garages.add(toGarage);
+	      }
+	      return garages;
+	  }
+	  
+	  public static List<TOService> getServices(){
+	      ArrayList<TOService> services = new ArrayList<TOService>();
+	      for (BookableService bookableService: CarShopApplication.getCarShop().getBookableServices()) {
+	        if (bookableService instanceof Service) {
+	          String technicianUsername = ((Service) bookableService).getGarage().getTechnician().getUsername();
+	          String technicianType = ((Service) bookableService).getGarage().getTechnician().getType().toString();
+	          TOGarage garage = new TOGarage(technicianUsername, technicianType);
+	          TOService toService = new TOService(bookableService.getName(), ((Service) bookableService).getDuration(), garage);
+	          services.add(toService);
+	        }   
+	      }
+	      return services;
+	  }
+	  
+	  
+	  public static List<TOAppointment> getAppointmentsOfCustomer(String username) {
+		  List<TOAppointment> appointments = new ArrayList<>();
+		  Customer cust = getCustomerWithUsername(username);
+		  
+		  for(Appointment app: cust.getAppointments()) {
+			  
+			  Date d = app.getServiceBookings().get(0).getTimeSlot().getStartDate();
+			  
+			  List<String> services = new ArrayList<>();
+			  List<Time> startTimes = new ArrayList<>();
+			  List<Time> endTimes = new ArrayList<>();
+			  
+			  for(ServiceBooking bookings: app.getServiceBookings()) {
+				  services.add(bookings.getService().getName());
+				  startTimes.add(bookings.getTimeSlot().getStartTime());
+				  endTimes.add(bookings.getTimeSlot().getEndTime());
+			  }
+			  
+			  TOAppointment toApp = new TOAppointment(username, app.getBookableService().getName(), d, services, startTimes, endTimes, app.getBookableService() instanceof ServiceCombo);
+			  appointments.add(toApp);
+		  }
+		  
+		  return appointments;
+	  }
+	  
+	  public static List<TOBookableService> getTOBookables() {
+		  List<TOBookableService> bookables = new ArrayList<>();
+		  
+		  for(BookableService bookable: CarShopApplication.getCarShop().getBookableServices()) {
+			  bookables.add(new TOBookableService(bookable.getName(), bookable instanceof ServiceCombo));
+		  }
+		  
+		  return bookables;
+	  }
+	  
+	  public static Appointment getAppointmentFromTO(TOAppointment to) {
+		  Customer c = (Customer) getCustomerWithUsername(to.getUsername());
+		  
+		  for(Appointment app: c.getAppointments()) {
+			  ServiceBooking booking1 = app.getServiceBookings().get(0);
+			  if(booking1.getTimeSlot().getStartDate().equals(to.getDate()) && booking1.getTimeSlot().getStartTime().equals(to.getStartTimes().get(0))) {
+				  return app;
+			  }
+		  }
+		  
+		  return null;
+	  }
+	  
+	  public static TOUser getTOLoggedIn() {
+		  if(loggedInUser == null) {
+			  return null;
+		  }
+		  
+		  if(loggedInUser instanceof Owner) {
+			  return new TOUser(loggedInUser.getUsername(), true, false, false);
+		  }
+		  else if(loggedInUser instanceof Technician) {
+			  return new TOUser(loggedInUser.getUsername(), false, false, true);
+		  }
+		  else {
+			  return new TOUser(loggedInUser.getUsername(), false, true, false);
+		  }
+	  }
+	  
+	  public static TOBusiness getBusiness() {
+			TOBusiness biz;
+			Business bus=CarShopApplication.getCarShop().getBusiness();
+			if(bus==null) return null;
+			else {
+				biz=new TOBusiness(bus.getName(),bus.getAddress(),bus.getEmail(),bus.getPhoneNumber());
+				return biz;
+			}	
+	  }
+	  
 	  public static void logOut() {
 		  loggedInUser=null;
 	  }
@@ -1704,7 +1876,6 @@ public class CarShopController {
 	  }
 		
 	  public static Time getCurrentTimes() {
-			
 			return now;
 	  }
 	  public static Date getToday() {

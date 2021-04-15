@@ -3,29 +3,30 @@
 
 package ca.mcgill.ecse.carshop.controller;
 
-// line 36 "../../../../../carshopTO.ump"
-
-public class TOService
+// line 29 "../../../../../carshopTO.ump"
+public class TOBusiness
 {
 
   //------------------------
   // MEMBER VARIABLES
   //------------------------
 
-  //TOService Attributes
+  //TOBusiness Attributes
   private String name;
-  private int duration;
-  private TOGarage garage;
+  private String address;
+  private String email;
+  private String phoneNumber;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public TOService(String aName, int aDuration, TOGarage aGarage)
+  public TOBusiness(String aName, String aAddress, String aEmail, String aPhoneNumber)
   {
     name = aName;
-    duration = aDuration;
-    garage = aGarage;
+    address = aAddress;
+    email = aEmail;
+    phoneNumber = aPhoneNumber;
   }
 
   //------------------------
@@ -40,18 +41,26 @@ public class TOService
     return wasSet;
   }
 
-  public boolean setDuration(int aDuration)
+  public boolean setAddress(String aAddress)
   {
     boolean wasSet = false;
-    duration = aDuration;
+    address = aAddress;
     wasSet = true;
     return wasSet;
   }
 
-  public boolean setGarage(TOGarage aGarage)
+  public boolean setEmail(String aEmail)
   {
     boolean wasSet = false;
-    garage = aGarage;
+    email = aEmail;
+    wasSet = true;
+    return wasSet;
+  }
+
+  public boolean setPhoneNumber(String aPhoneNumber)
+  {
+    boolean wasSet = false;
+    phoneNumber = aPhoneNumber;
     wasSet = true;
     return wasSet;
   }
@@ -61,14 +70,19 @@ public class TOService
     return name;
   }
 
-  public int getDuration()
+  public String getAddress()
   {
-    return duration;
+    return address;
   }
 
-  public TOGarage getGarage()
+  public String getEmail()
   {
-    return garage;
+    return email;
+  }
+
+  public String getPhoneNumber()
+  {
+    return phoneNumber;
   }
 
   public void delete()
@@ -79,7 +93,8 @@ public class TOService
   {
     return super.toString() + "["+
             "name" + ":" + getName()+ "," +
-            "duration" + ":" + getDuration()+ "]" + System.getProperties().getProperty("line.separator") +
-            "  " + "garage" + "=" + (getGarage() != null ? !getGarage().equals(this)  ? getGarage().toString().replaceAll("  ","    ") : "this" : "null");
+            "address" + ":" + getAddress()+ "," +
+            "email" + ":" + getEmail()+ "," +
+            "phoneNumber" + ":" + getPhoneNumber()+ "]";
   }
 }
