@@ -1754,43 +1754,6 @@ public class CarShopController {
 		  return appointments;
 	  }
 	  
-	  public static Garage getGarageFromTechnicianType(String username) throws InvalidInputException {
-		  List<Garage> garages = CarShopApplication.getCarShop().getGarages();
-		  Garage g = null;
-		  for (Garage garage: garages) {
-		    if (garage.getTechnician().getUsername() == username) {
-		      g = garage;
-		      break;
-		    }
-		  }
-		  if (g == null) {
-		    throw new InvalidInputException("Couldn't find any garage with technican type" + username);
-		  }
-		  return g;
-		}
-	  
-	  public static List<TOGarage> getGarages(){
-		  ArrayList<TOGarage> garages = new ArrayList<TOGarage>();
-		  for (Garage garage: CarShopApplication.getCarShop().getGarages()) {
-		    TOGarage toGarage = new TOGarage(garage.getTechnician().getUsername(), garage.getTechnician().getType().toString());
-		    garages.add(toGarage);
-	      }
-	      return garages;
-	  }
-	  
-	  public static List<TOService> getServices(){
-	      ArrayList<TOService> services = new ArrayList<TOService>();
-	      for (BookableService bookableService: CarShopApplication.getCarShop().getBookableServices()) {
-	        if (bookableService instanceof Service) {
-	          String technicianUsername = ((Service) bookableService).getGarage().getTechnician().getUsername();
-	          String technicianType = ((Service) bookableService).getGarage().getTechnician().getType().toString();
-	          TOGarage garage = new TOGarage(technicianUsername, technicianType);
-	          TOService toService = new TOService(bookableService.getName(), ((Service) bookableService).getDuration(), garage);
-	          services.add(toService);
-	        }   
-	      }
-	      return services;
-	  }
 	  
 	  
 	  public static List<TOAppointment> getAppointmentsOfCustomer(String username) {
