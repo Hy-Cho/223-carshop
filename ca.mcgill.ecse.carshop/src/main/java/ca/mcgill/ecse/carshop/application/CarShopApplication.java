@@ -24,6 +24,8 @@ import ca.mcgill.ecse.carshop.view.LogInPage;
 public class CarShopApplication {
 	
 	private static CarShop carShop;
+	//This variable has been added to make sure the cucumber test do not load the persistence layer.
+	//Not to be modified. Program will work as intended with View and Testing 
 	private static final boolean TESTING = false;
 
     public static void main(String[] args) {
@@ -77,6 +79,14 @@ public class CarShopApplication {
     			carShop = CarShopPersistence.load();
     		}
     	}	
+    	return carShop;
+    }
+    
+    public static CarShop resetForTesting() {
+    	if(carShop == null) {
+    		carShop = new CarShop();
+    	}
+    	
     	return carShop;
     }
     

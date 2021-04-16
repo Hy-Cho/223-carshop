@@ -804,7 +804,7 @@ public class CucumberStepDefinitions {
 	//We create a new instance of carShop 
 	@Given("a Carshop system exists")
 	public void a_carshop_system_exists() {
-		carshop = CarShopApplication.getCarShop();
+		carshop = CarShopApplication.resetForTesting();
 		
 		error = "";
 		errorCnt = 0;
