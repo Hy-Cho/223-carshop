@@ -19,6 +19,7 @@ import ca.mcgill.ecse.carshop.controller.TOGarage;
 import ca.mcgill.ecse.carshop.controller.TOService;
 import ca.mcgill.ecse.carshop.controller.TOServiceCombo;
 
+//Coded by Youssef Farouk
 public class TechnicianPage extends JFrame {
 	private static final long serialVersionUID = 3247238947283L;
 	

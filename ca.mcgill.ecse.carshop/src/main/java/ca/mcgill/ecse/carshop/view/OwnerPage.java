@@ -40,6 +40,7 @@ import ca.mcgill.ecse.carshop.controller.TOGarage;
 import ca.mcgill.ecse.carshop.controller.TOService;
 import ca.mcgill.ecse.carshop.controller.TOServiceCombo;
 
+//Coded by Mario Bouzakhm/Hadi Ghaddar
 public class OwnerPage extends JFrame {
 	private static final long serialVersionUID = 1633915862703837868L;
 	

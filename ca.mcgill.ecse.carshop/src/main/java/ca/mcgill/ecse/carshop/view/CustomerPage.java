@@ -40,6 +40,7 @@ import ca.mcgill.ecse.carshop.controller.TOService;
 import ca.mcgill.ecse.carshop.controller.TOServiceCombo;
 import ca.mcgill.ecse.carshop.controller.TOUser;
 
+//Coded by Sami Ait Ouahmane/Steven Cho
 public class CustomerPage extends JFrame {
 	
 	private static final long serialVersionUID = 143839453L;

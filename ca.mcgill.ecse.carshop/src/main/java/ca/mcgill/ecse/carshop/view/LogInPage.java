@@ -30,6 +30,7 @@ import ca.mcgill.ecse.carshop.controller.InvalidUserException;
 import ca.mcgill.ecse.carshop.controller.TOBusiness;
 import ca.mcgill.ecse.carshop.controller.TOUser;
 
+//Coded by Sami Ait Ouahmane/Steven Cho
 public class LogInPage extends JFrame {
 	private static final long serialVersionUID = -5633915762703837868L;
 	private JLabel errorMessage;
