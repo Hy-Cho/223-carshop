@@ -64,6 +64,37 @@ public class CarShopController {
       return services;
     }
     
+    public static List<TOServiceCombo> getCombos() {
+		ArrayList<TOServiceCombo> combos = new ArrayList<TOServiceCombo>();
+		for(BookableService bookableService: CarShopApplication.getCarShop().getBookableServices()) {
+			if(bookableService instanceof ServiceCombo) {
+				ServiceCombo combo = (ServiceCombo) bookableService;
+				String name = combo.getName();
+				String main = combo.getMainService().getService().getName();
+				
+				List<String> required = new ArrayList<>();
+				List<String> optional = new ArrayList<>();
+				
+				for(ComboItem item: combo.getServices()) {
+					if(item.getService().getName().equals(main)) {
+						continue;
+					}
+					
+					if(item.getMandatory()) {
+						required.add(item.getService().getName());
+					}
+					else {
+						optional.add(item.getService().getName());
+					}
+				}
+				
+				combos.add(new TOServiceCombo(name, main, required, optional));
+			}
+		}
+		
+		return combos;
+	}
+    
 	public static List<TOGarage> getGarages(){
 	  ArrayList<TOGarage> garages = new ArrayList<TOGarage>();
 	  for (Garage garage: CarShopApplication.getCarShop().getGarages()) {
@@ -1844,4 +1875,6 @@ public class CarShopController {
 	  public static Date getToday() {
 		  return today;
 	  }
+
+	
 }

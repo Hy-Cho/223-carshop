@@ -4,11 +4,14 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.sql.Date;
+import java.sql.Time;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -24,6 +27,10 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.SqlDateModel;
+
 import ca.mcgill.ecse.carshop.controller.CarShopController;
 import ca.mcgill.ecse.carshop.controller.InvalidInputException;
 import ca.mcgill.ecse.carshop.controller.InvalidUserException;
@@ -31,12 +38,15 @@ import ca.mcgill.ecse.carshop.controller.TOAppointment;
 import ca.mcgill.ecse.carshop.controller.TOBusiness;
 import ca.mcgill.ecse.carshop.controller.TOGarage;
 import ca.mcgill.ecse.carshop.controller.TOService;
+import ca.mcgill.ecse.carshop.controller.TOServiceCombo;
 
 public class OwnerPage extends JFrame {
 	private static final long serialVersionUID = 1633915862703837868L;
 	
 	private JLabel errorMessage;
 	private String error = null;
+	
+	private JButton logOutButton;
 	
 	//Business Info setter element
 	private JTextField BNameTextField;
@@ -101,7 +111,14 @@ public class OwnerPage extends JFrame {
 	private JTable serviceTable;
 	private JScrollPane serviceTableScrollPane;
 	
+	private JTable combosTable;
+	private JScrollPane combosTableScrollPane;
+	
+	private JDatePickerImpl overviewDatePicker;
+	private JLabel overviewDateLabel;
+	
 	private static final int HEIGHT_SERVICE_TABLE = 100;
+	private static final int HEIGHT_COMBOS_TABLE = 100;
 	private static final int HEIGHT_OVERVIEW_TABLE = 120;
 	
 	//Appointment Management
@@ -115,8 +132,11 @@ public class OwnerPage extends JFrame {
 	private DefaultTableModel serviceDtm;
 	private String serviceColumnNames[] = {"Name", "Duration", "Garage"};
 	
+	private DefaultTableModel serviceCombosDtm;
+	private String combosColumnNames[] = {"Name", "Main Service", "Required", "Optional"};
+	
 	public OwnerPage() {
-		this.setPreferredSize(new Dimension(980, 720));
+		this.setPreferredSize(new Dimension(1050, 850));
 		
 		initComponents();
 		refreshData();
@@ -125,6 +145,9 @@ public class OwnerPage extends JFrame {
 	private void initComponents() {
 		errorMessage = new JLabel();
 		errorMessage.setForeground(Color.red);
+		
+		logOutButton = new JButton();
+		logOutButton.setText("Log Out");
 		
 		//elements for BusinessInfoSetter
 		BNameTextField = new JTextField();
@@ -166,6 +189,15 @@ public class OwnerPage extends JFrame {
 		setTimeField = new JTextField();
 		setDateField = new JTextField();
 		
+		setTime = new JLabel("Time: ");
+		setDate = new JLabel("Date: ");
+		
+		setTimeButton = new JButton();
+		setTimeButton.setText("Set Time");
+		
+		setDateButton = new JButton();
+		setDateButton.setText("Set Date");
+		
 		//Elements for Owner Appointment Management.
 		appointmentList = new JComboBox<>(new String[0]);
 		appointmentListLabel = new JLabel("Appointments: ");
@@ -202,6 +234,14 @@ public class OwnerPage extends JFrame {
 		serviceTableScrollPane.setPreferredSize(new Dimension(d1.width, HEIGHT_SERVICE_TABLE));
 		serviceTableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		
+		combosTable = new JTable();
+		combosTableScrollPane = new JScrollPane(combosTable);
+		this.add(combosTableScrollPane);
+		Dimension d2 = combosTable.getPreferredSize();
+		combosTableScrollPane.setPreferredSize(new Dimension(d2.width, HEIGHT_COMBOS_TABLE));
+		combosTableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		
+		
 		// elements for combo booking
 		comboNameTextField = new JTextField();
 		comboNameLabel = new JLabel();
@@ -213,19 +253,32 @@ public class OwnerPage extends JFrame {
 		
 		servicesTextField = new JTextField();
 		servicesLabel = new JLabel();
-		servicesLabel.setText("Enter Combo Services (separated by ','): ");
+		servicesLabel.setText("Enter Required Services (separated by ','): ");
 		
 		mandatoryTextField = new JTextField();
 		mandatoryLabel = new JLabel();
-		mandatoryLabel.setText("Enter Mandatory Settings (separated by ','): ");
+		mandatoryLabel.setText("Enter Optional Services (separated by ','): ");
 		
 		defineComboButton = new JButton();
 		defineComboButton.setText("Add New Service Combo");
+		
+		// elements for daily overview
+		SqlDateModel overviewModel = new SqlDateModel();
+		LocalDate now = LocalDate.now();
+		overviewModel.setDate(now.getYear(), now.getMonthValue() - 1, now.getDayOfMonth());
+		overviewModel.setSelected(true);
+		Properties pO = new Properties();
+		pO.put("text.today", "Today");
+		pO.put("text.month", "Month");
+		pO.put("text.year", "Year");
+		JDatePanelImpl overviewDatePanel = new JDatePanelImpl(overviewModel, pO);
+		overviewDatePicker = new JDatePickerImpl(overviewDatePanel, new DateLabelFormatter());
+		overviewDateLabel = new JLabel();
+		overviewDateLabel.setText("Date for Overview:");
 	
 		// global settings
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Car Shop System");
-		
 		
 		//add listener to setup business info
 		setBizInfoButton.addActionListener(new java.awt.event.ActionListener() {
@@ -266,6 +319,30 @@ public class OwnerPage extends JFrame {
 		    }
 		});
 		
+		logOutButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				logOutButton(evt);
+			}
+		});
+		
+		setDateButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				setDateButton(evt);
+			}
+		});
+		
+		setTimeButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				setTimeButton(evt);
+			}
+		});
+		
+		overviewDatePicker.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				refreshAppointmentsList();
+			}
+		});
+		
 		JSeparator line1 = new JSeparator();
 		JSeparator line2 = new JSeparator();
 		JSeparator line3 = new JSeparator();
@@ -281,6 +358,7 @@ public class OwnerPage extends JFrame {
 			.addComponent(line2)
 			.addComponent(line3)
 			.addComponent(line4)
+			.addComponent(logOutButton)
 			.addGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
 					.addComponent(BNameLabel)
@@ -328,6 +406,7 @@ public class OwnerPage extends JFrame {
 	      		)
 			)
 			.addComponent(serviceTableScrollPane)
+			.addComponent(combosTableScrollPane)
 			.addGroup(
 				layout.createSequentialGroup()
 				.addComponent(appointmentListLabel)
@@ -341,6 +420,29 @@ public class OwnerPage extends JFrame {
 						.addComponent(registerNoShow)		
 					)	
 				)
+			)
+			.addGroup(
+				layout.createSequentialGroup()
+				.addGroup(
+					layout.createParallelGroup()
+					.addComponent(setTime)
+					.addComponent(setDate)
+				)
+				.addGroup(
+					layout.createParallelGroup()
+					.addComponent(setTimeField, 200, 200, 200)
+					.addComponent(setDateField, 200, 200, 200)
+				)
+				.addGroup(
+					layout.createParallelGroup()
+					.addComponent(setTimeButton)
+					.addComponent(setDateButton)
+				)
+			)
+			.addGroup(
+				layout.createSequentialGroup()
+				.addComponent(overviewDateLabel)
+				.addComponent(overviewDatePicker)
 			)
 			.addComponent(overviewScrollPane)
 		);
@@ -414,6 +516,7 @@ public class OwnerPage extends JFrame {
 			.addComponent(defineComboButton)
 			.addComponent(line4)
 			.addComponent(serviceTableScrollPane)
+			.addComponent(combosTableScrollPane)
 			.addComponent(line3)
 			.addGroup(
 				layout.createParallelGroup()
@@ -427,7 +530,26 @@ public class OwnerPage extends JFrame {
 				.addComponent(registerNoShow)
 			)
 			.addComponent(line2)
+			.addGroup(
+				layout.createParallelGroup()
+				.addComponent(overviewDateLabel)
+				.addComponent(overviewDatePicker)
+			)
 			.addComponent(overviewScrollPane)
+			.addGroup(
+				layout.createParallelGroup()
+				.addComponent(setTime)
+				.addComponent(setTimeField)
+				.addComponent(setTimeButton)
+			)
+			.addGroup(
+				layout.createParallelGroup()
+				.addComponent(setDate)
+				.addComponent(setDateField)
+				.addComponent(setDateButton)
+			)
+			.addGap(10)
+			.addComponent(logOutButton)
 		);
 		
 		layout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {setBizInfoButton, BPhoneNumberTextField, BEmailTextField,BAddressTextField,BNameTextField, serviceNameTextField, serviceDurationTextField, addServiceButton, garageList});
@@ -497,6 +619,7 @@ public class OwnerPage extends JFrame {
 			refreshAppointmentsList();
 			refreshDataBusinessInfo();
 			refreshAvailableServices();
+			refreshAvailableCombos();
 		}
 	}
 	
@@ -522,12 +645,27 @@ public class OwnerPage extends JFrame {
 		overviewTable.setModel(overviewDtm);
 		
 		for(TOAppointment to: CarShopController.getAppointments()) {
+			if(overviewDatePicker.getModel().getValue() != null) {
+				int dayPicker = overviewDatePicker.getModel().getDay();
+				int dayTo = to.getDate().getDate();
+				
+				int monthPicker = overviewDatePicker.getModel().getMonth();
+				int monthTo = to.getDate().getMonth();
+				
+				int yearPicker = overviewDatePicker.getModel().getYear();
+				int yearTo = to.getDate().getYear()+1900;
+				
+				if(dayPicker != dayTo || monthPicker != monthTo || yearPicker != yearTo) {
+					continue;
+				}
+			}
+			
 			String bookable = to.getName();
 			Date d = to.getDate();
 			
 			String services = "";
 			for(int i = 0; i < to.getServices().size(); i++) {
-				if(i == to.getServices().size()) {
+				if(i == to.getServices().size() - 1) {
 					services += to.getServices().get(i);
 				}
 				else {
@@ -568,6 +706,44 @@ public class OwnerPage extends JFrame {
 		  
 	    Dimension d = serviceTable.getPreferredSize();
 		serviceTableScrollPane.setPreferredSize(new Dimension(d.width, HEIGHT_SERVICE_TABLE));
+	}
+	
+	private void refreshAvailableCombos() {
+		serviceCombosDtm = new DefaultTableModel(0, 0);
+		serviceCombosDtm.setColumnIdentifiers(this.combosColumnNames);
+		combosTable.setModel(serviceCombosDtm);
+		
+		for(TOServiceCombo combo: CarShopController.getCombos()) {
+			String name = combo.getName();
+			String main = combo.getMain();
+			
+			
+			String required = "";
+			for(int i = 0; i < combo.getRequired().size(); i++) {
+				if(i == combo.getRequired().size() - 1) {
+					required += combo.getRequired().get(i);
+				}
+				else {
+					required += combo.getRequired().get(i) + ",";
+				}
+			}
+			
+			String optional = "";
+			for(int i = 0; i < combo.getOptional().size(); i++) {
+				if(i == combo.getOptional().size() - 1) {
+					optional += combo.getOptional().get(i);
+				}
+				else {
+					optional += combo.getOptional().get(i) + ",";
+				}
+			}
+			
+			Object[] obj = {name, main, required, optional};
+			serviceCombosDtm.addRow(obj);
+		}
+		
+		Dimension d = combosTable.getPreferredSize();
+		this.combosTableScrollPane.setPreferredSize(new Dimension(d.width, HEIGHT_COMBOS_TABLE));
 	}
 	
 	private void SetUpBusinessInfoAccountButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -662,39 +838,109 @@ public class OwnerPage extends JFrame {
 	private void defineComboButtonActionPerformed(java.awt.event.ActionEvent evt) {
 		// clear error message and basic input validation
 		error = "";
+		
 		int selectedService = mainServiceList.getSelectedIndex();
 		if (selectedService < 0)
 			error = "Service needs to be selected for definition! ";
 		String comboName = comboNameTextField.getText();
 		if (comboName.equals(""))
 			error = error + "Combo Name canot be empty! ";
+		
 		String services = servicesTextField.getText();
-		if (services.equals(""))
-			error = error + "Services canot be empty! ";
 		String mandatorySettings = mandatoryTextField.getText();
-		if (mandatorySettings.equals(""))
-			error = error + "Mandatory settings canot be empty! ";
-		List<String> servicesList = new ArrayList<String>(Arrays.asList(servicesTextField.getText().split(",")));
-		List<String> mandatorySettingsList = new ArrayList<String>(Arrays.asList(mandatoryTextField.getText().split(",")));
-		int lastMandatoryIndex = mandatorySettingsList.size() - 1;
-		List<Boolean> mandatorySettingsBoolean = new ArrayList<Boolean>();
-		for(int i=0; i==lastMandatoryIndex; i++) {
-			String currentSetting = mandatorySettingsList.get(i);
-				Boolean respectiveBoolean = Boolean.parseBoolean(currentSetting);
-				mandatorySettingsBoolean.add(respectiveBoolean);
-		};
+		String main = existingServices.get(selectedService);
+		
+		List<String> requiredServices = new ArrayList<String>(Arrays.asList(services.split(",")));
+		requiredServices.add(main);
+		List<String> optionalServices = new ArrayList<String>(Arrays.asList(mandatorySettings.split(",")));
+		
+		List<String> servicesList = new ArrayList<String>();
+		List<Boolean> mandatorySettingsBoolean = new ArrayList<>();
+		
+		for(int i = 0; i < requiredServices.size(); i++) {
+			servicesList.add(requiredServices.get(i));
+			mandatorySettingsBoolean.add(true);
+		}
+		
+		for(int i = 0; i < optionalServices.size(); i++) {
+			String service = optionalServices.get(i);
+			System.out.println(service);
+			if(!service.equals("")) {
+				servicesList.add(optionalServices.get(i));
+				mandatorySettingsBoolean.add(false);
+			}
+		}
+		
+		
 		error = error.trim();
 		if (error.length() == 0) {
 			// call the controller
 			try { 
-				CarShopController.defineCombo(comboName, existingServices.get(selectedService), servicesList, mandatorySettingsBoolean);
+				CarShopController.defineCombo(comboName, main, servicesList, mandatorySettingsBoolean);
 			} catch (InvalidInputException e) {
 				error = e.getMessage();
 			}
 		}
 		// update visuals
 		refreshData();		
-	}		
+	}
+	
+	private void setDateButton(ActionEvent evt) {
+		String dateStr = this.setDateField.getText();
+		if(!dateStr.equals("")) {
+			
+			try {
+				Date date = convertToDate(dateStr);
+				CarShopController.setToday(date);
+			}
+			catch(Exception ex) {
+				error = ex.getMessage();
+			}
+		}
+		
+		refreshData();
+	}
+	
+	private void setTimeButton(ActionEvent evt) {
+		String timeStr = this.setTimeField.getText();
+		if(!timeStr.equals("")) {
+			
+			try {
+				Time time = convertToTime(timeStr);
+				CarShopController.setTime(time);
+			}
+			catch(Exception ex) {
+				error = ex.getMessage();
+			}
+		}
+		
+		refreshData();
+	}
+	
+	private void logOutButton(ActionEvent evt) {
+		CarShopController.logOut();
+		this.setVisible(false);
+		
+		new LogInPage().setVisible(true);
+	}
+	
+	private Date convertToDate(String date) throws NumberFormatException {
+		String[] splits = date.split("-");
+		
+		int year = Integer.parseInt(splits[0]) - 1900;
+		int month = Integer.parseInt(splits[1]) - 1;
+		int day = Integer.parseInt(splits[2]);
+		
+		return new Date(year, month, day);
+	}
+	
+	private Time convertToTime(String time) throws NumberFormatException {
+		String[] splits = time.split(":");
+		int hours = Integer.parseInt(splits[0]);
+		int minutes = Integer.parseInt(splits[1]);
+		
+		return new Time(hours, minutes, 0);
+	}
 	
 	private void sortedAppointments(List<TOAppointment> tos) {
 		for(int i = 0; i < tos.size(); i++) {

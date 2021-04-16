@@ -5,11 +5,13 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -25,6 +27,10 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.SqlDateModel;
+
 import ca.mcgill.ecse.carshop.controller.CarShopController;
 import ca.mcgill.ecse.carshop.controller.InvalidInputException;
 import ca.mcgill.ecse.carshop.controller.TOAppointment;
@@ -32,6 +38,10 @@ import ca.mcgill.ecse.carshop.controller.TOBookableService;
 import ca.mcgill.ecse.carshop.controller.TOUser;
 
 public class CustomerPage extends JFrame {
+	
+	private static final long serialVersionUID = 143839453L;
+
+	private JButton logOutButton;
 	
 	//Error Label
 	private JLabel errorMessage;
@@ -71,9 +81,20 @@ public class CustomerPage extends JFrame {
 	private JTextField addOptionalService;
 	private JLabel addOptionalServiceLabel;
 	
+	//Change Date and Time
+	private JLabel setTime;
+	private JLabel setDate;
+	private JTextField setTimeField;
+	private JTextField setDateField;
+	private JButton setTimeButton;
+	private JButton setDateButton;
+	
 	//View Appointment By Date
 	private JTable overviewTable;
 	private JScrollPane overviewScrollPane;
+	
+	private JDatePickerImpl overviewDatePicker;
+	private JLabel overviewDateLabel;
 	
 	private HashMap<Integer, TOAppointment> customerAppointments;
 	
@@ -82,6 +103,8 @@ public class CustomerPage extends JFrame {
 	private DefaultTableModel overviewDtm;
 
 	private String overviewColumnNames[] = {"Bookable", "Date", "Services", "Start Times"};
+
+
 		
 	public CustomerPage() {
 		this.setPreferredSize(new Dimension(520, 600));
@@ -93,6 +116,22 @@ public class CustomerPage extends JFrame {
 	private void initComponents() {
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Car Shop System");
+		
+		logOutButton = new JButton();
+		logOutButton.setText("Log Out");
+		
+		//Settings the time
+		setTimeField = new JTextField();
+		setDateField = new JTextField();
+		
+		setTime = new JLabel("Time: ");
+		setDate = new JLabel("Date: ");
+		
+		setTimeButton = new JButton();
+		setTimeButton.setText("Set Time");
+		
+		setDateButton = new JButton();
+		setDateButton.setText("Set Date");
 		
 		//Elements for error message
 		errorMessage = new JLabel();
@@ -135,6 +174,20 @@ public class CustomerPage extends JFrame {
 		addOptionalService = new JTextField();
 		addOptionalServiceLabel = new JLabel("Optional Service: ");
 		
+		// elements for daily overview
+		SqlDateModel overviewModel = new SqlDateModel();
+		LocalDate now = LocalDate.now();
+		overviewModel.setDate(now.getYear(), now.getMonthValue() - 1, now.getDayOfMonth());
+		overviewModel.setSelected(true);
+		Properties pO = new Properties();
+		pO.put("text.today", "Today");
+		pO.put("text.month", "Month");
+		pO.put("text.year", "Year");
+		JDatePanelImpl overviewDatePanel = new JDatePanelImpl(overviewModel, pO);
+		overviewDatePicker = new JDatePickerImpl(overviewDatePanel, new DateLabelFormatter());
+		overviewDateLabel = new JLabel();
+		overviewDateLabel.setText("Date for Overview:");
+		
 		overviewTable = new JTable();
 		overviewScrollPane = new JScrollPane(overviewTable);
 		this.add(overviewScrollPane);
@@ -160,6 +213,30 @@ public class CustomerPage extends JFrame {
 			}
 		});
 		
+		logOutButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				logOutButton(evt);
+			}
+		});
+		
+		setDateButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				setDateButton(evt);
+			}
+		});
+		
+		setTimeButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				setTimeButton(evt);
+			}
+		});
+		
+		overviewDatePicker.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				refreshAppointmentsList();
+			}
+		});
+		
 		JSeparator seperator1 = new JSeparator();
 		JSeparator seperator2 = new JSeparator();
 		
@@ -174,6 +251,7 @@ public class CustomerPage extends JFrame {
 			.addComponent(errorMessage)
 			.addComponent(seperator1)
 			.addComponent(seperator2)
+			.addComponent(logOutButton)
 			.addGroup(
 				layout.createSequentialGroup()
 				.addGroup(
@@ -220,8 +298,31 @@ public class CustomerPage extends JFrame {
 				.addComponent(updateButton)
 			)
 			.addGroup(
+				layout.createSequentialGroup()
+				.addGroup(
+					layout.createParallelGroup()
+					.addComponent(setTime)
+					.addComponent(setDate)
+				)
+				.addGroup(
+					layout.createParallelGroup()
+					.addComponent(setTimeField, 200, 200, 200)
+					.addComponent(setDateField, 200, 200, 200)
+				)
+				.addGroup(
+					layout.createParallelGroup()
+					.addComponent(setTimeButton)
+					.addComponent(setDateButton)
+				)
+			)
+			.addGroup(
 				layout.createParallelGroup()
 				.addComponent(overviewScrollPane)
+			)
+			.addGroup(
+				layout.createSequentialGroup()
+				.addComponent(overviewDateLabel)
+				.addComponent(overviewDatePicker)
 			)
 			
 		);
@@ -290,8 +391,27 @@ public class CustomerPage extends JFrame {
 			.addComponent(seperator2)
 			.addGroup(
 				layout.createParallelGroup()
+				.addComponent(overviewDateLabel)
+				.addComponent(overviewDatePicker)
+			)
+			.addGroup(
+				layout.createParallelGroup()
 				.addComponent(overviewScrollPane)
 			)
+			.addGroup(
+				layout.createParallelGroup()
+					.addComponent(setTime)
+					.addComponent(setTimeField)
+					.addComponent(setTimeButton)
+				)
+				.addGroup(
+					layout.createParallelGroup()
+					.addComponent(setDate)
+					.addComponent(setDateField)
+					.addComponent(setDateButton)
+				)
+			.addGap(10)
+			.addComponent(logOutButton)
 		);
 			
 		pack();
@@ -304,6 +424,9 @@ public class CustomerPage extends JFrame {
 			bookableNameAppointment.setText("");
 			appointmentStartTimes.setText("");
 			optionalServicesAppointment.setText("");
+			
+			setDateField.setText("");
+			setTimeField.setText("");
 			
 			newDate.setText("");
 			newTimes.setText("");
@@ -341,6 +464,21 @@ public class CustomerPage extends JFrame {
 		
 		TOUser toLoggedIn = CarShopController.getTOLoggedIn();
 		for(TOAppointment to: CarShopController.getAppointmentsOfCustomer(toLoggedIn.getUsername())) {
+			if(overviewDatePicker.getModel().getValue() != null) {
+				int dayPicker = overviewDatePicker.getModel().getDay();
+				int dayTo = to.getDate().getDate();
+				
+				int monthPicker = overviewDatePicker.getModel().getMonth();
+				int monthTo = to.getDate().getMonth();
+				
+				int yearPicker = overviewDatePicker.getModel().getYear();
+				int yearTo = to.getDate().getYear()+1900;
+				
+				if(dayPicker != dayTo || monthPicker != monthTo || yearPicker != yearTo) {
+					continue;
+				}
+			}
+			
 			String bookable = to.getName();
 			Date d = to.getDate();
 			
@@ -429,6 +567,13 @@ public class CustomerPage extends JFrame {
 		}
 	}
 	
+	private void logOutButton(ActionEvent evt) {
+		CarShopController.logOut();
+		this.setVisible(false);
+		
+		new LogInPage().setVisible(true);
+	}
+	
 	private void updateButton(ActionEvent evt) {
 		error = null;
 		
@@ -507,6 +652,38 @@ public class CustomerPage extends JFrame {
 		refreshData();
 	}
 	
+	private void setDateButton(ActionEvent evt) {
+		String dateStr = this.setDateField.getText();
+		if(!dateStr.equals("")) {
+			
+			try {
+				Date date = convertToDate(dateStr);
+				CarShopController.setToday(date);
+			}
+			catch(Exception ex) {
+				error = ex.getMessage();
+			}
+		}
+		
+		refreshData();
+	}
+	
+	private void setTimeButton(ActionEvent evt) {
+		String timeStr = this.setTimeField.getText();
+		if(!timeStr.equals("")) {
+			
+			try {
+				Time time = convertToTime(timeStr);
+				CarShopController.setTime(time);
+			}
+			catch(Exception ex) {
+				error = ex.getMessage();
+			}
+		}
+		
+		refreshData();
+	}
+	
 	
 	private Date convertToDate(String date) throws NumberFormatException {
 		String[] splits = date.split("-");
@@ -554,5 +731,7 @@ public class CustomerPage extends JFrame {
 		
 		return null;
 	}
+	
+	
 
 }

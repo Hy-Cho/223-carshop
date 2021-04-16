@@ -39,6 +39,16 @@ class TOService {
   TOGarage garage;
 }
 
+class TOServiceCombo {
+  depend java.util.List;
+  
+  String name;
+  String main;
+  List<String> required;
+  List<String> optional;
+}
+
+
 class TOGarage {
   String technicianUsername;
   String technicianType;
