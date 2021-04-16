@@ -26,7 +26,7 @@ public class CarShopApplication {
 	private static CarShop carShop;
 	//This variable has been added to make sure the cucumber test do not load the persistence layer.
 	//Not to be modified. Program will work as intended with View and Testing 
-	private static final boolean TESTING = false;
+	private static boolean TESTING = false;
 
     public static void main(String[] args) {
         //Testing from the owner point of view.
@@ -72,12 +72,8 @@ public class CarShopApplication {
     
     public static CarShop getCarShop() {
     	if(carShop == null) {
-    		if(TESTING) {
-    			carShop = new CarShop();
-    		}
-    		else {
-    			carShop = CarShopPersistence.load();
-    		}
+    		TESTING = false;
+    		carShop = CarShopPersistence.load();    	
     	}	
     	return carShop;
     }
@@ -86,6 +82,7 @@ public class CarShopApplication {
     	if(carShop == null) {
     		carShop = new CarShop();
     	}
+    	TESTING = true;
     	
     	return carShop;
     }

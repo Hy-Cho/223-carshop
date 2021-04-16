@@ -166,7 +166,7 @@ public class CustomerPage extends JFrame {
 		appointmentDateLabel = new JLabel("Date: ");
 		
 		appointmentStartTimes = new JTextField();
-		appointmentStartTimesLabel = new JLabel("Start Time(s): ");
+		appointmentStartTimesLabel = new JLabel("Start Time(s): (seperated by ',')");
 		
 		bookableNameAppointment = new JTextField();
 		bookableNameAppointmentLabel = new JLabel("Bookable Name: ");
@@ -385,15 +385,16 @@ public class CustomerPage extends JFrame {
 			)
 			.addGroup(
 				layout.createParallelGroup()
-				.addComponent(appointmentStartTimesLabel)
-				.addComponent(appointmentStartTimes)
+				.addComponent(appointmentDateLabel)
+				.addComponent(appointmentDate)
 				.addComponent(newDateLabel)
 				.addComponent(newDate)
 			)
 			.addGroup(
 				layout.createParallelGroup()
-				.addComponent(appointmentDateLabel)
-				.addComponent(appointmentDate)
+				.addComponent(appointmentStartTimesLabel)
+				.addComponent(appointmentStartTimes)
+
 				.addComponent(newTimes)
 				.addComponent(newTimesLabel)
 			)
@@ -449,6 +450,7 @@ public class CustomerPage extends JFrame {
 	
 	private void refreshData() {
 		errorMessage.setText(error);
+		
 		if(error == null || error.length() == 0) {
 			appointmentDate.setText("");
 			bookableNameAppointment.setText("");
@@ -606,11 +608,27 @@ public class CustomerPage extends JFrame {
 		String optionalServices = optionalServicesAppointment.getText();
 		
 		if(!dateStr.equals("") && !timesStr.equals("") && !bookableName.equals("")) {
-			Date date = convertToDate(dateStr);
+			Date date = null;
+			try {
+				date = convertToDate(dateStr);
+			}
+			catch(Exception ex) {
+				error = "Error with date format entered.";
+				refreshData();
+				return;
+			}
+				
 			
 			List<Time> startTimes = new ArrayList<>();
 			for(String s: timesStr.split(",")) {
-				startTimes.add(convertToTime(s));
+				try {
+					startTimes.add(convertToTime(s));
+				}
+				catch(Exception ex) {
+					error = "Error with time format entered.";
+					refreshData();
+					return;
+				}		
 			}
 			
 			TOBookableService bookable = this.getTOBookableFromName(bookableName);
@@ -627,7 +645,13 @@ public class CustomerPage extends JFrame {
 				catch(Exception e) {
 					error = e.getMessage();
 				}
-			}	
+			}
+			else {
+				error = "Service Mentioned does not exist";
+			}
+		}
+		else {
+			error = "Please complete the first three required fields to process any request.";
 		}
 		
 		refreshData();
@@ -680,13 +704,23 @@ public class CustomerPage extends JFrame {
 				TOAppointment to = customerAppointments.get(selectedAppointment);
 				if(to.getIsComboApp()) {
 					TOBookableService toB = getTOBookableFromName(addOptionalStr);
-					Time newTime = convertToTime(newTimesStr.split(",")[0]);
+					
+					Time newTime = null;
+					
+					try {
+						newTime = convertToTime(newTimesStr.split(",")[0]);
+					}
+					catch(Exception ex) {
+						error = "Error in time format";
+						refreshData();
+						return;
+					}
+					
 					if(toB == null || newTime == null) {
 						error = "Invalid Input.";
 					}
 					else {
 						try {
-							System.out.println("here");
 							CarShopController.addOptionalServiceTO(to, addOptionalStr, newTime);
 						}
 						catch(InvalidInputException ex) {
@@ -717,11 +751,29 @@ public class CustomerPage extends JFrame {
 			}
 			//Finally we update the new date and times
 			else if(!newDateStr.equals("") && !newTimesStr.equals("")) {
-				Date d = convertToDate(newDateStr);
+				
+				Date d = null;
+				try {
+					d = convertToDate(newDateStr);
+				}
+				catch(Exception ex) {
+					error = "Error in date format";
+					refreshData();
+					return;
+				}
+					
 				List<Time> startTimes = new ArrayList<>();
 				
 				for(String time: newTimesStr.split(",")) {
-					startTimes.add(convertToTime(time));
+					try {
+						startTimes.add(convertToTime(time));
+					}
+					catch(Exception ex) {
+						error = "Error in time format";
+						refreshData();
+						return;
+					}
+
 				}
 				
 				try {
@@ -748,7 +800,7 @@ public class CustomerPage extends JFrame {
 				CarShopController.setToday(date);
 			}
 			catch(Exception ex) {
-				error = ex.getMessage();
+				error = "Error with date format entered.";
 			}
 		}
 		
@@ -764,7 +816,7 @@ public class CustomerPage extends JFrame {
 				CarShopController.setTime(time);
 			}
 			catch(Exception ex) {
-				error = ex.getMessage();
+				error = "Error with time format entered.";
 			}
 		}
 		

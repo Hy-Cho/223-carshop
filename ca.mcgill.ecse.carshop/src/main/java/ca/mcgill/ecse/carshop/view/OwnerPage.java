@@ -767,12 +767,10 @@ public class OwnerPage extends JFrame {
 		try {
 			if(CarShopController.getBusiness() == null) {
 				CarShopController.setBusinessInfo(BNameTextField.getText(), BAddressTextField.getText(), BPhoneNumberTextField.getText(), BEmailTextField.getText());
-				refreshData();
 
 			}
 			else {
 				CarShopController.updateBusinessInfo(BNameTextField.getText(), BAddressTextField.getText(), BPhoneNumberTextField.getText(), BEmailTextField.getText());
-				refreshData();
 			}			
 		}
 		catch(InvalidInputException e) {
@@ -781,6 +779,8 @@ public class OwnerPage extends JFrame {
 		catch(InvalidUserException e) {
 			error=e.getMessage();
 		}
+		
+		refreshData();
 	}
 	
 	private void startButtonActionPerformed(ActionEvent evt) {
@@ -881,7 +881,6 @@ public class OwnerPage extends JFrame {
 		
 		for(int i = 0; i < optionalServices.size(); i++) {
 			String service = optionalServices.get(i);
-			System.out.println(service);
 			if(!service.equals("")) {
 				servicesList.add(optionalServices.get(i));
 				mandatorySettingsBoolean.add(false);
@@ -911,7 +910,7 @@ public class OwnerPage extends JFrame {
 				CarShopController.setToday(date);
 			}
 			catch(Exception ex) {
-				error = ex.getMessage();
+				error = "Error with date format entered";
 			}
 		}
 		
@@ -927,7 +926,7 @@ public class OwnerPage extends JFrame {
 				CarShopController.setTime(time);
 			}
 			catch(Exception ex) {
-				error = ex.getMessage();
+				error = "Error with time format entered.";
 			}
 		}
 		

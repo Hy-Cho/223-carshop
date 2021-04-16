@@ -131,6 +131,9 @@ public class CarShopController {
 			if(!app.getServiceBooking(0).getTimeSlot().getStartDate().equals(today)) {
 				app.Cancel();
 			}
+			else {
+				throw new InvalidInputException("You cannot cancel an appointment the same day");
+			}
 		}
 		
 		CarShopPersistence.save(CarShopApplication.getCarShop());
