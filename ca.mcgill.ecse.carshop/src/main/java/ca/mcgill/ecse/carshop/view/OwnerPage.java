@@ -832,8 +832,6 @@ public class OwnerPage extends JFrame {
       // clear error message
       error = "";
       
-      System.out.println(CarShopController.getTOLoggedIn().getUsername());
-      System.out.println(CarShopController.getTOLoggedIn().getIsOwner());
 	      
       int selectedGarage = garageList.getSelectedIndex();
       if (selectedGarage < 0) {
