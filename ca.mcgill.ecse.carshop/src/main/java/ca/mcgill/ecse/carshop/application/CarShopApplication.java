@@ -23,67 +23,26 @@ import ca.mcgill.ecse.carshop.view.LogInPage;
 public class CarShopApplication {
 	
 	private static CarShop carShop;
-	private static final boolean TESTING = true;
+	private static final boolean TESTING = false;
 
     public static void main(String[] args) {
         //Testing from the owner point of view.
     	CarShop carShop = CarShopApplication.getCarShop();
-    	
+//    	
     	try {
-    		
-    		//Log In the owner to see the modify the business.
-			CarShopController.logIn("owner", "password");
-			
 			//Set up business 
-			CarShopController.setBusinessInfo("Group 6's Shop", "845 Sherbrooke St W", "(514)987-6543", "group6.carshop@mail.mcgill.ca");
+			if(carShop.getBusiness().getBusinessHours().size() == 0) { 
+				//Log In the owner to see the modify the business.
+				CarShopController.logIn("owner", "password");
+				CarShopController.addBusinessHour(DayOfWeek.Monday, new Time(9, 0, 0), new Time(17, 0, 0));
+				CarShopController.addBusinessHour(DayOfWeek.Tuesday, new Time(10, 0, 0), new Time(17, 0, 0));
+				CarShopController.addBusinessHour(DayOfWeek.Wednesday, new Time(9, 0, 0), new Time(17, 0, 0));
+				CarShopController.addBusinessHour(DayOfWeek.Thursday, new Time(10, 0, 0), new Time(17, 0, 0));
+				CarShopController.addBusinessHour(DayOfWeek.Friday, new Time(9, 0, 0), new Time(15, 0, 0));
 			
-			//Add Business Hours for the Business
-			CarShopController.addBusinessHour(DayOfWeek.Monday, new Time(9, 0, 0), new Time(17, 0, 0));
-			CarShopController.addBusinessHour(DayOfWeek.Tuesday, new Time(10, 0, 0), new Time(17, 0, 0));
-			CarShopController.addBusinessHour(DayOfWeek.Wednesday, new Time(9, 0, 0), new Time(17, 0, 0));
-			CarShopController.addBusinessHour(DayOfWeek.Thursday, new Time(10, 0, 0), new Time(17, 0, 0));
-			CarShopController.addBusinessHour(DayOfWeek.Friday, new Time(9, 0, 0), new Time(15, 0, 0));
-
-			//Add the necessary Technician Accounts
-			CarShopController.logIn("Tire-Technician", "password");
-			CarShopController.logIn("Engine-Technician", "password");
-			CarShopController.logIn("Fluids-Technician", "password");
-			CarShopController.logIn("Electronics-Technician", "password");
-			CarShopController.logIn("Transmission-Technician", "password");
-			
-			//The owner logs in to add holidays, vacations.
-			CarShopController.logIn("owner", "password");
-			CarShopController.addNewTimeSlot("holiday", new Date(2021, 3, 10), new Time(10, 0, 0), new Date(2021, 3, 14), new Time(23, 59, 0));
-			CarShopController.addNewTimeSlot("vacation", new Date(2021, 03, 28), new Time(9, 0, 0), new Date(2021, 03, 29), new Time(23, 59, 0));
-			
-			//The owner proceeds to add services and service combos to setup his garage.
-			CarShopController.createService("tire-change", 10, getGarageForTechnician(TechnicianType.Tire));
-			CarShopController.createService("transmission-check", 75, getGarageForTechnician(TechnicianType.Transmission));
-			CarShopController.createService("engine-check", 60, getGarageForTechnician(TechnicianType.Engine));
-			CarShopController.createService("electronics-repair", 50, getGarageForTechnician(TechnicianType.Electronics));
-			CarShopController.createService("brake-fluids", 20, getGarageForTechnician(TechnicianType.Fluids));
-			
-			//Defines the first combo
-			List<String> combo1 = new ArrayList<>();
-			List<Boolean> comboB1 = new ArrayList<>();
-			combo1.add("engine-check");
-			combo1.add("transmission-check");
-			comboB1.add(true);
-			comboB1.add(false);
-			
-			CarShopController.defineCombo("engine-check-basic", "engine-check", combo1, comboB1);
-			
-			//Defines the second combo
-			List<String> combo2 = new ArrayList<>();
-			List<Boolean> comboB2 = new ArrayList<>();
-			combo2.add("electronics-repair");
-			combo2.add("engine-check");
-			combo2.add("tire-change");
-			comboB2.add(true);
-			comboB2.add(true);
-			comboB2.add(false);
-			
-			CarShopController.defineCombo("electronics-repair-basic", "electronics-repair", combo2, comboB2);
+				CarShopController.addNewTimeSlot("holiday", new Date(2021, 3, 10), new Time(10, 0, 0), new Date(2021, 3, 14), new Time(23, 59, 0));
+				CarShopController.addNewTimeSlot("vacation", new Date(2021, 03, 28), new Time(9, 0, 0), new Date(2021, 03, 29), new Time(23, 59, 0));
+			}
 			
 			CarShopController.logOut();
 			
@@ -93,53 +52,6 @@ public class CarShopApplication {
 		} catch (InvalidUserException e) {
 			System.out.println(e.getMessage());
 		}
-    	
-    	
-    	//Testing from the customer's point of view
-    	try {
-			CarShopController.signUpCustomerAccount("John-Doe", "password1");
-			CarShopController.logIn("John-Doe", "password1");
-			
-			CarShopController.setTime(new Time(10, 0, 0));
-			CarShopController.setToday(new Date(121, 2, 28));
-			
-			//The Customer takes an appoint for a service combo
-			CarShopController.makeAppointmentCombo("electronics-repair-basic", Arrays.asList(new String[] {"engine-check"}), new Date(121, 3, 5), Arrays.asList(new Time[] {new Time(10, 0, 0), new Time(11, 0, 0)}));
-			
-			//The Customer takes an appointment for a service
-			CarShopController.makeAppointmentService("tire-change", new Date(121, 3, 1), new Time(10, 0, 0));
-			
-			CarShopController.logOut();
-			
-    	} catch (InvalidInputException e) {
-			System.out.println(e.getMessage());
-		}
-    	
-    	//Testing the Appointment Management Functionality
-		//Log in from the owner point of view to manage appointments
-//		try {
-//			CarShopController.logIn("owner", "password");
-//			
-//			CarShopController.setToday(new Date(121, 3, 5));
-//    		CarShopController.setTime(new Time(10, 1, 00));
-//    		
-//    		Appointment app = getCustomerWithUsername("John-Doe").getAppointment(0);
-//    		
-//    		System.out.println(app.getStates());
-//    		
-//    		CarShopController.startAppointment(app);
-//    		
-//    		System.out.println(app.getStates());
-//    		
-//    		CarShopController.setTime(new Time(13, 0, 0));
-//    		
-//    		CarShopController.endAppointment(app);
-//    		
-//    		System.out.println(app.getStates());
-//		} 
-//		catch (InvalidInputException e) {
-//			System.out.println(e.getMessage());
-//		}
     	
     	// start UI
         java.awt.EventQueue.invokeLater(new Runnable() {

@@ -94,8 +94,6 @@ public class LogInPage extends JFrame {
 		logInAccountButton = new JButton();
 		logInAccountButton.setText("Log In");
 		
-		
-		
 		//add listeners to sign up as a customer
 		signUpForCustomerAccountButton.addActionListener(new java.awt.event.ActionListener() {
 		    public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -191,7 +189,9 @@ public class LogInPage extends JFrame {
 				new CustomerPage().setVisible(true);
 			}
 			else {
+				this.setVisible(false);
 				
+				new TechnicianPage().setVisible(true);
 			}
 		}
 		catch(InvalidInputException e) {

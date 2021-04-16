@@ -136,7 +136,7 @@ public class OwnerPage extends JFrame {
 	private String combosColumnNames[] = {"Name", "Main Service", "Required", "Optional"};
 	
 	public OwnerPage() {
-		this.setPreferredSize(new Dimension(1050, 850));
+		this.setPreferredSize(new Dimension(1050, 820));
 		
 		initComponents();
 		refreshData();
@@ -423,21 +423,28 @@ public class OwnerPage extends JFrame {
 			)
 			.addGroup(
 				layout.createSequentialGroup()
-				.addGroup(
-					layout.createParallelGroup()
-					.addComponent(setTime)
-					.addComponent(setDate)
-				)
-				.addGroup(
-					layout.createParallelGroup()
-					.addComponent(setTimeField, 200, 200, 200)
-					.addComponent(setDateField, 200, 200, 200)
-				)
-				.addGroup(
-					layout.createParallelGroup()
-					.addComponent(setTimeButton)
-					.addComponent(setDateButton)
-				)
+				.addComponent(setTime)
+				.addComponent(setTimeField)
+				.addComponent(setTimeButton)
+				.addComponent(setDate)
+				.addComponent(setDateField)
+				.addComponent(setDateButton)
+
+//				.addGroup(
+//					layout.createParallelGroup()
+//					.addComponent(setTime)
+//					.addComponent(setDate)
+//				)
+//				.addGroup(
+//					layout.createParallelGroup()
+//					.addComponent(setTimeField, 200, 200, 200)
+//					.addComponent(setDateField, 200, 200, 200)
+//				)
+//				.addGroup(
+//					layout.createParallelGroup()
+//					.addComponent(setTimeButton)
+//					.addComponent(setDateButton)
+//				)
 			)
 			.addGroup(
 				layout.createSequentialGroup()
@@ -445,6 +452,7 @@ public class OwnerPage extends JFrame {
 				.addComponent(overviewDatePicker)
 			)
 			.addComponent(overviewScrollPane)
+			.addComponent(logOutButton)
 		);
 		
 		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {setBizInfoButton, BPhoneNumberTextField, BEmailTextField,BAddressTextField,BNameTextField, serviceNameTextField, serviceDurationTextField, addServiceButton, garageList});
@@ -541,15 +549,17 @@ public class OwnerPage extends JFrame {
 				.addComponent(setTime)
 				.addComponent(setTimeField)
 				.addComponent(setTimeButton)
-			)
-			.addGroup(
-				layout.createParallelGroup()
 				.addComponent(setDate)
 				.addComponent(setDateField)
 				.addComponent(setDateButton)
 			)
+//			.addGroup(
+//				layout.createParallelGroup()
+
+//			)
 			.addGap(10)
 			.addComponent(logOutButton)
+//			
 		);
 		
 		layout.linkSize(SwingConstants.VERTICAL, new java.awt.Component[] {setBizInfoButton, BPhoneNumberTextField, BEmailTextField,BAddressTextField,BNameTextField, serviceNameTextField, serviceDurationTextField, addServiceButton, garageList});
@@ -563,6 +573,11 @@ public class OwnerPage extends JFrame {
 			
 			setTimeField.setText("");
 			setDateField.setText("");
+			
+			BNameTextField.setText("");
+			BAddressTextField.setText("");
+			BPhoneNumberTextField.setText("");;
+			BEmailTextField.setText("");;
 			
 			//Appointments List
 			appointments = new HashMap<Integer, TOAppointment>();
@@ -751,10 +766,12 @@ public class OwnerPage extends JFrame {
 		try {
 			if(CarShopController.getBusiness() == null) {
 				CarShopController.setBusinessInfo(BNameTextField.getText(), BAddressTextField.getText(), BPhoneNumberTextField.getText(), BEmailTextField.getText());
+				refreshData();
 
 			}
 			else {
 				CarShopController.updateBusinessInfo(BNameTextField.getText(), BAddressTextField.getText(), BPhoneNumberTextField.getText(), BEmailTextField.getText());
+				refreshData();
 			}			
 		}
 		catch(InvalidInputException e) {
@@ -763,8 +780,6 @@ public class OwnerPage extends JFrame {
 		catch(InvalidUserException e) {
 			error=e.getMessage();
 		}
-		//create TO business info 
-		refreshData();
 	}
 	
 	private void startButtonActionPerformed(ActionEvent evt) {
@@ -815,6 +830,9 @@ public class OwnerPage extends JFrame {
 	private void addServiceButtonActionPerformed(java.awt.event.ActionEvent evt) {
       // clear error message
       error = "";
+      
+      System.out.println(CarShopController.getTOLoggedIn().getUsername());
+      System.out.println(CarShopController.getTOLoggedIn().getIsOwner());
 	      
       int selectedGarage = garageList.getSelectedIndex();
       if (selectedGarage < 0) {

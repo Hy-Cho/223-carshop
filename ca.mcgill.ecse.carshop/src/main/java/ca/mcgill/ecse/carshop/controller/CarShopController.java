@@ -910,7 +910,7 @@ public class CarShopController {
 	//Code Written by Mario Bouzakhm
 	public static void createService(String name, int duration, Garage garage) throws RuntimeException, InvalidInputException {
 		//Checks that the logged in User is the owner
-		if(loggedInUser == null  || loggedInUser.getUsername() != "owner" || !(loggedInUser instanceof Owner)) {
+		if(loggedInUser == null  || !loggedInUser.getUsername().equals("owner") || !(loggedInUser instanceof Owner)) {
 			throw new RuntimeException("You are not authorized to perform this operation");
 		}
 		
@@ -938,7 +938,7 @@ public class CarShopController {
 	
 	public static void updateService(String oldName, String newName, int newDuration, Garage newGarage) throws InvalidInputException {
 		//Checks that the logged in User is the owner
-		if(loggedInUser == null  || loggedInUser.getUsername() != "owner" || !(loggedInUser instanceof Owner)) {
+		if(loggedInUser == null  || !loggedInUser.getUsername().equals("owner") || !(loggedInUser instanceof Owner)) {
 			throw new RuntimeException("You are not authorized to perform this operation");
 		}
 		

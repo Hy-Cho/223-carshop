@@ -35,6 +35,9 @@ import ca.mcgill.ecse.carshop.controller.CarShopController;
 import ca.mcgill.ecse.carshop.controller.InvalidInputException;
 import ca.mcgill.ecse.carshop.controller.TOAppointment;
 import ca.mcgill.ecse.carshop.controller.TOBookableService;
+import ca.mcgill.ecse.carshop.controller.TOGarage;
+import ca.mcgill.ecse.carshop.controller.TOService;
+import ca.mcgill.ecse.carshop.controller.TOServiceCombo;
 import ca.mcgill.ecse.carshop.controller.TOUser;
 
 public class CustomerPage extends JFrame {
@@ -104,16 +107,36 @@ public class CustomerPage extends JFrame {
 
 	private String overviewColumnNames[] = {"Bookable", "Date", "Services", "Start Times"};
 
-
+	//Add Services/Services Combos Tables
+	private JTable serviceTable;
+	private JScrollPane serviceTableScrollPane;
+	
+	private JTable combosTable;
+	private JScrollPane combosTableScrollPane;
+	
+	private static final int HEIGHT_SERVICE_TABLE = 150;
+	private static final int HEIGHT_COMBOS_TABLE = 150;
+	
+	private DefaultTableModel serviceDtm;
+	private String serviceColumnNames[] = {"Name", "Duration", "Garage"};
+	
+	private DefaultTableModel serviceCombosDtm;
+	private String combosColumnNames[] = {"Name", "Main Service", "Required", "Optional"};
+	
 		
 	public CustomerPage() {
-		this.setPreferredSize(new Dimension(520, 600));
+		this.setPreferredSize(new Dimension(800, 700));
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		setTitle("Car Shop System");
 		
 		initComponents();
 		refreshData();
 	}
 	
 	private void initComponents() {
+		errorMessage = new JLabel();
+		errorMessage.setForeground(Color.red);
+		
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Car Shop System");
 		
@@ -195,6 +218,20 @@ public class CustomerPage extends JFrame {
 		overviewScrollPane.setPreferredSize(new Dimension(d.width, HEIGHT_OVERVIEW_TABLE));
 		overviewScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		
+		serviceTable = new JTable();
+		serviceTableScrollPane = new JScrollPane(serviceTable);
+		this.add(serviceTableScrollPane);
+		Dimension d1 = serviceTable.getPreferredSize();
+		serviceTableScrollPane.setPreferredSize(new Dimension(d1.width, HEIGHT_SERVICE_TABLE));
+		serviceTableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		
+		combosTable = new JTable();
+		combosTableScrollPane = new JScrollPane(combosTable);
+		this.add(combosTableScrollPane);
+		Dimension d2 = combosTable.getPreferredSize();
+		combosTableScrollPane.setPreferredSize(new Dimension(d2.width, HEIGHT_COMBOS_TABLE));
+		combosTableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		
 		deleteButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				deleteButton(evt);
@@ -268,12 +305,8 @@ public class CustomerPage extends JFrame {
 					.addComponent(appointmentStartTimes, 200, 200, 400)
 					.addComponent(bookableNameAppointment, 200, 200, 400)
 					.addComponent(optionalServicesAppointment, 200, 200, 400)
+					.addComponent(makeAppointment)
 				)
-				
-			)
-			.addComponent(makeAppointment)
-			.addGroup(
-				layout.createSequentialGroup()
 				.addGroup(
 					layout.createParallelGroup()
 					.addComponent(customerAppointmentsLabel)
@@ -281,7 +314,7 @@ public class CustomerPage extends JFrame {
 					.addComponent(newTimesLabel)
 					.addComponent(changeMainServiceLabel)
 					.addComponent(addOptionalServiceLabel)
-					
+						
 				)
 				.addGroup(
 					layout.createParallelGroup()
@@ -290,12 +323,18 @@ public class CustomerPage extends JFrame {
 					.addComponent(newTimes, 200, 200, 400)
 					.addComponent(changeMainService, 200, 200, 400)
 					.addComponent(addOptionalService, 200, 200, 400)
+					.addGroup(
+						layout.createSequentialGroup()
+						.addComponent(deleteButton)
+						.addComponent(updateButton)
+					)
 				)
+				
 			)
 			.addGroup(
-				layout.createSequentialGroup()
-				.addComponent(deleteButton)
-				.addComponent(updateButton)
+				layout.createParallelGroup()
+				.addComponent(serviceTableScrollPane)
+				.addComponent(combosTableScrollPane)
 			)
 			.addGroup(
 				layout.createSequentialGroup()
@@ -339,55 +378,45 @@ public class CustomerPage extends JFrame {
 			.addGroup(
 				layout.createParallelGroup()
 				.addComponent(bookableNameAppointmentLabel)
-				.addComponent(bookableNameAppointment)				
-			)
-			.addGroup(
-				layout.createParallelGroup()
-				.addComponent(appointmentStartTimesLabel)
-				.addComponent(appointmentStartTimes)
-			)
-			.addGroup(
-				layout.createParallelGroup()
-				.addComponent(appointmentDateLabel)
-				.addComponent(appointmentDate)	
-			)
-			.addGroup(
-				layout.createParallelGroup()
-				.addComponent(optionalServicesAppointmentLabel)
-				.addComponent(optionalServicesAppointment)
-			)
-			.addComponent(makeAppointment)
-			.addComponent(seperator1)
-			.addGroup(
-				layout.createParallelGroup()
+				.addComponent(bookableNameAppointment)		
 				.addComponent(customerAppointmentsLabel)
 				.addComponent(customerAppointmentList)
 			)
 			.addGroup(
 				layout.createParallelGroup()
-				.addComponent(newDate)
+				.addComponent(appointmentStartTimesLabel)
+				.addComponent(appointmentStartTimes)
 				.addComponent(newDateLabel)
+				.addComponent(newDate)
 			)
 			.addGroup(
 				layout.createParallelGroup()
+				.addComponent(appointmentDateLabel)
+				.addComponent(appointmentDate)
 				.addComponent(newTimes)
 				.addComponent(newTimesLabel)
 			)
 			.addGroup(
 				layout.createParallelGroup()
+				.addComponent(optionalServicesAppointmentLabel)
+				.addComponent(optionalServicesAppointment)
 				.addComponent(changeMainService)
 				.addComponent(changeMainServiceLabel)
 			)
 			.addGroup(
 				layout.createParallelGroup()
-				.addComponent(addOptionalServiceLabel)
+				.addComponent(makeAppointment)
 				.addComponent(addOptionalService)
+				.addComponent(addOptionalServiceLabel)
 			)
 			.addGroup(
 				layout.createParallelGroup()
-				.addComponent(deleteButton)
 				.addComponent(updateButton)
+				.addComponent(deleteButton)
 			)
+			.addComponent(seperator1)
+			.addComponent(serviceTableScrollPane)
+			.addComponent(combosTableScrollPane)
 			.addComponent(seperator2)
 			.addGroup(
 				layout.createParallelGroup()
@@ -453,7 +482,64 @@ public class CustomerPage extends JFrame {
 			
 			
 			refreshAppointmentsList();
+			refreshAvailableServices();
+			refreshAvailableCombos();
 		}
+	}
+	
+	private void refreshAvailableServices() {
+	      serviceDtm = new DefaultTableModel(0, 0);
+	      serviceDtm.setColumnIdentifiers(serviceColumnNames);
+	      serviceTable.setModel(serviceDtm);
+	      for (TOService service : CarShopController.getServices()) {
+	        String serviceName = service.getName();
+	        int duration = service.getDuration();
+	        TOGarage garage = service.getGarage();
+	        String garageName =  garage.getTechnicianUsername() + "'s garage";
+	        Object[] obj = {serviceName, duration, garageName};
+	        serviceDtm.addRow(obj);
+	    }
+		  
+	    Dimension d = serviceTable.getPreferredSize();
+		serviceTableScrollPane.setPreferredSize(new Dimension(d.width, HEIGHT_SERVICE_TABLE));
+	}
+	
+	private void refreshAvailableCombos() {
+		serviceCombosDtm = new DefaultTableModel(0, 0);
+		serviceCombosDtm.setColumnIdentifiers(this.combosColumnNames);
+		combosTable.setModel(serviceCombosDtm);
+		
+		for(TOServiceCombo combo: CarShopController.getCombos()) {
+			String name = combo.getName();
+			String main = combo.getMain();
+			
+			
+			String required = "";
+			for(int i = 0; i < combo.getRequired().size(); i++) {
+				if(i == combo.getRequired().size() - 1) {
+					required += combo.getRequired().get(i);
+				}
+				else {
+					required += combo.getRequired().get(i) + ",";
+				}
+			}
+			
+			String optional = "";
+			for(int i = 0; i < combo.getOptional().size(); i++) {
+				if(i == combo.getOptional().size() - 1) {
+					optional += combo.getOptional().get(i);
+				}
+				else {
+					optional += combo.getOptional().get(i) + ",";
+				}
+			}
+			
+			Object[] obj = {name, main, required, optional};
+			serviceCombosDtm.addRow(obj);
+		}
+		
+		Dimension d = combosTable.getPreferredSize();
+		this.combosTableScrollPane.setPreferredSize(new Dimension(d.width, HEIGHT_COMBOS_TABLE));
 	}
 	
 	private void refreshAppointmentsList() {
