@@ -16,6 +16,7 @@ import ca.mcgill.ecse.carshop.model.Customer;
 import ca.mcgill.ecse.carshop.model.Garage;
 import ca.mcgill.ecse.carshop.model.Technician.TechnicianType;
 import ca.mcgill.ecse.carshop.model.Appointment;
+import ca.mcgill.ecse.carshop.model.Business;
 import ca.mcgill.ecse.carshop.model.BusinessHour.DayOfWeek;
 import ca.mcgill.ecse.carshop.persistence.CarShopPersistence;
 import ca.mcgill.ecse.carshop.view.LogInPage;
@@ -30,9 +31,14 @@ public class CarShopApplication {
     	CarShop carShop = CarShopApplication.getCarShop();
 //    	
     	try {
-			//Set up business 
+			//Set up business
+    		
+    		if(carShop.getBusiness() == null) {
+    			Business business = new Business("", "", "", "", carShop);
+    		}
 			if(carShop.getBusiness().getBusinessHours().size() == 0) { 
 				//Log In the owner to see the modify the business.
+				//This is added because we do not have to implement the update business hours hence they are set from scratch to a single value for testing.
 				CarShopController.logIn("owner", "password");
 				CarShopController.addBusinessHour(DayOfWeek.Monday, new Time(9, 0, 0), new Time(17, 0, 0));
 				CarShopController.addBusinessHour(DayOfWeek.Tuesday, new Time(10, 0, 0), new Time(17, 0, 0));
@@ -40,6 +46,7 @@ public class CarShopApplication {
 				CarShopController.addBusinessHour(DayOfWeek.Thursday, new Time(10, 0, 0), new Time(17, 0, 0));
 				CarShopController.addBusinessHour(DayOfWeek.Friday, new Time(9, 0, 0), new Time(15, 0, 0));
 			
+				//Vacation and Holiday slots are added also for testing purposes.
 				CarShopController.addNewTimeSlot("holiday", new Date(2021, 3, 10), new Time(10, 0, 0), new Date(2021, 3, 14), new Time(23, 59, 0));
 				CarShopController.addNewTimeSlot("vacation", new Date(2021, 03, 28), new Time(9, 0, 0), new Date(2021, 03, 29), new Time(23, 59, 0));
 			}
