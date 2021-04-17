@@ -3,6 +3,7 @@
  */
 package ca.mcgill.ecse.carshop.application;
 import java.sql.Time;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.sql.Date;
@@ -54,6 +55,13 @@ public class CarShopApplication {
 			}
 			
 			CarShopController.logOut();
+			
+			LocalDateTime now = LocalDateTime.now();
+			Time t = new Time(now.getHour(), now.getMinute(), now.getSecond());
+			Date d = new Date(now.getYear() - 1900, now.getMonthValue() - 1, now.getDayOfMonth());
+			
+			CarShopController.setTime(t);
+			CarShopController.setToday(d);
 			
 			
 		} catch (InvalidInputException e) {
